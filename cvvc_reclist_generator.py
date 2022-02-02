@@ -1,5 +1,6 @@
 from collections import namedtuple, deque
 from random import choice
+import re
 from typing import List, Set, Dict, Optional, Iterable
 from dataclasses import dataclass, field
 import configparser
@@ -20,6 +21,9 @@ class CVV(namedtuple("CVV", "cvv c v act_c cv mid_v end_v")):
     """
 
     __slot__ = ()
+    
+    def get_cv(self) -> str:
+        return self.cv if self.cv else self.cvv
 
     def __str__(self) -> str:
         str_order = (self.cvv, self.cv, 
@@ -65,16 +69,6 @@ class OTO(namedtuple("OTO", "wav prefix alien suffix l con r pre ovl")):
         if self.suffix:
             alien += self.suffix
         return "{}={},{},{},{},{},{}".format(self.wav, alien, *self[-5:])
-
-
-"""class AliensType(Enum):
-    _c = auto()
-    c = auto()
-    _cv = auto()
-    cv = auto()
-    vc = auto()
-    v = auto()
-    vcv = auto()"""
 
 
 class VC_Set(set[tuple[str, str]]):
@@ -130,26 +124,6 @@ class VC_Set(set[tuple[str, str]]):
         else:
             return (current_max_letter, current_max_digit)
         
-        '''if aliens_type == "v":
-            for key, value in self.v_dict.items():
-                if value > current_max_digit:
-                    current_max_digit = value
-                    current_max_letter = key
-        elif aliens_type == "c":
-            for key, value in self.c_dict.items():
-                if value > current_max_digit:
-                    current_max_digit = value
-                    current_max_letter = key
-        return (current_max_letter, current_max_digit)
-        if current_max_digit == 0 or current_max_letter == '':
-            self.__post_init__()
-            if aliens_type == 'v':
-                return self.__max_v
-            else:
-                return self.__max_c
-        else:
-            return (current_max_letter, current_max_digit)'''
-
     def __update_dict(self, vc: tuple[str, str], add_or_sub: bool) -> None:
         update_idx = 1 if add_or_sub else -1
         v, c = vc
@@ -206,6 +180,11 @@ class VC_Set(set[tuple[str, str]]):
         for value in __iterable:
             self.discard(value)
         return self
+    
+    def __or__(self, __iterable: Iterable[tuple[str, str]]) -> "VC_Set":
+        for value in __iterable:
+            self.add(value)
+        return self
 
 
 @dataclass
@@ -217,13 +196,13 @@ class Aliens:
     vr: Set[str] = field(default_factory=set)
     vcv: VC_Set = field(default_factory=VC_Set)
 
-    def __post_init__(self) -> None:
+    '''def __post_init__(self) -> None:
         self._c = set()
         self._cv = set()
         self.cv = set()
         self.vc = VC_Set()
         self.vr = set()
-        self.vcv = VC_Set()
+        self.vcv = VC_Set()'''
 
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -247,17 +226,18 @@ class Aliens:
 
     def add(self, other: "Aliens") -> None:
         for key, value in other.__dict__.items():
-            self.__dict__[key] |= value
+            self.__dict__[key].__or__(value)
 
     def discard(self, other: "Aliens") -> None:
         for key, value in other.__dict__.items():
-            self.__dict__[key] -= value
+            self.__dict__[key].__sub__(value)
 
 
 class CVVCReclistGenerator:
     def __init__(self) -> None:
         self.cvv: Set[CVV] = set()
         self.cvv_dict: Dict[str, CVV] = {}
+        self.cv_dict: Dict[str, List[CVV]] = {}
         self.c_dict: Dict[str, List[CVV]] = {}
         self.v_dict: Dict[str, List[CVV]] = {}
 
@@ -304,6 +284,8 @@ class CVVCReclistGenerator:
                     word = CVV(cvv, c, v, None, None, None, None)
                 self.cvv.add(word)
                 self.cvv_dict.setdefault(cvv, word)
+                if word.cv:
+                    self.cv_dict.setdefault(word.cv, []).append(word)
                 self.c_dict.setdefault(c, []).append(word)
                 self.v_dict.setdefault(v, []).append(word)
 
@@ -323,9 +305,8 @@ class CVVCReclistGenerator:
             if cv := self.cvv_dict.get(cvv):
                 return cv
             else:
-                for ele in list(self.cvv):
-                    if ele.cv == cvv:
-                        return ele
+                if cv_list := self.cv_dict.get(cvv):
+                    return choice(cv_list)
                 else:
                     raise ValueError
         if c and not v:
@@ -366,22 +347,34 @@ class CVVCReclistGenerator:
         full_cv: bool = True,
         aliens_config: Optional[str] = None,
     ) -> Aliens:
+        """Get needed aliens.
+
+        Args:
+            _c (bool, optional): Begining consonant for vocalsharp. Defaults to False.
+            _cv (bool, optional): Begining cv head. Defaults to True.
+            full_cv (bool, optional): For cv and cv head. 
+                If your dict inclued extra cv part and you WANT TO use them in non vcv part,
+                you must set to False. Defaults to True.
+            aliens_config (Optional[str], optional): exceptional aliens config. Defaults to None.
+
+        Returns:
+            Aliens
+        """
         aliens = Aliens()
         if _c:
             aliens._c = {x for x in self.c_dict.keys()}
         if full_cv:
-            aliens.cv = {x.cvv for x in self.cvv}
+            aliens.cv = {cv.cvv for cv in self.cvv}
         else:
-            for cv in self.cvv:
-                cv = cv.cv
-                if cv is None:
-                    raise TypeError
-                else:
-                    aliens.cv.add(cv)
+            aliens.cv = {cv.get_cv() for cv in self.cvv}
         if _cv:
             aliens._cv = aliens.cv.copy()
         aliens.vc = VC_Set()
-        aliens.vc.update((v, c) for v in self.v_dict.keys() for c in self.c_dict.keys())
+        aliens.vc.update(
+            (v, c) 
+            for v in self.v_dict.keys()
+            for c in self.c_dict.keys()
+        )
         aliens.vr = {v for v in self.v_dict.keys()}
         if aliens_config:
             unneeded, needed = self.read_aliens_config(aliens_config)
@@ -392,7 +385,20 @@ class CVVCReclistGenerator:
         self.aliens = aliens
         return aliens
 
-    def read_aliens_config(self, aliens_config: str) -> tuple[Aliens, Aliens]:
+    def read_aliens_config(self, aliens_config: str, full_cv: bool = True) -> tuple[Aliens, Aliens]:
+        """Read aliens config to get unwanted aliens and wanted aliens.
+        For config format plz check on the comments in config
+
+        Args:
+            aliens_config (str): config path.
+            full_cv (bool): For cv and cv head. Details in self.get_needed_aliens()
+
+        Raises:
+            ValueError: Given a wrong value like there is no 'R' but get one. 
+
+        Returns:
+            tuple[unneeded_Aliens, needed_Aliens]
+        """
         unneeded, needed = Aliens(), Aliens()
         config = configparser.ConfigParser()
         config.read(aliens_config, encoding="utf-8")
@@ -404,18 +410,22 @@ class CVVCReclistGenerator:
                     if self.find_cvv(cvv=cv):
                         unneeded.__dict__[cv].add(cv)
                     elif cv in self.c_dict.keys():
-                        unneeded.__dict__[cv].update(
-                            (cvv.cvv for cvv in self.c_dict[cv])
-                        )
-                        unneeded.__dict__[cv].update(
-                            (cvv.cv for cvv in self.c_dict[cv] if cvv.cv is not None)
-                        )
+                        if full_cv:
+                            unneeded.__dict__[cv].update(
+                                cvv.cvv for cvv in self.c_dict[cv]
+                            )
+                        else:
+                            unneeded.__dict__[cv].update(
+                                cvv.get_cv() for cvv in self.c_dict[cv]
+                            )
                     else:
                         raise ValueError
             elif key == "vc":
                 for vc in value.split(","):
-                    if vc in self.v_dict.keys():
-                        unneeded.vc.update((vc, c) for c in self.c_dict.keys())
+                    if vc in self.c_dict:
+                        unneeded.vc.update((v, vc) for v in self.v_dict)
+                    if vc in self.v_dict:
+                        unneeded.vc.update((vc, c) for c in self.c_dict)
                     elif " " in vc:
                         unneeded.vc.add(tuple(vc.split(" ")))
                     else:
@@ -428,52 +438,36 @@ class CVVCReclistGenerator:
                 for vcv in value.split(","):
                     if vcv in self.c_dict.keys():
                         unneeded.vcv.update(
-                            (v, cvv.cvv)
+                            (v, cvv.get_cv())
                             for v in self.v_dict.keys()
                             for cvv in self.c_dict[vcv]
-                        )
-                        unneeded.vcv.update(
-                            (v, cvv.cv)
-                            for v in self.v_dict.keys()
-                            for cvv in self.c_dict[vcv]
-                            if cvv.cv is not None
                         )
                     elif vcv in self.v_dict.keys():
-                        unneeded.vcv.update((vcv, cvv) for cvv in self.cvv_dict.keys())
                         unneeded.vcv.update(
-                            (vcv, cvv.cv) for cvv in self.cvv if cvv.cv is not None
+                            (vcv, cvv.get_cv()) 
+                            for cvv in self.cvv
                         )
                     elif " " in vcv:
                         unneeded.vcv.add(tuple(vcv.split(" ")))
         vcv_value = config["NEEDED"]["vcv"]
         if vcv_value.upper() == "ALL":
             needed.vcv.update(
-                (v, cvv) for v in self.v_dict.keys() for cvv in self.cvv_dict.keys()
-            )
-            needed.vcv.update(
-                (v, cvv.cv)
-                for v in self.v_dict.keys()
+                (v, cvv.get_cv()) 
+                for v in self.v_dict
                 for cvv in self.cvv
-                if cvv.cv is not None
             )
         elif "," in vcv_value:
             for vcv in vcv_value.split(","):
                 if vcv in self.c_dict.keys():
                     needed.vcv.update(
-                        (v, cvv.cvv)
+                        (v, cvv.get_cv())
                         for v in self.v_dict.keys()
                         for cvv in self.c_dict[vcv]
-                    )
-                    needed.vcv.update(
-                        (v, cvv.cv)
-                        for v in self.v_dict.keys()
-                        for cvv in self.c_dict[vcv]
-                        if cvv.cv is not None
                     )
                 elif vcv in self.v_dict.keys():
-                    needed.vcv.update((vcv, cvv) for cvv in self.cvv_dict.keys())
                     needed.vcv.update(
-                        (vcv, cvv.cv) for cvv in self.cvv if cvv.cv is not None
+                        (vcv, cvv.get_cv()) 
+                        for cvv in self.cvv
                     )
                 elif " " in vcv:
                     needed.vcv.add(tuple(vcv.split(" ")))
@@ -489,21 +483,25 @@ class CVVCReclistGenerator:
                 self.reclist.append(RecLine(cvv, cvv))
                 all_vc.discard((cvv.v, cvv.c))
                 if all_vcv:
-                    all_vcv.discard((cvv.v, cvv.cvv))
-                    if cvv.cv:
-                        all_vcv.discard((cvv.v, cvv.cv))
+                    all_vcv.discard((cvv.v, cvv.get_cv()))
             else:
                 print(f"{cv}= has no match word.")
                 raise ValueError
-        all_vc = list(all_vc)
-        all_vc.sort()
-        for vc in all_vc:
-            self.reclist.append(RecLine(*vc))
         if all_vcv:
             all_vcv = list(all_vcv)
             all_vcv.sort()
             for vcv in all_vcv:
-                self.reclist.append(RecLine(*vcv))
+                v = CVV(*[None]*7)
+                v._replace(v=vcv[0])
+                cvv = self.find_cvv(cvv=vcv[1])
+                self.reclist.append(RecLine((v, cvv)))
+                aliens.vc.discard((v.v, cvv.c))
+        all_vc = list(all_vc)
+        all_vc.sort()
+        for vc in all_vc:
+            v, c = CVV(*[None]*7), CVV(*[None]*7)
+            v._replace(v=vc[0]), c._replace(c=vc[1])
+            self.reclist.append(RecLine((v, c)))
 
     def gen_plan_b(self, aliens: Aliens) -> Aliens:
         all_cv = list(aliens.cv | aliens._cv)
@@ -512,24 +510,34 @@ class CVVCReclistGenerator:
             if cv := self.find_cvv(cv):
                 self.reclist.append(RecLine(cv, cv, cv))
                 aliens.vc.discard((cv.v, cv.c))
-                if cv.cv:
-                    aliens.cv.discard(cv.cv)
-                    aliens._cv.discard(cv.cv)
-                aliens.cv.discard(cv.cvv)
-                aliens._cv.discard(cv.cvv)
                 aliens.vr.discard(cv.v)
                 if aliens.vcv:
-                    aliens.vcv.discard((cv.v, cv.cvv))
-                    aliens.vcv.discard((cv.v, cv.cv))
+                    aliens.vcv.discard((cv.v, cv.get_cv()))
             else:
                 raise ValueError
+        aliens.cv.clear()
+        aliens._cv.clear()
         return aliens
 
     def gen_mora_x(
-        self, aliens: Aliens, length: int, cv_mid: Optional[Set[str]] = None
+        self, 
+        aliens: Aliens, 
+        length: int, 
+        cv_mid: Optional[Set[str]] = None
     ) -> None:
-        if cv_mid is None:
-            cv_mid = set()
+        """Generate given x length long pre row of reclist.
+
+        Args:
+            aliens (Aliens): Needed aliens
+            length (int): length pre row
+            cv_mid (Optional[Set[str]], optional): 
+                For some consonant is shorter in the beginning 
+                that can be hard to oto like [y], [w] in manderin. 
+                Defaults to None.
+
+        Returns: None
+        """
+        cv_mid = cv_mid if cv_mid else set()
 
         cv_deque = deque(sorted(list(aliens.cv)))
         while cv_deque:
@@ -549,13 +557,57 @@ class CVVCReclistGenerator:
                         row.append(cv)
                         cv_mid_switch = not cv_mid_switch
                 elif i < length - 1:
-                    aliens.vc.discard((row[i].v, cv.c))
-                    aliens.vcv.discard((row[i].v, cv.cvv))
-                    aliens.vcv.discard((row[i].v, cv.cv))
+                    aliens.vc.discard((row[i-1].v, cv.c))
+                    aliens.vcv.discard((row[i-1].v, cv.get_cv()))
                 else:
                     aliens.vr.discard(cv.v)
             self.reclist.append(RecLine(*row))
         aliens.cv.clear()
+        
+        # complete vcv part
+        row: List[CVV] = []
+        i = 0
+        while True:
+            if not aliens.vcv:
+                break
+            if i == 0:
+                vcv = aliens.vcv.pop(v=aliens.vcv.max_v[0])
+                v_cvv = self.find_cvv(v=vcv[0])
+                cv_cvv = self.find_cvv(cvv=vcv[1])
+                aliens.vc.discard((v_cvv.v, cv_cvv.c))
+                row = [v_cvv, cv_cvv]
+                i += 2
+            elif i <= length - 1:
+                try:
+                    vcv = aliens.vcv.pop(v=row[-1].v)
+                    next_cv = self.find_cvv(cvv=vcv[1])
+                    aliens.vc.discard((vcv[0], next_cv.c))
+                    row.append(next_cv)
+                    i += 1
+                except ValueError:
+                    if i <= length - 2:
+                        vcv = aliens.vcv.pop()
+                        cv1 = self.find_cvv(v=vcv[0])
+                        cv2 = self.find_cvv(cvv=vcv[1])
+                        aliens.vc.discard((row[-1].v, cv1.c))
+                        aliens.vc.discard((cv1.v, cv2.c))
+                        row.extend([cv1, cv2])
+                        i += 2
+                    else:
+                        i = length
+                        continue
+            elif i == length:
+                self.reclist.append(RecLine(*row))
+                aliens.vr.discard(row[-1].v)
+                aliens._cv.discard(row[0].cvv)
+                aliens._cv.discard(row[0].cv)
+                row: List[CVV] = []
+                i = 0
+        if row:
+            self.reclist.append(RecLine(*row))
+            aliens.vr.discard(row[-1].v)
+            aliens._cv.discard(row[0].cvv)
+            aliens._cv.discard(row[0].cv)
 
         # complete the vc part
         def find_next(vc: tuple[str, str], vc_max_v: str) -> CVV:
@@ -570,8 +622,6 @@ class CVVCReclistGenerator:
         while True:
             if not aliens.vc:
                 break
-            cv_mid_switch = False
-            
             if i == 0:
                 current_v = aliens.vc.max_v[0]
                 current_cv = self.find_cvv(v=current_v)
@@ -592,17 +642,11 @@ class CVVCReclistGenerator:
                             cv2 = self.find_cvv(c=vc[1], v=aliens.vc.max_v[0])
                         except ValueError:
                             cv2 = self.find_cvv(c=vc[1])
-                        aliens.vcv.discard((row[-1].v, cv1.cvv))
-                        aliens.vcv.discard((row[-1].v, cv1.cv))
                         row.extend([cv1, cv2])
-                        aliens.vcv.discard((cv1.v, cv2.cvv))
-                        aliens.vcv.discard((cv1.v, cv2.cv))
                         i += 2
                     else:
                         i = length
                         continue
-                aliens.vcv.discard((row[-2].v, row[-1].cvv))
-                aliens.vcv.discard((row[-2].v, row[-1].cv))
             elif i == length:
                 self.reclist.append(RecLine(*row))
                 aliens.vr.discard(row[-1].v)
@@ -615,8 +659,6 @@ class CVVCReclistGenerator:
             aliens.vr.discard(row[-1].v)
             aliens._cv.discard(row[0].cvv)
             aliens._cv.discard(row[0].cv)
-
-        # complete vcv part
 
         # complete cv head part
         _cv_dq = deque(sorted(list(aliens._cv)))
@@ -662,9 +704,15 @@ class CVVCReclistGenerator:
     def check_integrity(self, aliens: Aliens) -> None:
         # _c_log = self.check_chead_integrity()
         _cv_log = self.check_cvhead_integrity(aliens._cv)
-        cv_log = self.check_cv_integrity()
-        vc_log = self.check_vc_integrity()
-        vr_log = self.check_vr_integrity()
+        cv_log = self.check_cv_integrity(aliens.cv)
+        vcv_log = self.check_vcv_integrity(aliens.vcv)
+        vc_log = self.check_vc_integrity(aliens.vc)
+        vr_log = self.check_vr_integrity(aliens.vr)
+        print(f'Missing cv head: {_cv_log}\n'
+              f'Missing cv: {cv_log}\n'
+              f'Missing vcv: {vcv_log}\n'
+              f'Missing vc: {vc_log}\n'
+              f'Missing ending v: {vr_log}')
         
     def check_cvhead_integrity(self, cv_set: Set[str]) -> str:
         for row in self.reclist:
@@ -675,22 +723,53 @@ class CVVCReclistGenerator:
                     if cvv != self.emptyCVV:
                         cv_set.discard(cvv.cvv)
                         cv_set.discard(cvv.cv)
-        _cv_log = ', '.join(cv_set)
+        _cv_log = ', '.join(cv_set) if cv_set else 'None'
         return _cv_log
     
     def check_cv_integrity(self, cv_set: Set[str], cv_mid: Optional[Set[str]]=None) -> str:
-        cv_log = ', '.join(cv_set)
+        cv_mid = cv_mid if cv_mid else set()
+        for row in self.reclist:
+            for idx, cvv in enumerate(row):
+                if idx == 0 and (cvv.cv in cv_mid or cvv.cvv in cv_mid):
+                    continue
+                cv_set.discard(cvv.cvv)
+                cv_set.discard(cvv.cv)
+        cv_log = ', '.join(cv_set) if cv_set else 'None'
         return cv_log
+    
+    def check_vc_integrity(self, vc_set: Set[tuple[str, str]]) -> str:
+        for row in self.reclist:
+            for idx, cvv in enumerate(row):
+                if idx == 0:
+                    continue
+                vc_set.discard((row[idx-1].v, cvv.c))
+        vc_log = ", ".join(str(vc) for vc in vc_set) if vc_set else 'None'
+        return vc_log
+    
+    def check_vcv_integrity(self, vcv_set: Set[tuple[str, str]]) -> str:
+        for row in self.reclist:
+            for idx, cvv in enumerate(row):
+                if idx == 0:
+                    continue
+                vcv_set.discard((row[idx-1].v, cvv.get_cv()))
+        vcv_log = ", ".join(str(vcv) for vcv in vcv_set) if vcv_set else 'None'
+        return vcv_log
+            
+    def check_vr_integrity(self, vr_set: Set[str]) -> str:
+        for row in self.reclist:
+            vr_set.discard(row[-1].v)
+        vr_log = ', '.join(vr_set) if vr_set else 'None'
+        return vr_log
 
 
 def main():
     generator = CVVCReclistGenerator()
     generator.read_dict("dict_files\\CHN.txt")
-    aliens = generator.get_needed_aliens()
-    # aliens = generator.gen_plan_b(aliens=aliens)
-    generator.gen_mora_x(aliens=aliens, length=5)
+    aliens = generator.get_needed_aliens(aliens_config=".\\config\\aliens_config.ini")
+    aliens = generator.gen_plan_b(aliens=aliens)
+    generator.gen_mora_x(aliens=aliens, length=8)
     generator.save_reclist("result\\reclist.txt")
-
+    generator.check_integrity(generator.get_needed_aliens())
 
 if __name__ == "__main__":
     main()
