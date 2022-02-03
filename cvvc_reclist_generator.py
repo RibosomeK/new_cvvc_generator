@@ -1,9 +1,12 @@
 from collections import namedtuple, deque
 from random import choice
-import re
+from enum import Enum
 from typing import List, Set, Dict, Optional, Iterable
 from dataclasses import dataclass, field
 import configparser
+
+
+Aliens_Type = Enum('Aliens_Type', 'CV VC VCV VR')
 
 
 class CVV(namedtuple("CVV", "cvv c v act_c cv mid_v end_v")):
@@ -22,8 +25,11 @@ class CVV(namedtuple("CVV", "cvv c v act_c cv mid_v end_v")):
 
     __slot__ = ()
     
-    def get_cv(self) -> str:
-        return self.cv if self.cv else self.cvv
+    def get_cv(self, full_cv: Optional[bool] = False) -> str:
+        if full_cv:
+            return self.cvv
+        else:
+            return self.cv if self.cv else self.cvv
 
     def __str__(self) -> str:
         str_order = (self.cvv, self.cv, 
@@ -43,7 +49,7 @@ class CVV(namedtuple("CVV", "cvv c v act_c cv mid_v end_v")):
             return False
 
 
-class RecLine(tuple):
+class RecLine(tuple[CVV, ...]):
     def __new__(cls, *args):
         recline = (x for x in args)
         return super().__new__(cls, recline)
@@ -344,7 +350,7 @@ class CVVCReclistGenerator:
         self,
         _c: bool = False,
         _cv: bool = True,
-        full_cv: bool = True,
+        full_cv: bool = False,
         aliens_config: Optional[str] = None,
     ) -> Aliens:
         """Get needed aliens.
@@ -354,7 +360,7 @@ class CVVCReclistGenerator:
             _cv (bool, optional): Begining cv head. Defaults to True.
             full_cv (bool, optional): For cv and cv head. 
                 If your dict inclued extra cv part and you WANT TO use them in non vcv part,
-                you must set to False. Defaults to True.
+                you must set to False. Defaults to False.
             aliens_config (Optional[str], optional): exceptional aliens config. Defaults to None.
 
         Returns:
@@ -363,10 +369,7 @@ class CVVCReclistGenerator:
         aliens = Aliens()
         if _c:
             aliens._c = {x for x in self.c_dict.keys()}
-        if full_cv:
-            aliens.cv = {cv.cvv for cv in self.cvv}
-        else:
-            aliens.cv = {cv.get_cv() for cv in self.cvv}
+        aliens.cv = {cv.get_cv(full_cv) for cv in self.cvv}
         if _cv:
             aliens._cv = aliens.cv.copy()
         aliens.vc = VC_Set()
@@ -385,7 +388,7 @@ class CVVCReclistGenerator:
         self.aliens = aliens
         return aliens
 
-    def read_aliens_config(self, aliens_config: str, full_cv: bool = True) -> tuple[Aliens, Aliens]:
+    def read_aliens_config(self, aliens_config: str, full_cv: bool = False) -> tuple[Aliens, Aliens]:
         """Read aliens config to get unwanted aliens and wanted aliens.
         For config format plz check on the comments in config
 
@@ -410,14 +413,9 @@ class CVVCReclistGenerator:
                     if self.find_cvv(cvv=cv):
                         unneeded.__dict__[cv].add(cv)
                     elif cv in self.c_dict.keys():
-                        if full_cv:
-                            unneeded.__dict__[cv].update(
-                                cvv.cvv for cvv in self.c_dict[cv]
-                            )
-                        else:
-                            unneeded.__dict__[cv].update(
-                                cvv.get_cv() for cvv in self.c_dict[cv]
-                            )
+                        unneeded.__dict__[cv].update(
+                            cvv.get_cv(full_cv) for cvv in self.c_dict[cv]
+                        )
                     else:
                         raise ValueError
             elif key == "vc":
@@ -474,34 +472,47 @@ class CVVCReclistGenerator:
         return unneeded, needed
 
     def gen_2mora(self, aliens: Aliens) -> None:
-        all_cv = list(aliens.cv | aliens._cv)
-        all_vc, all_vcv = aliens.vc, aliens.vcv
-        all_cv.sort()
-        for cv in all_cv:
+        cv_list = list(aliens.cv | aliens._cv)
+        cv_list.sort()
+        for cv in cv_list:
             cvv = self.find_cvv(cvv=cv)
             if cvv:
                 self.reclist.append(RecLine(cvv, cvv))
-                all_vc.discard((cvv.v, cvv.c))
-                if all_vcv:
-                    all_vcv.discard((cvv.v, cvv.get_cv()))
+                aliens.vc.discard((cvv.v, cvv.c))
+                if aliens.vcv:
+                    aliens.vcv.discard((cvv.v, cvv.get_cv()))
+                aliens.vr.discard(cvv.v)
             else:
                 print(f"{cv}= has no match word.")
                 raise ValueError
-        if all_vcv:
-            all_vcv = list(all_vcv)
-            all_vcv.sort()
-            for vcv in all_vcv:
+        if aliens.vcv:
+            vcv_list = list(aliens.vcv)
+            vcv_list.sort()
+            for vcv in vcv_list:
                 v = CVV(*[None]*7)
                 v._replace(v=vcv[0])
                 cvv = self.find_cvv(cvv=vcv[1])
                 self.reclist.append(RecLine((v, cvv)))
                 aliens.vc.discard((v.v, cvv.c))
-        all_vc = list(all_vc)
-        all_vc.sort()
-        for vc in all_vc:
+                aliens.vr.discard(cvv.v)
+        vc_list = list(aliens.vc)
+        vc_list.sort()
+        for vc in vc_list:
             v, c = CVV(*[None]*7), CVV(*[None]*7)
             v._replace(v=vc[0]), c._replace(c=vc[1])
             self.reclist.append(RecLine((v, c)))
+        if vr_deque := deque(sorted(list(aliens.vr))):
+            row: List[CVV] = []
+            while vr_deque:
+                vr = vr_deque.popleft()
+                vr = CVV(None, None, vr, None, None, None, None)
+                if len(row) < 3:
+                    row.extend([vr, self.emptyCVV])
+                else:
+                    self.reclist.append(RecLine(*row))
+                    row.clear()
+            if row:
+                self.reclist.append(RecLine(*row))
 
     def gen_plan_b(self, aliens: Aliens) -> Aliens:
         all_cv = list(aliens.cv | aliens._cv)
@@ -690,6 +701,137 @@ class CVVCReclistGenerator:
             self.reclist.append(RecLine(*row))
             row: List[CVV] = []
         aliens.vr.clear()
+        
+    def gen_oto(self, aliens: Aliens, bpm: float, full_cv: bool = False, cv_mid: Set[str]=None):
+        """Generate all otos.
+
+        Args:
+            aliens (Aliens): [description]
+        """
+        cv_mid = cv_mid if cv_mid else set()
+        cv_oto_list: List[OTO] = []
+        vc_oto_list: List[OTO] = []
+        vcv_oto_list: List[OTO] = []
+        vr_oto_list: List[OTO] = []
+        for row in self.reclist:
+            wav = str(row)
+            if row[0] == row[1] == row[2]:
+                if (_cv := row[0].get_cv(full_cv)) in aliens._cv:
+                    _cv_alien = f'- {row[0].get_cv(full_cv)}'
+                    _cv_oto = self.get_oto(Aliens_Type.CV, wav, _cv_alien, 0, bpm)
+                    cv_oto_list.append(_cv_oto)
+                    aliens._cv.discard(_cv)
+                if (cv := row[1].get_cv(full_cv)) in aliens.cv:
+                    cv_alien = row[1].get_cv(full_cv)
+                    cv_L_alien = f'{row[2].get_cv(full_cv)}_L'
+                    cv_oto = self.get_oto(Aliens_Type.CV, wav, cv_alien, 1, bpm)
+                    cv_L_oto = self.get_oto(Aliens_Type.CV, wav, cv_L_alien, 2, bpm)
+                    cv_oto_list.extend((cv_oto, cv_L_oto))
+                    aliens.cv.discard(cv)
+                if (vc := (row[0].v, row[1].c)) in aliens.vc:
+                    vc_oto = self.get_oto(Aliens_Type.VC, wav, vc, 1, bpm)
+                    vc_oto_list.append(vc_oto)
+                    aliens.vc.discard(vc)
+                if (vcv := (row[0].v, row[1].get_cv())) in aliens.vcv:
+                    vcv_oto = self.get_oto(Aliens_Type.VCV, wav, vcv, 1, bpm)
+                    vcv_oto_list.append(vcv_oto)
+                    aliens.vcv.discard(vcv)
+                if (vr := row[2]) in aliens.vr:
+                    vr_alien = f'{row[2].v} R'
+                    vr_oto = self.get_oto(Aliens_Type.VR, wav, vr_alien, 2, bpm)
+                    vr_oto_list.append(vr_oto)
+                    aliens.vr.discard(vr)
+            else:
+                for idx, cvv in enumerate(row):
+                    if idx == 0:
+                        cv = cvv.get_cv(full_cv)
+                        if cv in aliens._cv:
+                            _cv_alien = f'- {cv}'
+                            oto = self.get_oto(Aliens_Type.CV, wav, _cv_alien, idx, bpm)
+                            cv_oto_list.append(oto)
+                            aliens._cv.discard(cv)
+                        if cv in aliens.cv and cv not in cv_mid:
+                            oto = self.get_oto(Aliens_Type.CV, wav, cv, idx, bpm)
+                            cv_oto_list.append(oto)
+                            aliens._cv.discard(cv)
+                    elif idx <= len(row)-1:
+                        if (cv := cvv.get_cv(full_cv)) in aliens.cv:
+                            oto = self.get_oto(Aliens_Type.CV, wav, cv, idx, bpm)
+                            cv_oto_list.append(oto)
+                            aliens._cv.discard(cv)
+                        if (vc := (row[idx-1].v, cvv.c)) in aliens.vc:
+                            oto = self.get_oto(Aliens_Type.VC, wav, vc, idx, bpm)
+                            vc_oto_list.append(oto)
+                            aliens.vc.discard(vc)
+                        if (vcv := (row[idx-1].v, cvv.get_cv())) in aliens.vcv:
+                            oto = self.get_oto(Aliens_Type.VCV, wav, vcv, idx, bpm)
+                            vcv_oto_list.append(oto)
+                            aliens.vcv.discard(vcv)
+                    if idx == len(row)-1 and (vr := row[idx].v) in aliens.vr:
+                        vr_alien = f'{vr} R'
+                        oto = self.get_oto(Aliens_Type.VR, wav, vr_alien, idx, bpm)
+                        vr_oto_list.append(oto)
+                        aliens.vr.discard(vr)
+        self.oto.extend(cv_oto_list)
+        self.oto.extend(vc_oto_list)
+        self.oto.extend(vcv_oto_list)
+        self.oto.extend(vr_oto_list)
+                        
+    def get_oto(
+        self, 
+        aliens_type: Aliens_Type, 
+        wav: str,
+        alien: str | tuple[str, str], 
+        position: int,
+        bpm: float
+    ) -> OTO:
+        """Get one sigle oto.
+
+        Args:
+            aliens_type (str): the type of alien: [cv, vc, vcv, vr]
+            wav (str) : the string of wav
+            alien (str or tuple[str, str]): alien in oto, tuple for vc and vcv types
+            position (int): position in row, start from 0. for vc and vcv types use the c or cv position
+            bpm (float): the bpm of recording BGM
+
+        Returns:
+            OTO the class
+        """
+        bpm_param = float(120 / bpm)
+        beat = bpm_param*(1250 + position*500)
+        OVL, CONSONANT_VEL, VOWEL_VEL = 80, 100, 200
+            
+        if aliens_type == Aliens_Type.CV:
+            offset = beat - CONSONANT_VEL
+            consonant = 0.25*500*bpm_param + CONSONANT_VEL
+            cutoff = -(beat + 0.75*500*bpm_param)
+            preutterance = CONSONANT_VEL
+            overlap = CONSONANT_VEL / 2
+        elif aliens_type == Aliens_Type.VR:
+            offset = beat + 500*bpm_param - OVL - VOWEL_VEL
+            consonant = OVL + VOWEL_VEL + 100
+            cutoff = -(consonant + 100)
+            preutterance = OVL + VOWEL_VEL
+            overlap = OVL
+        elif aliens_type == Aliens_Type.VC:
+            alien = '{} {}'.format(*alien)
+            offset = beat - OVL - VOWEL_VEL - CONSONANT_VEL
+            consonant = OVL + VOWEL_VEL + 0.33*CONSONANT_VEL
+            cutoff = -(OVL + VOWEL_VEL + CONSONANT_VEL)
+            preutterance = OVL + VOWEL_VEL
+            overlap = OVL
+        elif aliens_type == Aliens_Type.VCV:
+            alien = '{} {}'.format(*alien)
+            offset = beat - OVL - VOWEL_VEL - CONSONANT_VEL
+            consonant = OVL + VOWEL_VEL + CONSONANT_VEL + 0.25*500*bpm_param
+            cutoff = -(OVL + VOWEL_VEL + CONSONANT_VEL + 0.75*500*bpm_param)
+            preutterance = OVL + VOWEL_VEL + CONSONANT_VEL
+            overlap = OVL
+        else:
+            raise TypeError
+            
+        oto = OTO(wav, None, alien, None, offset, consonant, cutoff, preutterance, overlap)
+        return oto
 
     def save_reclist(self, reclist_dir: str) -> None:
         with open(reclist_dir, mode="w", encoding="utf-8") as reclist_file:
@@ -768,7 +910,9 @@ def main():
     aliens = generator.get_needed_aliens(aliens_config=".\\config\\aliens_config.ini")
     aliens = generator.gen_plan_b(aliens=aliens)
     generator.gen_mora_x(aliens=aliens, length=8)
+    generator.gen_oto(generator.get_needed_aliens(aliens_config=".\\config\\aliens_config.ini"), 120)
     generator.save_reclist("result\\reclist.txt")
+    generator.save_oto("result\\oto.txt")
     generator.check_integrity(generator.get_needed_aliens())
 
 if __name__ == "__main__":
