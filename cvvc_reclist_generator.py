@@ -1,12 +1,12 @@
 from collections import namedtuple, deque
 from random import choice
 from enum import Enum
-from typing import List, Set, Dict, Optional, Iterable
+from typing import List, Set, Dict, NamedTuple, Optional, Iterable
 from dataclasses import dataclass, field
 import configparser
 
 
-Aliens_Type = Enum('Aliens_Type', 'CV VC VCV VR')
+Aliens_Type = Enum('Aliens_Type', 'C CV VC VCV VR')
 
 
 class CVV(namedtuple("CVV", "cvv c v act_c cv mid_v end_v")):
@@ -75,6 +75,13 @@ class OTO(namedtuple("OTO", "wav prefix alien suffix l con r pre ovl")):
         if self.suffix:
             alien += self.suffix
         return "{}={},{},{},{},{},{}".format(self.wav, alien, *self[-5:])
+    
+
+class VS_OTO(namedtuple("VS_OTO", "alien wav l pre con r ovl")):
+    __slot__ = ()
+    
+    def __str__(self) -> str:
+        return ','.join(self)
 
 
 class VC_Set(set[tuple[str, str]]):
@@ -248,7 +255,7 @@ class CVVCReclistGenerator:
         self.v_dict: Dict[str, List[CVV]] = {}
 
         self.reclist: List[RecLine] = []
-        self.oto: List[OTO] = []
+        self.oto: List[NamedTuple] = []
 
         self.aliens: Aliens
         self.emptyCVV = CVV(*[None] * 7)
@@ -777,6 +784,31 @@ class CVVCReclistGenerator:
         self.oto.extend(vcv_oto_list)
         self.oto.extend(vr_oto_list)
                         
+    def gen_vsdxmf(
+        self, 
+        aliens: Aliens, 
+        bpm: float, 
+        full_cv: bool = False, 
+        cv_mid: Set[str]=None, 
+        redirect_config_dir: Optional[str]=None
+    ) -> None:
+        """Generate vsdxmf for vocalsharp.
+
+        Args:
+            aliens (Aliens): [description]
+            bpm (float): [description]
+            full_cv (bool, optional): [description]. Defaults to False.
+            cv_mid (Set[str], optional): [description]. Defaults to None.
+            redirect_config_dir (Optional[str], optional): [description]. Defaults to None.
+        """
+        cv_mid = cv_mid if cv_mid else set()
+        c_vsdxmf_list: List[VS_OTO] = []
+        cv_vsdxmf_list: List[VS_OTO] = []
+        vc_vsdxmf_list: List[VS_OTO] = []
+        vr_vsdxmf_list: List[VS_OTO] = []
+        
+            
+        
     def get_oto(
         self, 
         aliens_type: Aliens_Type, 
@@ -832,6 +864,98 @@ class CVVCReclistGenerator:
             
         oto = OTO(wav, None, alien, None, offset, consonant, cutoff, preutterance, overlap)
         return oto
+    
+    def get_vs_oto(
+        self,
+        aliens_type: Aliens_Type, 
+        wav: str,
+        alien: str | tuple[str, str], 
+        position: int,
+        bpm: float, 
+        redirect_config: Optional[configparser.ConfigParser]=None
+    ) -> VS_OTO:
+        bpm_param = float(120 / bpm)
+        beat = bpm_param*(1250 + position*500)
+        OVL, CONSONANT_VEL, VOWEL_VEL = 80, 100, 200
+            
+        if aliens_type == Aliens_Type.C:
+            phoneme = f' {alien}'
+            offset = beat - 20 - CONSONANT_VEL
+            preutterance = offset + 20
+            consonant = preutterance + 0.25*CONSONANT_VEL
+            cutoff = consonant + CONSONANT_VEL
+            overlap = offset + 5
+        if aliens_type == Aliens_Type.CV:
+            cvv = self.find_cvv(cvv=str(alien))
+            phoneme = f'{cvv.c} {cvv.v}'
+            offset = beat - CONSONANT_VEL
+            preutterance = beat
+            consonant = 0.25*500*bpm_param + preutterance
+            cutoff = consonant + 0.75*500*bpm_param
+            overlap = offset + CONSONANT_VEL / 2
+        elif aliens_type == Aliens_Type.VR:
+            phoneme = f'{alien} '
+            offset = beat + 500*bpm_param - OVL - VOWEL_VEL
+            preutterance = offset + OVL + VOWEL_VEL
+            consonant = preutterance + 100
+            cutoff = consonant + 100
+            overlap = offset + OVL
+        elif aliens_type == Aliens_Type.VC:
+            phoneme = '{} {}'.format(*alien)
+            offset = beat - OVL - VOWEL_VEL - CONSONANT_VEL
+            preutterance = beat - CONSONANT_VEL
+            consonant = preutterance + 0.33*CONSONANT_VEL
+            cutoff = beat
+            overlap = offset + OVL
+            '''
+        elif aliens_type == Aliens_Type.VCV:
+            alien = '{} {}'.format(*alien)
+            offset = beat - OVL - VOWEL_VEL - CONSONANT_VEL
+            preutterance = beat
+            consonant = beat + 0.25*500*bpm_param
+            cutoff = beat + 0.75*500*bpm_param
+            overlap = offset + OVL
+            '''
+        else:
+            raise TypeError
+        
+        old_phoneme = phoneme
+        if redirect_config:
+            redirect_vowel = {
+                value: key 
+                for key, values in redirect_config['VOWEL'] 
+                for value in values.split(',')
+            }
+            redirect_consonant = {
+                value: key
+                for key, values in redirect_config['CONSONANT']
+                for value in values.split(',')
+            }
+            if aliens_type == Aliens_Type.C:
+                alien = str(alien)
+                phoneme = f' {redirect_consonant.get(alien, alien)}'
+            elif aliens_type == Aliens_Type.CV:
+                c, v = alien
+                c = redirect_consonant.get(c, c)
+                v = redirect_vowel.get(v, v)
+                phoneme = f'{c} {v}'
+            elif aliens_type == Aliens_Type.VR:
+                alien = str(alien)
+                phoneme = f'{redirect_vowel.get(alien, alien)} '
+            elif aliens_type == Aliens_Type.VC:
+                v, c = alien
+                v = redirect_vowel.get(v, v)
+                c = redirect_consonant.get(c, c)
+                phoneme = f'{v} {c}'
+            else:
+                raise TypeError
+        
+        if old_phoneme != phoneme:
+            wav = f'#{old_phoneme}'
+            offset, preutterance, consonant, cutoff, overlap = 0, 0, 0, 0, 0
+        
+        vs_oto = VS_OTO(phoneme, wav, offset, preutterance, consonant, cutoff, overlap)
+        return vs_oto
 
     def save_reclist(self, reclist_dir: str) -> None:
         with open(reclist_dir, mode="w", encoding="utf-8") as reclist_file:
@@ -842,6 +966,28 @@ class CVVCReclistGenerator:
         with open(oto_dir, mode="w", encoding="utf-8") as oto_file:
             oto_str = "\n".join(str(oto) for oto in self.oto)
             oto_file.write(oto_str)
+            
+    def save_presamp(self, presamp_dir: str) -> None:
+        presamp_ini: List[str] = ['[VERSION]\n'
+                                  '1.7']
+        presamp_ini.append('[VOWEL]')
+        for v, cvv_list in self.v_dict.items():
+            v_str = ','.join(str(cvv) for cvv in cvv_list)
+            v_str = f'{v}={v}={v_str}=100'
+            presamp_ini.append(v_str)
+        presamp_ini.append('[CONSONANT]')
+        for c, cvv_list in self.c_dict.items():
+            if c in self.v_dict:
+                continue
+            c_str = ','.join(str(cvv) for cvv in cvv_list)
+            c_str = f'{c}={c_str}=1'
+            presamp_ini.append(c_str)
+        presamp_ini.append('[ENDTYPE]\n'
+                           '%v% R\n'
+                           '[ENDFLAG]\n'
+                           '1')
+        with open(presamp_dir, mode='w', encoding='utf-8') as f:
+            f.write('\n'.join(presamp_ini))
             
     def check_integrity(self, aliens: Aliens) -> None:
         # _c_log = self.check_chead_integrity()
@@ -913,6 +1059,7 @@ def main():
     generator.gen_oto(generator.get_needed_aliens(aliens_config=".\\config\\aliens_config.ini"), 120)
     generator.save_reclist("result\\reclist.txt")
     generator.save_oto("result\\oto.txt")
+    generator.save_presamp("result\\presamp.ini")
     generator.check_integrity(generator.get_needed_aliens())
 
 if __name__ == "__main__":
