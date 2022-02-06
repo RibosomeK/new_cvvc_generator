@@ -81,7 +81,7 @@ class VS_OTO(namedtuple("VS_OTO", "alien wav l pre con r ovl")):
     __slot__ = ()
     
     def __str__(self) -> str:
-        return ','.join(self)
+        return ','.join(str(ele) for ele in self)
 
 
 class VC_Set(set[tuple[str, str]]):
@@ -256,6 +256,11 @@ class CVVCReclistGenerator:
 
         self.reclist: List[RecLine] = []
         self.oto: List[NamedTuple] = []
+        
+        self.lsd_cvv: Dict[str, CVV] = {}
+        self.vsdxmf: List[NamedTuple] = []
+        self.redirect_vowel_dict: Dict[str, List[str]]
+        self.redirect_consonant_dict: Dict[str, List[str]]
 
         self.aliens: Aliens
         self.emptyCVV = CVV(*[None] * 7)
@@ -721,7 +726,7 @@ class CVVCReclistGenerator:
         vcv_oto_list: List[OTO] = []
         vr_oto_list: List[OTO] = []
         for row in self.reclist:
-            wav = str(row)
+            wav = f'{row}.wav'
             if row[0] == row[1] == row[2]:
                 if (_cv := row[0].get_cv(full_cv)) in aliens._cv:
                     _cv_alien = f'- {row[0].get_cv(full_cv)}'
@@ -743,7 +748,7 @@ class CVVCReclistGenerator:
                     vcv_oto = self.get_oto(Aliens_Type.VCV, wav, vcv, 1, bpm)
                     vcv_oto_list.append(vcv_oto)
                     aliens.vcv.discard(vcv)
-                if (vr := row[2]) in aliens.vr:
+                if (vr := row[2].v) in aliens.vr:
                     vr_alien = f'{row[2].v} R'
                     vr_oto = self.get_oto(Aliens_Type.VR, wav, vr_alien, 2, bpm)
                     vr_oto_list.append(vr_oto)
@@ -802,11 +807,105 @@ class CVVCReclistGenerator:
             redirect_config_dir (Optional[str], optional): [description]. Defaults to None.
         """
         cv_mid = cv_mid if cv_mid else set()
+        if redirect_config_dir:
+            redirect_config = configparser.ConfigParser(allow_no_value=True)
+            redirect_config.read(redirect_config_dir, encoding='utf-8')
+            lsd_cvv_check = set()
+            for lsd_cvv in redirect_config["LSD"]:
+                if ',' in lsd_cvv:
+                    split_symbol = ','
+                elif '\t' in lsd_cvv:
+                    split_symbol = '\t'
+                else:
+                    raise SyntaxError('Invaild split symbol. Use comma or tab')
+                cvv, c, v = lsd_cvv.split(split_symbol)
+                if (c, v) in lsd_cvv_check:
+                    # rpd stand for repeated
+                    for lsd_cvv in self.lsd_cvv.values():
+                        if lsd_cvv.c == c and lsd_cvv.v == v:
+                            rpd_cv = lsd_cvv.cvv
+                            raise AttributeError(f'{(cvv, c, v)} and {(rpd_cv, c, v)} is repeated.')
+                self.lsd_cvv[cvv] = CVV(cvv, c, v, *[None]*4)
+                lsd_cvv_check.add((c, v))
+            self.redirect_vowel_dict = {
+                key: values.split(',') 
+                for key, values in redirect_config["VOWEL"].items()
+            }
+            self.redirect_consonant_dict = {
+                key: values.split(',')
+                for key, values in redirect_config['CONSONANT'].items()
+            }
+            redirect_config = True
+        else:
+            redirect_config = False
+                
         c_vsdxmf_list: List[VS_OTO] = []
         cv_vsdxmf_list: List[VS_OTO] = []
         vc_vsdxmf_list: List[VS_OTO] = []
         vr_vsdxmf_list: List[VS_OTO] = []
         
+        for row in self.reclist:
+            wav = f'{row}.wav'
+            if row[0] == row[1] == row[2]:
+                if (c := row[0].c) in aliens._c:
+                    c_vsdxmf = self.get_vs_oto(Aliens_Type.C, wav, c, 0, bpm, redirect_config)
+                    c_vsdxmf_list.extend(c_vsdxmf)
+                    aliens._c.discard(c)
+                if (cv := row[1].get_cv(full_cv)) in aliens.cv and row[0].c != row[0].v:
+                    cv_alien = row[1].get_cv(full_cv)
+                    cv_vsdxmf = self.get_vs_oto(Aliens_Type.CV, wav, cv_alien, 1, bpm, redirect_config)
+                    cv_L_vsdxmf = self.get_vs_oto(Aliens_Type.CV, wav, cv_alien, 2, bpm, redirect_config)
+                    for L_vsdxmf in cv_L_vsdxmf:
+                        L_vsdxmf = L_vsdxmf._replace(alien=f'{L_vsdxmf.alien}_L')
+                        cv_vsdxmf_list.append(L_vsdxmf)
+                    cv_vsdxmf_list.extend(cv_vsdxmf)
+                    aliens.cv.discard(cv)
+                if (vc := (row[0].v, row[1].c)) in aliens.vc:
+                    vc_vsdxmf = self.get_vs_oto(Aliens_Type.VC, wav, vc, 1, bpm, redirect_config)
+                    vc_vsdxmf_list.extend(vc_vsdxmf)
+                    aliens.vc.discard(vc)
+                '''if (vcv := (row[0].v, row[1].get_cv())) in aliens.vcv:
+                    vcv_vsdxmf = self.get_vs_oto(Aliens_Type.VCV, wav, vcv, 1, bpm, redirect_config)
+                    vcv_vsdxmf_list.append(vcv_vsdxmf)
+                    aliens.vcv.discard(vcv)'''
+                if (vr := row[2].v) in aliens.vr:
+                    vr_vsdxmf = self.get_vs_oto(Aliens_Type.VR, wav, vr, 2, bpm)
+                    vr_vsdxmf_list.extend(vr_vsdxmf)
+                    aliens.vr.discard(vr)
+            else:
+                for idx, cvv in enumerate(row):
+                    if idx == 0:
+                        if (c := cvv.c) in aliens._c:
+                            vsdxmf = self.get_vs_oto(Aliens_Type.C, wav, c, idx, bpm, redirect_config)
+                            c_vsdxmf_list.extend(vsdxmf)
+                            aliens._c.discard(c)
+                        cv = cvv.get_cv(full_cv)
+                        if cv in aliens.cv and cv not in cv_mid and cvv.c != cvv.v:
+                            vsdxmf = self.get_vs_oto(Aliens_Type.CV, wav, cv, idx, bpm, redirect_config)
+                            cv_vsdxmf_list.extend(vsdxmf)
+                            aliens._cv.discard(cv)
+                    elif idx <= len(row)-1:
+                        if (cv := cvv.get_cv(full_cv)) in aliens.cv and cvv.c != cvv.v:
+                            vsdxmf = self.get_vs_oto(Aliens_Type.CV, wav, cv, idx, bpm, redirect_config)
+                            cv_vsdxmf_list.extend(vsdxmf)
+                            aliens._cv.discard(cv)
+                        if (vc := (row[idx-1].v, cvv.c)) in aliens.vc:
+                            vsdxmf = self.get_vs_oto(Aliens_Type.VC, wav, vc, idx, bpm, redirect_config)
+                            vc_vsdxmf_list.extend(vsdxmf)
+                            aliens.vc.discard(vc)
+                        '''if (vcv := (row[idx-1].v, cvv.get_cv())) in aliens.vcv:
+                            vsdxmf = self.get_vs_oto(Aliens_Type.VCV, wav, vcv, idx, bpm, redirect_config)
+                            vcv_vsdxmf_list.append(vsdxmf)
+                            aliens.vcv.discard(vcv)'''
+                    if idx == len(row)-1 and (vr := row[idx].v) in aliens.vr:
+                        vsdxmf = self.get_vs_oto(Aliens_Type.VR, wav, vr, idx, bpm)
+                        vr_vsdxmf_list.extend(vsdxmf)
+                        aliens.vr.discard(vr)
+                        
+        self.vsdxmf.extend(c_vsdxmf_list)
+        self.vsdxmf.extend(cv_vsdxmf_list)
+        self.vsdxmf.extend(vc_vsdxmf_list)
+        self.vsdxmf.extend(vr_vsdxmf_list)
             
         
     def get_oto(
@@ -872,11 +971,12 @@ class CVVCReclistGenerator:
         alien: str | tuple[str, str], 
         position: int,
         bpm: float, 
-        redirect_config: Optional[configparser.ConfigParser]=None
-    ) -> VS_OTO:
+        redirect_config: Optional[bool]=True
+    ) -> List[VS_OTO]:
         bpm_param = float(120 / bpm)
         beat = bpm_param*(1250 + position*500)
         OVL, CONSONANT_VEL, VOWEL_VEL = 80, 100, 200
+        vs_oto_list: List[VS_OTO] = []
             
         if aliens_type == Aliens_Type.C:
             phoneme = f' {alien}'
@@ -885,7 +985,7 @@ class CVVCReclistGenerator:
             consonant = preutterance + 0.25*CONSONANT_VEL
             cutoff = consonant + CONSONANT_VEL
             overlap = offset + 5
-        if aliens_type == Aliens_Type.CV:
+        elif aliens_type == Aliens_Type.CV:
             cvv = self.find_cvv(cvv=str(alien))
             phoneme = f'{cvv.c} {cvv.v}'
             offset = beat - CONSONANT_VEL
@@ -918,44 +1018,63 @@ class CVVCReclistGenerator:
             '''
         else:
             raise TypeError
-        
-        old_phoneme = phoneme
+        vs_oto = VS_OTO(phoneme, wav, offset, preutterance, consonant, cutoff, overlap)
+        if redirect_config is None or aliens_type != Aliens_Type.CV:
+            vs_oto_list.append(vs_oto)
+            
         if redirect_config:
-            redirect_vowel = {
-                value: key 
-                for key, values in redirect_config['VOWEL'] 
-                for value in values.split(',')
-            }
-            redirect_consonant = {
-                value: key
-                for key, values in redirect_config['CONSONANT']
-                for value in values.split(',')
-            }
             if aliens_type == Aliens_Type.C:
-                alien = str(alien)
-                phoneme = f' {redirect_consonant.get(alien, alien)}'
+                if alien in self.v_dict:
+                    redirect_consonant_dict = self.redirect_vowel_dict
+                else:
+                    redirect_consonant_dict = self.redirect_consonant_dict
+                if alien in redirect_consonant_dict:
+                    for redirect_consonant in redirect_consonant_dict[str(alien)]:
+                        phoneme = f' {redirect_consonant}'
+                        redirect_phoneme = f'#{vs_oto.alien}'
+                        redirect_vs_oto = VS_OTO(phoneme, redirect_phoneme, 0, 0, 0, 0, 0)
+                        vs_oto_list.append(redirect_vs_oto)
             elif aliens_type == Aliens_Type.CV:
-                c, v = alien
-                c = redirect_consonant.get(c, c)
-                v = redirect_vowel.get(v, v)
+                _, c, v, *__ = self.lsd_cvv[str(alien)]
                 phoneme = f'{c} {v}'
-            elif aliens_type == Aliens_Type.VR:
-                alien = str(alien)
-                phoneme = f'{redirect_vowel.get(alien, alien)} '
+                vs_oto = vs_oto._replace(alien=phoneme)
+                vs_oto_list.append(vs_oto)
+            elif aliens_type == Aliens_Type.VR and alien in self.redirect_vowel_dict:
+                for redirect_vowel in self.redirect_vowel_dict[str(alien)]:
+                    phoneme = f'{redirect_vowel} '
+                    redirect_phoneme = f'#{vs_oto.alien}'
+                    redirect_vs_oto = VS_OTO(phoneme, redirect_phoneme, 0, 0, 0, 0, 0)
+                    vs_oto_list.append(redirect_vs_oto)
             elif aliens_type == Aliens_Type.VC:
                 v, c = alien
-                v = redirect_vowel.get(v, v)
-                c = redirect_consonant.get(c, c)
-                phoneme = f'{v} {c}'
+                if c in self.v_dict:
+                    redirect_consonant_dict = self.redirect_vowel_dict
+                else:
+                    redirect_consonant_dict = self.redirect_consonant_dict
+                if v in self.redirect_vowel_dict:
+                    for redirect_vowel in self.redirect_vowel_dict[v]:
+                        phoneme = f'{redirect_vowel} {c}'
+                        redirect_phoneme = f'#{v} {c}'
+                        redirect_vs_oto = VS_OTO(phoneme, redirect_phoneme, 0, 0, 0, 0, 0)
+                        vs_oto_list.append(redirect_vs_oto)
+                if c in redirect_consonant_dict:
+                    for redirect_consonant in redirect_consonant_dict[c]:
+                        phoneme = f'{v} {redirect_consonant}'
+                        redirect_phoneme = f'#{v} {c}'
+                        redirect_vs_oto = VS_OTO(phoneme, redirect_phoneme, 0, 0, 0, 0, 0)
+                        vs_oto_list.append(redirect_vs_oto)
+                if v in self.redirect_vowel_dict and c in redirect_consonant_dict:
+                    for redirect_vowel in self.redirect_vowel_dict[v]:
+                        for redirect_consonant in redirect_consonant_dict[c]:
+                            phoneme = f'{redirect_vowel} {redirect_consonant}'
+                            redirect_phoneme = f'#{v} {c}'
+                            redirect_vs_oto = VS_OTO(phoneme, redirect_phoneme, 0, 0, 0, 0, 0)
+                            vs_oto_list.append(redirect_vs_oto)
             else:
                 raise TypeError
         
-        if old_phoneme != phoneme:
-            wav = f'#{old_phoneme}'
-            offset, preutterance, consonant, cutoff, overlap = 0, 0, 0, 0, 0
-        
         vs_oto = VS_OTO(phoneme, wav, offset, preutterance, consonant, cutoff, overlap)
-        return vs_oto
+        return vs_oto_list
 
     def save_reclist(self, reclist_dir: str) -> None:
         with open(reclist_dir, mode="w", encoding="utf-8") as reclist_file:
@@ -988,6 +1107,11 @@ class CVVCReclistGenerator:
                            '1')
         with open(presamp_dir, mode='w', encoding='utf-8') as f:
             f.write('\n'.join(presamp_ini))
+            
+    def save_vsdxmf(self, vsdxmf_dir: str) -> None:
+        with open(vsdxmf_dir, mode='w', encoding='utf-8') as f:
+            vsdxmf_str = '\n'.join(str(vsdxmf) for vsdxmf in self.vsdxmf)
+            f.write(vsdxmf_str)
             
     def check_integrity(self, aliens: Aliens) -> None:
         # _c_log = self.check_chead_integrity()
@@ -1060,6 +1184,8 @@ def main():
     generator.save_reclist("result\\reclist.txt")
     generator.save_oto("result\\oto.txt")
     generator.save_presamp("result\\presamp.ini")
+    generator.gen_vsdxmf(generator.get_needed_aliens(_c=True, aliens_config=".\\config\\aliens_config.ini"), 120, redirect_config_dir="config\\redirect.ini")
+    generator.save_vsdxmf("result\\vsdxmf.vsdxmf")
     generator.check_integrity(generator.get_needed_aliens())
 
 if __name__ == "__main__":
