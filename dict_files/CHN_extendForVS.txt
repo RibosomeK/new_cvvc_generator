@@ -1,0 +1,403 @@
+a	a	a		
+ba	b	a		
+pa	p	a		
+ma	m	a		
+fa	f	a		
+da	d	a		
+ta	t	a		
+na	n	a		
+la	l	a		
+ga	g	a		
+ka	k	a		
+ha	h	a		
+zha	zh	a		
+cha	ch	a		
+sha	sh	a		
+za	z	a		
+ca	c	a		
+sa	s	a		
+ya	y	a		
+lia	ly	a		
+jia	j	a		
+qia	q	a		
+xia	xy	a		
+wa	w	a		
+gua	g	a	gw	a
+kua	k	a	kw	a
+hua	hw	a	hw	a
+zhua	zh	a	zhw	a
+shua	shw	a		
+dia	d	a	dy	a
+ai	ai	ai		
+bai	b	ai		
+pai	p	ai		
+mai	m	ai		
+dai	d	ai		
+tai	t	ai		
+nai	n	ai		
+lai	l	ai		
+gai	g	ai		
+kai	k	ai		
+hai	h	ai		
+zhai	zh	ai		
+chai	ch	ai		
+shai	sh	ai		
+zai	z	ai		
+cai	c	ai		
+sai	s	ai		
+wai	w	ai		
+guai	g	ai	gw	ai
+kuai	k	ai	kw	ai
+huai	hw	ai		
+zhuai	zh	ai	zhw	ai
+chuai	ch	ai	chw	ai
+shuai	shw	ai		
+an	an	an		
+ban	b	an		
+pan	p	an		
+man	m	an		
+fan	f	an		
+dan	d	an		
+tan	t	an		
+nan	n	an		
+lan	l	an		
+gan	g	an		
+kan	k	an		
+han	h	an		
+zhan	zh	an		
+chan	ch	an		
+shan	sh	an		
+ran	r	an		
+zan	z	an		
+can	c	an		
+san	s	an		
+wan	w	an		
+duan	d	an	dw	an
+tuan	t	an	tw	an
+nuan	n	an	nw	an
+luan	l	an	lw	an
+guan	g	an	gw	an
+kuan	k	an	kw	an
+huan	hw	an	hw	an
+zhuan	zh	an	zhw	an
+chuan	ch	an	chw	an
+shuan	shw	an	shw	an
+ruan	r	an	rw	an
+zuan	z	an	zw	an
+cuan	c	an	cw	an
+suan	sw	an	sw	an
+ang	ang	ang		
+bang	b	ang		
+pang	p	ang		
+mang	m	ang		
+fang	f	ang		
+dang	d	ang		
+tang	t	ang		
+nang	n	ang		
+lang	l	ang		
+gang	g	ang		
+kang	k	ang		
+hang	h	ang		
+zhang	zh	ang		
+chang	ch	ang		
+shang	sh	ang		
+rang	r	ang		
+zang	z	ang		
+cang	c	ang		
+sang	s	ang		
+yang	y	ang		
+liang	ly	ang		
+jiang	j	ang		
+qiang	q	ang		
+xiang	xy	ang		
+wang	w	ang		
+guang	g	ang	gw	ang
+kuang	k	ang	kw	ang
+huang	hw	ang		
+zhuang	zh	ang	zhw	ang
+chuang	ch	ang	chw	ang
+shuang	shw	ang	shw	ang
+niang	ny	ang		
+ao	ao	ao		
+bao	b	ao		
+pao	p	ao		
+mao	m	ao		
+dao	d	ao		
+tao	t	ao		
+nao	n	ao		
+lao	l	ao		
+gao	g	ao		
+kao	k	ao		
+hao	h	ao		
+zhao	zh	ao		
+chao	ch	ao		
+shao	sh	ao		
+rao	r	ao		
+zao	z	ao		
+cao	c	ao		
+sao	s	ao		
+yao	y	ao		
+biao	b	ao	by	ao
+piao	p	ao	py	ao
+miao	my	ao	my	ao
+diao	d	ao	dy	ao
+tiao	t	ao	ty	ao
+niao	ny	ao		
+liao	ly	ao		
+jiao	j	ao		
+qiao	q	ao		
+xiao	xy	ao		
+e	e	e		
+me	m	e		
+de	d	e		
+te	t	e		
+ne	n	e		
+le	l	e		
+ge	g	e		
+ke	k	e		
+he	h	e		
+zhe	zh	e		
+che	ch	e		
+she	sh	e		
+re	r	e		
+ze	z	e		
+ce	c	e		
+se	s	e		
+ye	y	e0		
+bie	b	e0	by	e0
+pie	p	e0	py	e0
+mie	my	e0		
+die	d	e0	dy	e0
+tie	t	e0	ty	e0
+nie	ny	e0		
+lie	ly	e0		
+jie	j	e0		
+qie	q	e0		
+xie	xy	e0		
+yue	v	e0		
+nue	n	e0		
+lue	l	e0		
+jue	j	e0	jy	e0
+que	q	e0	qy	e0
+xue	xw	e0	xw	e0
+ei	ei	ei		
+bei	b	ei		
+pei	p	ei		
+mei	m	ei		
+fei	f	ei		
+dei	d	ei		
+tei	t	ei		
+nei	n	ei		
+lei	l	ei		
+gei	g	ei		
+kei	k	ei		
+hei	h	ei		
+zhei	zh	ei		
+shei	sh	ei		
+zei	z	ei		
+wei	w	ei		
+dui	d	ei	dw	ei
+tui	t	ei	tw	ei
+gui	g	ei	gw	ei
+kui	k	ei	kw	ei
+hui	hw	ei		
+zhui	zh	ei	zhw	ei
+chui	ch	ei	chw	ei
+shui	shw	ei		
+rui	r	ei	rw	ei
+zui	z	ei	zw	ei
+cui	c	ei	cw	ei
+sui	sw	ei		
+en	en	en		
+ben	b	en		
+pen	p	en		
+men	m	en		
+fen	f	en		
+nen	n	en		
+gen	g	en		
+ken	k	en		
+hen	h	en		
+zhen	zh	en		
+chen	ch	en		
+shen	sh	en		
+ren	r	en		
+zen	z	en		
+cen	c	en		
+sen	s	en		
+wen	w	en		
+dun	d	en		
+tun	t	en		
+lun	l	en		
+gun	g	en	gw	en
+kun	k	en	kw	en
+hun	hw	en		
+zhun	zh	en	zhw	en
+chun	ch	en	chw	en
+shun	shw	en		
+run	r	en	rw	en
+zun	z	en	zw	en
+cun	c	en	cw	en
+sun	sw	en	sw	en
+yan	y	en0		
+bian	b	en0	by	en0
+pian	p	en0	py	en0
+mian	my	en0		
+dian	d	en0	dy	en0
+tian	t	en0	ty	en0
+nian	ny	en0		
+lian	ly	en0		
+jian	j	en0		
+qian	q	en0		
+xian	xy	en0		
+yuan	v	en0		
+juan	j	en0	jy	en0
+quan	q	en0	qy	en0
+xuan	xw	en0		
+beng	b	eng		
+peng	p	eng		
+meng	m	eng		
+feng	f	eng		
+deng	d	eng		
+teng	t	eng		
+neng	n	eng		
+leng	l	eng		
+geng	g	eng		
+keng	k	eng		
+heng	h	eng		
+weng	w	eng		
+zheng	zh	eng		
+cheng	ch	eng		
+sheng	sh	eng		
+reng	r	eng		
+zeng	z	eng		
+ceng	c	eng		
+seng	s	eng		
+er	er	er		
+bi	b	i		
+pi	p	i		
+mi	my	i		
+di	d	i		
+ti	t	i		
+ni	ny	i		
+li	ly	i		
+ji	j	i		
+qi	q	i		
+xi	xy	i		
+yi	y	i		
+yin	y	in		
+bin	b	in		
+pin	p	in		
+min	my	in		
+nin	ny	in		
+lin	ly	in		
+jin	j	in		
+qin	q	in		
+xin	xy	in		
+ying	y	ing		
+bing	b	ing		
+ping	p	ing		
+ming	my	ing		
+ding	d	ing		
+ting	t	ing		
+ning	ny	ing		
+ling	ly	ing		
+jing	j	ing		
+qing	q	ing		
+xing	xy	ing		
+zi	z	i0		
+ci	c	i0		
+si	s	i0		
+zhi	zh	ir		
+chi	ch	ir		
+shi	sh	ir		
+ri	r	ir		
+bo	b	o		
+po	p	o		
+mo	m	o		
+fo	f	o		
+wo	w	o		
+duo	d	o		
+tuo	t	o		
+nuo	n	o		
+luo	l	o		
+guo	g	o		
+kuo	k	o		
+huo	hw	o		
+zhuo	zh	o		
+chuo	ch	o		
+shuo	shw	o		
+ruo	r	o		
+zuo	z	o		
+cuo	c	o		
+suo	sw	o		
+dong	d	ong		
+tong	t	ong		
+nong	n	ong		
+long	l	ong		
+gong	g	ong		
+kong	k	ong		
+hong	h	ong		
+zhong	zh	ong		
+chong	ch	ong		
+rong	r	ong		
+zong	z	ong		
+cong	c	ong		
+song	s	ong		
+yong	y	ong		
+jiong	j	ong		
+qiong	q	ong		
+xiong	xy	ong		
+ou	ou	ou		
+pou	p	ou		
+mou	m	ou		
+fou	f	ou		
+dou	d	ou		
+tou	t	ou		
+lou	l	ou		
+gou	g	ou		
+kou	k	ou		
+hou	h	ou		
+zhou	zh	ou		
+chou	ch	ou		
+shou	sh	ou		
+rou	r	ou		
+zou	z	ou		
+cou	c	ou		
+sou	s	ou		
+you	y	ou		
+miu	my	ou		
+diu	d	ou	dy	ou
+niu	ny	ou		
+liu	ly	ou		
+jiu	j	ou		
+qiu	q	ou		
+xiu	xy	ou		
+bu	b	u		
+pu	p	u		
+mu	m	u		
+fu	f	u		
+du	d	u		
+tu	t	u		
+nu	n	u		
+lu	l	u		
+gu	g	u		
+ku	k	u		
+hu	hw	u		
+zhu	zh	u		
+chu	ch	u		
+shu	shw	u		
+ru	r	u		
+zu	z	u		
+cu	c	u		
+su	sw	u		
+wu	w	u		
+yu	v	v		
+nv	n	v		
+lv	l	v		
+ju	j	v		
+qu	q	v		
+xu	xw	v		
+yun	v	vn		
+jun	j	vn		
+qun	q	vn		
+xun	xw	vn		
