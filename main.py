@@ -21,6 +21,7 @@ def main():
     generator.save_reclist("result\\reclist.txt")
     generator.save_presamp("result\\presamp.ini")
     generator.save_vsdxmf("result\\vsdxmf.vsdxmf")
+    generator.save_lsd("result\\lsd.lsd")
     
 
 if __name__ == "__main__":

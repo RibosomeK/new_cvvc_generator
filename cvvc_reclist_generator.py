@@ -1,4 +1,3 @@
-from ast import alias
 from cvvc_generator_dataclasses import CVV, RecLine, OTO, VS_OTO, Alias_Type, AliasUnion, VC_Set
 from collections import deque
 from random import choice
@@ -862,6 +861,17 @@ class CVVCReclistGenerator:
         with open(vsdxmf_dir, mode='w', encoding='utf-8') as f:
             vsdxmf_str = '\n'.join(str(vsdxmf) for vsdxmf in self.vsdxmf)
             f.write(vsdxmf_str)
+            
+    def save_lsd(self, lsd_dir: str) -> None:
+        with open(lsd_dir, mode='w', encoding='utf-8') as f:
+            lsd_str = []
+            for cvv in sorted(self.cvv, key=CVV.get_lsd_c):
+                cv, c, v = cvv.get_lsd_cvv()
+                if c == v:
+                    lsd_str.append(f'{cv}\n#{v}')
+                else:
+                    lsd_str.append(f'{cv}\n{c}#{v}')
+            f.write('\n'.join(lsd_str))
             
     def check_integrity(self, alias_union: AliasUnion) -> None:
         # _c_log = self.check_c_head_integrity()
