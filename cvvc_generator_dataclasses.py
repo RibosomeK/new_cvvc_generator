@@ -60,7 +60,7 @@ class CVV(namedtuple("CVV", "cvv c v act_c fol_v cv mid_v end_v")):
     def __str__(self) -> str:
         str_order = (self.cvv, self.cv, 
                      self.c, self.v, self.act_c, 
-                     self.mid_v, self.end_v)
+                     self.fol_v, self.mid_v, self.end_v)
         for value in str_order:
             if value:
                 return str(value)
@@ -191,6 +191,11 @@ class VC_Set(set[tuple[str, str]]):
         for value in __iterable:
             self.add(value)
         return self
+    
+    def copy(self) -> "VC_Set":
+        new_vc_set = VC_Set()
+        new_vc_set.update(self)
+        return new_vc_set
 
 
 @dataclass

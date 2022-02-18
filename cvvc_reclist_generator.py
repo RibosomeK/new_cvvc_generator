@@ -140,7 +140,11 @@ class CVVCReclistGenerator:
                     self.redirect_cv_dict.setdefault(cvv.cv, []).append(cvv.cvv)
         alias_union = AliasUnion()
         if is_c_head:
-            alias_union.c_head = {x.get_lsd_c() for x in self.cvv}
+            alias_union.c_head = {
+                x.get_lsd_c() 
+                for x in self.cvv
+                if x.v != x.get_lsd_c()
+            }
         alias_union.cv = {cv.get_cv(is_full_cv) for cv in self.cvv}
         if is_cv_head:
             alias_union.cv_head = alias_union.cv.copy()
@@ -250,13 +254,14 @@ class CVVCReclistGenerator:
             cvv = self.find_cvv(cvv=cv)
             if cvv:
                 self.reclist.append(RecLine(cvv, cvv))
+                alias_union.c_head.discard(cvv.get_lsd_c())
                 alias_union.vc.discard((cvv.v, cvv.c))
-                if alias_union.vcv:
-                    alias_union.vcv.discard((cvv.v, cvv.get_cv()))
+                alias_union.vcv.discard((cvv.v, cvv.get_cv()))
                 alias_union.vr.discard(cvv.v)
             else:
                 print(f"{cv}= has no match word.")
                 raise ValueError
+            
         if alias_union.vcv:
             vcv_list = list(alias_union.vcv)
             vcv_list.sort()
@@ -273,11 +278,25 @@ class CVVCReclistGenerator:
             v, c = CVV.new(), CVV.new()
             v._replace(v=vc[0]), c._replace(c=vc[1])
             self.reclist.append(RecLine((v, c)))
-        if vr_deque := deque(sorted(list(alias_union.vr))):
+            
+        if c_head_deque := deque(sorted(alias_union.c_head)):
+            row: List[CVV] = []
+            while c_head_deque:
+                c_head = c_head_deque.popleft()
+                c_head = CVV.new(('', '', '', c_head))
+                if len(row) < 3:
+                    row.extend([c_head, self.emptyCVV])
+                else:
+                    self.reclist.append(RecLine(*row))
+                    row.clear()
+            if row:
+                self.reclist.append(RecLine(*row))
+                
+        if vr_deque := deque(sorted(alias_union.vr)):
             row: List[CVV] = []
             while vr_deque:
                 vr = vr_deque.popleft()
-                vr = CVV(None, None, vr, None, None, None, None, None)
+                vr = CVV.new(('', '', vr))
                 if len(row) < 3:
                     row.extend([vr, self.emptyCVV])
                 else:
@@ -292,10 +311,10 @@ class CVVCReclistGenerator:
         for cv in all_cv:
             if cv := self.find_cvv(cv):
                 self.reclist.append(RecLine(cv, cv, cv))
+                alias_union.c_head.discard(cv.get_lsd_c())
                 alias_union.vc.discard((cv.v, cv.c))
                 alias_union.vr.discard(cv.v)
-                if alias_union.vcv:
-                    alias_union.vcv.discard((cv.v, cv.get_cv()))
+                alias_union.vcv.discard((cv.v, cv.get_cv()))
             else:
                 raise ValueError
         alias_union.cv.clear()
@@ -334,6 +353,7 @@ class CVVCReclistGenerator:
                 cv = self.find_cvv(cvv=cv_deque.popleft())
                 row.append(cv)
                 if i == 0:
+                    alias_union.c_head.discard(cv.get_lsd_c())
                     alias_union.cv_head.discard(cv.cvv)
                     alias_union.cv_head.discard(cv.cv)
                     if (cv.cvv in cv_mid) or (cv.cv in cv_mid):
@@ -382,6 +402,7 @@ class CVVCReclistGenerator:
             elif i == length:
                 self.reclist.append(RecLine(*row))
                 alias_union.vr.discard(row[-1].v)
+                alias_union.c_head.discard(row[0].get_lsd_c())
                 alias_union.cv_head.discard(row[0].cvv)
                 alias_union.cv_head.discard(row[0].cv)
                 row: List[CVV] = []
@@ -389,6 +410,7 @@ class CVVCReclistGenerator:
         if row:
             self.reclist.append(RecLine(*row))
             alias_union.vr.discard(row[-1].v)
+            alias_union.c_head.discard(row[0].get_lsd_c())
             alias_union.cv_head.discard(row[0].cvv)
             alias_union.cv_head.discard(row[0].cv)
 
@@ -433,6 +455,7 @@ class CVVCReclistGenerator:
             elif i == length:
                 self.reclist.append(RecLine(*row))
                 alias_union.vr.discard(row[-1].v)
+                alias_union.c_head.discard(row[0].get_lsd_c())
                 alias_union.cv_head.discard(row[0].cvv)
                 alias_union.cv_head.discard(row[0].cv)
                 row: List[CVV] = []
@@ -440,6 +463,7 @@ class CVVCReclistGenerator:
         if row:
             self.reclist.append(RecLine(*row))
             alias_union.vr.discard(row[-1].v)
+            alias_union.c_head.discard(row[0].get_lsd_c())
             alias_union.cv_head.discard(row[0].cvv)
             alias_union.cv_head.discard(row[0].cv)
 
@@ -452,6 +476,7 @@ class CVVCReclistGenerator:
                     break
                 row.append(self.find_cvv(cvv=_cv_dq.popleft()))
                 alias_union.vr.discard(row[-1].v)
+                alias_union.c_head.discard(row[-1].get_lsd_c())
                 row.append(self.emptyCVV)
             if row[-1] == self.emptyCVV:
                 row.pop()
@@ -459,8 +484,30 @@ class CVVCReclistGenerator:
             row: List[CVV] = []
         alias_union.cv_head.clear()
 
+        # complete c head part
+        c_head_list = list(sorted(alias_union.c_head, reverse=True))
+        row: List[CVV] = []
+        while c_head_list:
+            for i in range(1 + length // 2):
+                if not c_head_list:
+                    break
+                c_head = c_head_list.pop()
+                for cvv in self.cvv:
+                    if cvv.get_lsd_c == c_head:
+                        c_head = cvv
+                        break
+                else:
+                    raise AttributeError
+                row.extend((c_head, self.emptyCVV))
+                alias_union.vr.discard(c_head.v)
+            if row[-1] == self.emptyCVV:
+                row.pop()
+            self.reclist.append(RecLine(*row))
+            row.clear()
+        alias_union.c_head.clear()
+
         # complete ending v part
-        vr_dq = deque(sorted(list(alias_union.vr)))
+        vr_dq = deque(sorted(alias_union.vr))
         row: List[CVV] = []
         while vr_dq:
             for i in range(1 + length // 2):
@@ -480,7 +527,9 @@ class CVVCReclistGenerator:
         Args:
             alias_union (AliasUnion): [description]
         """
+        alias_union_backup = alias_union.copy()
         cv_mid = cv_mid if cv_mid else set()
+        c_head_oto_list: List[OTO] = []
         cv_oto_list: List[OTO] = []
         vc_oto_list: List[OTO] = []
         vcv_oto_list: List[OTO] = []
@@ -488,15 +537,19 @@ class CVVCReclistGenerator:
         for row in self.reclist:
             wav = f'{row}.wav'
             if len(row) == 3 and row[0] == row[1] == row[2]:
-                if (_cv := row[0].get_cv(is_full_cv)) in alias_union.cv_head:
-                    _cv_alias = f'- {row[0].get_cv(is_full_cv)}'
-                    _cv_oto = self.get_oto(Alias_Type.CV, wav, _cv_alias, 0, bpm)
-                    cv_oto_list.append(_cv_oto)
-                    alias_union.cv_head.discard(_cv)
+                if (c_head := row[0].get_lsd_c()) in alias_union.c_head:
+                    c_head_alias = f'- {c_head}'
+                    c_head_oto = self.get_oto(Alias_Type.C, wav, c_head_alias, 0, bpm)
+                    c_head_oto_list.append(c_head_oto)
+                    alias_union.c_head.discard(c_head)
+                if (cv_head := row[0].get_cv(is_full_cv)) in alias_union.cv_head:
+                    cv_head_alias = f'- {cv_head}'
+                    cv_head_oto = self.get_oto(Alias_Type.CV, wav, cv_head_alias, 0, bpm)
+                    cv_oto_list.append(cv_head_oto)
+                    alias_union.cv_head.discard(cv_head)
                 if (cv := row[1].get_cv(is_full_cv)) in alias_union.cv:
-                    cv_alias = row[1].get_cv(is_full_cv)
-                    cv_L_alias = f'{row[2].get_cv(is_full_cv)}_L'
-                    cv_oto = self.get_oto(Alias_Type.CV, wav, cv_alias, 1, bpm)
+                    cv_L_alias = f'{cv}_L'
+                    cv_oto = self.get_oto(Alias_Type.CV, wav, cv, 1, bpm)
                     cv_L_oto = self.get_oto(Alias_Type.CV, wav, cv_L_alias, 2, bpm)
                     cv_oto_list.extend((cv_oto, cv_L_oto))
                     alias_union.cv.discard(cv)
@@ -509,17 +562,21 @@ class CVVCReclistGenerator:
                     vcv_oto_list.append(vcv_oto)
                     alias_union.vcv.discard(vcv)
                 if (vr := row[2].v) in alias_union.vr:
-                    vr_alias = f'{row[2].v} R'
+                    vr_alias = f'{vr} R'
                     vr_oto = self.get_oto(Alias_Type.VR, wav, vr_alias, 2, bpm)
                     vr_oto_list.append(vr_oto)
                     alias_union.vr.discard(vr)
             else:
                 for idx, cvv in enumerate(row):
                     if idx == 0:
+                        if (c_head := cvv.get_lsd_c()) in alias_union.c_head:
+                            c_head_alias = f'- {c_head}'
+                            c_head_oto = self.get_oto(Alias_Type.C, wav, c_head_alias, idx, bpm)
+                            c_head_oto_list.append(c_head_oto)
                         cv = cvv.get_cv(is_full_cv)
                         if cv in alias_union.cv_head:
-                            _cv_alias = f'- {cv}'
-                            oto = self.get_oto(Alias_Type.CV, wav, _cv_alias, idx, bpm)
+                            cv_head_alias = f'- {cv}'
+                            oto = self.get_oto(Alias_Type.CV, wav, cv_head_alias, idx, bpm)
                             cv_oto_list.append(oto)
                             alias_union.cv_head.discard(cv)
                         if cv in alias_union.cv and cv not in cv_mid:
@@ -544,10 +601,12 @@ class CVVCReclistGenerator:
                         oto = self.get_oto(Alias_Type.VR, wav, vr_alias, idx, bpm)
                         vr_oto_list.append(oto)
                         alias_union.vr.discard(vr)
+        self.oto.extend(c_head_oto_list)
         self.oto.extend(cv_oto_list)
         self.oto.extend(vc_oto_list)
         self.oto.extend(vcv_oto_list)
         self.oto.extend(vr_oto_list)
+        alias_union = alias_union_backup.copy()
         
     def check_lsd_cvv_uniqueness(self) -> None:
         check_dict: Dict[tuple[str, str], List[str]] = {}
@@ -599,8 +658,8 @@ class CVVCReclistGenerator:
         
         for row in self.reclist:
             wav = f'{row}.wav'
-            if row[0] == row[1] == row[2]:
-                if (c := row[0].c) in alias_union.c_head:
+            if len(row) == 3 and row[0] == row[1] == row[2]:
+                if (c := row[0].get_lsd_c()) in alias_union.c_head:
                     c_vsdxmf = self.get_vs_oto(Alias_Type.C, wav, c, 0, bpm)
                     c_vsdxmf_list.extend(c_vsdxmf)
                     alias_union.c_head.discard(c)
@@ -628,7 +687,7 @@ class CVVCReclistGenerator:
             else:
                 for idx, cvv in enumerate(row):
                     if idx == 0:
-                        if (c := cvv.c) in alias_union.c_head:
+                        if (c := cvv.get_lsd_c()) in alias_union.c_head:
                             vsdxmf = self.get_vs_oto(Alias_Type.C, wav, c, idx, bpm)
                             c_vsdxmf_list.extend(vsdxmf)
                             alias_union.c_head.discard(c)
@@ -685,7 +744,13 @@ class CVVCReclistGenerator:
         beat = bpm_param*(1250 + position*500)
         OVL, CONSONANT_VEL, VOWEL_VEL = 80, 100, 200
             
-        if alias_type == Alias_Type.CV:
+        if alias_type == Alias_Type.C:
+            offset = beat - 2*CONSONANT_VEL
+            consonant = beat - 0.25*CONSONANT_VEL*bpm_param
+            cutoff = - beat
+            preutterance = beat - CONSONANT_VEL
+            overlap = 10    
+        elif alias_type == Alias_Type.CV:
             offset = beat - CONSONANT_VEL
             consonant = 0.25*500*bpm_param + CONSONANT_VEL
             cutoff = -(beat + 0.75*500*bpm_param)
@@ -720,13 +785,14 @@ class CVVCReclistGenerator:
     def get_redirect_phoneme(self, phoneme: str | tuple[str, str], alias_type: Alias_Type) -> List[str]:
         redirect_phoneme: List[str] = []
         if alias_type == Alias_Type.C:
-            if phoneme in self.v_dict:
+            return redirect_phoneme
+            '''if phoneme in self.v_dict:
                 redirect_consonant_dict = self.redirect_vowel_dict
             else:
                 redirect_consonant_dict = self.redirect_consonant_dict
             if phoneme in redirect_consonant_dict:
                 for redirect_consonant in redirect_consonant_dict.get(str(phoneme), []):
-                    redirect_phoneme.append(f' {redirect_consonant}')
+                    redirect_phoneme.append(f' {redirect_consonant}')'''
                     
         elif alias_type == Alias_Type.CV:
             if phoneme in self.redirect_cv_dict:
@@ -820,8 +886,8 @@ class CVVCReclistGenerator:
         vs_oto_list.append(vs_oto)
 
         redirect_phoneme_list = self.get_redirect_phoneme(alias, alias_type)
-        for _redirect_phoneme in redirect_phoneme_list:
-            vs_oto_list.append(VS_OTO.get_redirect(_redirect_phoneme, vs_oto.phoneme))
+        for redirect_phoneme in redirect_phoneme_list:
+            vs_oto_list.append(VS_OTO.get_redirect(redirect_phoneme, vs_oto.phoneme))
         
         return vs_oto_list
 
