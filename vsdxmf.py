@@ -1,8 +1,8 @@
 from collections import UserDict, namedtuple
-import configparser
 from typing import Optional
 from alias import AliasType, AliasUnion
-from reclist import Cvv, Reclist
+from cvv_workshop import CvvWorkshop
+from reclist import Reclist
 
 
 class Vsdxmf(namedtuple("VS_OTO", "phoneme wav l pre con r ovl")):
@@ -54,22 +54,10 @@ class VsdxmfUnion(UserDict):
 class VsdxmfGenerator:
     """a vsdxmf generator"""
     
-    def __init__(self) -> None:
+    def __init__(self, dict_dir: str) -> None:
         self.vsdxmf_union = VsdxmfUnion()
-        self.redirect_consonant_dict = {}
-        self.redirect_vowel_dict = {}
-        
-    def read_redirect_config(self, redirect_config_dir) -> None:
-        redirect_config = configparser.ConfigParser(allow_no_value=True)
-        redirect_config.read(redirect_config_dir, encoding='utf-8')
-        self.redirect_vowel_dict = {
-            key: values.split(',') 
-            for key, values in redirect_config["VOWEL"].items()
-            }
-        self.redirect_consonant_dict = {
-            key: values.split(',')
-            for key, values in redirect_config['CONSONANT'].items()
-        }
+        self.cvv_workshop = CvvWorkshop()
+        self.cvv_workshop.read_dict(dict_dir)
         
     def gen_vsdxmf(self, reclist: Reclist, alias_union: AliasUnion, bpm: float, is_full_cv: bool = False, cv_mid: set[str]=None, redirect_config_dir: Optional[str]=None) -> None:
         """Generate vsdxmf for vocalsharp.
@@ -83,7 +71,7 @@ class VsdxmfGenerator:
         """
         cv_mid = cv_mid if cv_mid else set()
         if redirect_config_dir:
-            self.read_redirect_config(redirect_config_dir)
+            self.cvv_workshop.read_redirect_config(redirect_config_dir)
         
         for row in reclist:
             wav = f'{row}.wav'
@@ -142,47 +130,7 @@ class VsdxmfGenerator:
                         vsdxmf = self.get_vs_oto(AliasType.VR, wav, vr, idx, bpm)
                         self.vsdxmf_union[AliasType.VR].extend(vsdxmf)
                         alias_union.vr.discard(vr)
-                        
-    def get_redirect_phoneme(self, phoneme: Cvv | tuple[Cvv, Cvv], alias_type: AliasType) -> list[str]:
-        redirect_phoneme: list[str] = []
-        if alias_type == AliasType.C:
-            return redirect_phoneme
-                    
-        elif alias_type == AliasType.CV:
-            if phoneme in self.redirect_cv_dict:
-                for cv in self.redirect_cv_dict.get(str(phoneme), []):
-                    _, c, v = self.find_cvv(cvv=cv).get_lsd_cvv()
-                    redirect_phoneme.append(f'{c} {v}')
-                    
-        elif alias_type == AliasType.VC:
-            v, c = phoneme
-            if c in self.v_dict:
-                redirect_consonant_dict = self.redirect_vowel_dict
-            else:
-                redirect_consonant_dict = self.redirect_consonant_dict
-                
-            if v in self.redirect_vowel_dict:
-                for redirect_vowel in self.redirect_vowel_dict[v]:
-                    redirect_phoneme.append(f'{redirect_vowel} {c}')
-                    
-            if c in redirect_consonant_dict:
-                for redirect_consonant in redirect_consonant_dict[c]:
-                    redirect_phoneme.append(f'{v} {redirect_consonant}')
-                    
-            if v in self.redirect_vowel_dict and c in redirect_consonant_dict:
-                for redirect_vowel in self.redirect_vowel_dict[v]:
-                    for redirect_consonant in redirect_consonant_dict[c]:
-                        redirect_phoneme.append(f'{redirect_vowel} {redirect_consonant}')
-                        
-        elif alias_type == AliasType.VR:
-            for redirect_vowel in self.redirect_vowel_dict.get(str(phoneme), []):
-                redirect_phoneme.append(f'{redirect_vowel} ')
-                
-        else:
-            raise TypeError('Given wrong alias type!')
-        
-        return redirect_phoneme
-    
+                            
     def get_vs_oto(self, alias_type: AliasType, wav: str, alias: str | tuple[str, str], position: int, bpm: float) -> list[Vsdxmf]:
         bpm_param = float(120 / bpm)
         beat = bpm_param*(1250 + position*500)
@@ -197,7 +145,7 @@ class VsdxmfGenerator:
             cutoff = consonant + CONSONANT_VEL
             overlap = offset + 5
         elif alias_type == AliasType.CV:
-            cvv = self.find_cvv(cvv=str(alias))
+            cvv = self.cvv_workshop.find_cvv(cvv=str(alias))
             phoneme = f'{cvv.get_lsd_c()} {cvv.get_lsd_v()}'
             offset = beat - CONSONANT_VEL
             preutterance = beat
@@ -232,8 +180,13 @@ class VsdxmfGenerator:
         vsdxmf = Vsdxmf(phoneme, wav, offset, preutterance, consonant, cutoff, overlap)
         vsdxmf_list.append(vsdxmf)
 
-        redirect_phoneme_list = self.get_redirect_phoneme(alias, alias_type)
+        redirect_phoneme_list = self.cvv_workshop.get_redirect_phoneme(alias, alias_type)
         for redirect_phoneme in redirect_phoneme_list:
             vsdxmf_list.append(Vsdxmf.get_redirect(redirect_phoneme, vsdxmf.phoneme))
         
         return vsdxmf_list
+
+    def save_vsdxmf(self, vsdxmf_dir: str) -> None:
+        with open(vsdxmf_dir, mode='w', encoding='utf-8') as f:
+            f.write(str(self.vsdxmf_union))
+            

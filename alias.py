@@ -2,7 +2,7 @@ import configparser
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Counter, Iterable, Optional
-from cvv_workshop import CvvWorkshop, Cvv
+from cvv_workshop import CvvWorkshop
 
 
 class AliasType(Enum):
