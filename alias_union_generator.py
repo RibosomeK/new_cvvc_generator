@@ -1,152 +1,13 @@
 import configparser
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Counter, Iterable, Optional
-from cvv_workshop import CvvWorkshop
-
-
-class AliasType(Enum):
-    C = 'C'
-    CV = 'CV'
-    VC = 'VC'
-    VCV = 'VCV'
-    VR = 'VR'
-    
-    
-class VC_Set(set[tuple[str, str]]):
-    _v_counter: Counter
-    _c_counter: Counter
-    __max_v: tuple[str, int] = ("", 0)
-    __max_c: tuple[str, int] = ("", 0)
-
-    def __init__(self, __iterable: Iterable[tuple[str, str]] = ...) -> None:
-        if __iterable == ...:
-            __iterable = set()
-        super().__init__(__iterable)
-        self.__post_init__()
-
-    def __post_init__(self) -> None:
-        self._v_counter = Counter()
-        self._c_counter = Counter()
-        for vc in self:
-            self.__update_dict(vc, True)
-
-    @property
-    def max_v(self):
-        self.__max_v = self._v_counter.most_common(1)[0]
-        return self.__max_v
-
-    @property
-    def max_c(self):
-        self.__max_c = self._c_counter.most_common(1)[0]
-        return self.__max_c
-        
-        
-    def __update_dict(self, vc: tuple[str, str], is_add: bool) -> None:
-        update_idx = 1 if is_add else -1
-        v, c = vc
-        self._v_counter[v] += update_idx
-        self._c_counter[c] += update_idx
-
-    def add(self, vc: tuple[str, str]) -> None:
-        self.__update_dict(vc, True)
-        return super().add(vc)
-
-    def update(self, __iterable: Iterable[tuple[str, str]]) -> None:
-        for value in __iterable:
-            self.add(value)
-
-    def discard(self, vc: tuple[str, str]) -> None:
-        if vc not in self:
-            return
-        self.__update_dict(vc, False)
-        return super().discard(vc)
-
-    def pop(self, c: Optional[str] = None, v: Optional[str] = None) -> tuple[str, str]:
-        if not (c or v):
-            vc = super().pop()
-            self.__update_dict(vc, False)
-            return vc
-        aimed_vc = None
-        for vc in self:
-            if c and c == vc[1]:
-                aimed_vc = vc
-            elif v and v == vc[0]:
-                aimed_vc = vc
-            if aimed_vc:
-                break
-        if aimed_vc:
-            self.discard(aimed_vc)
-            return aimed_vc
-        else:
-            raise ValueError
-
-    def __sub__(self, __iterable: Iterable[tuple[str, str]]) -> "VC_Set":
-        for value in __iterable:
-            self.discard(value)
-        return self
-    
-    def __or__(self, __iterable: Iterable[tuple[str, str]]) -> "VC_Set":
-        for value in __iterable:
-            self.add(value)
-        return self
-    
-    def copy(self) -> "VC_Set":
-        new_vc_set = VC_Set()
-        new_vc_set.update(self)
-        return new_vc_set
-
-
-@dataclass
-class AliasUnion:
-    c_head: set[str] = field(default_factory=set)
-    cv_head: set[str] = field(default_factory=set)
-    cv: set[str] = field(default_factory=set)
-    vc: VC_Set = field(default_factory=VC_Set)
-    vr: set[str] = field(default_factory=set)
-    vcv: VC_Set = field(default_factory=VC_Set)
-
-    def __len__(self) -> int:
-        return len(self.__dict__)
-
-    def __getitem__(self, key: str) -> set | VC_Set:
-        return self.__dict__[key]
-
-    def __iter__(self):
-        for values in self.__dict__.values():
-            yield values
-
-    def __bool__(self) -> bool:
-        for container in self:
-            if container:
-                return True
-        else:
-            return False
-        
-    def copy(self) -> "AliasUnion":
-        union = AliasUnion()
-        for key in self.__dict__:
-            union.__dict__[key] = self.__dict__[key].copy()
-        return union
-
-    def __repr__(self) -> str:
-        return ", ".join(f"{key}={value}" for key, value in self.__dict__.items())
-
-    def add(self, other: "AliasUnion") -> None:
-        for key, value in other.__dict__.items():
-            self.__dict__[key].__or__(value)
-
-    def discard(self, other: "AliasUnion") -> None:
-        for key, value in other.__dict__.items():
-            self.__dict__[key].__sub__(value)
+from typing import Optional
+from cvv_dataclasses import CvvWorkshop, VcSet, AliasUnion
 
 
 class AliasUnionGenerator:
     """get needed alias."""
     
-    def __init__(self, dict_dir: str) -> None:
-        self.cvv_workshop = CvvWorkshop()
-        self.cvv_workshop.read_dict(dict_dir)
+    def __init__(self, cvv_workshop: CvvWorkshop) -> None:
+        self.cvv_workshop = cvv_workshop
     
     def get_needed_alias(self, is_c_head: bool = False, is_cv_head: bool = True, is_full_cv: bool = True, alias_config: Optional[str] = None) -> 'AliasUnion':
         """Get needed alias.
@@ -172,7 +33,7 @@ class AliasUnionGenerator:
         alias_union.cv = {cv.get_cv(is_full_cv) for cv in self.cvv_workshop.cvv_set}
         if is_cv_head:
             alias_union.cv_head = alias_union.cv.copy()
-        alias_union.vc = VC_Set()
+        alias_union.vc = VcSet()
         alias_union.vc.update(
             (v, c) 
             for v in self.cvv_workshop.v_dict

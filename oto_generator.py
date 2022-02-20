@@ -1,54 +1,4 @@
-from collections import UserDict, namedtuple
-from alias import AliasType, AliasUnion
-from reclist import Reclist
-
-
-class Oto(namedtuple("OTO", "wav prefix alias suffix l con r pre ovl")):
-    """single line of oto"""
-    __slot__ = ()
-
-    def __str__(self) -> str:
-        alias = self.alias
-        if self.prefix:
-            alias = self.prefix + self.alias
-        if self.suffix:
-            alias += self.suffix
-        return "{}={},{},{},{},{},{}".format(self.wav, alias, *self[-5:])
-    
-
-class OtoUnion(UserDict):
-    """a set of otos"""
-    
-    __is_frozen: bool = True
-    
-    @property
-    def _is_frozen(self) -> bool:
-        return self.__is_frozen
-    
-    @_is_frozen.setter
-    def _is_freeze(self, value) -> None:
-        self.__is_frozen = value
-    
-    def __new__(cls: type[UserDict]) -> UserDict:
-        oto_union = UserDict()
-        oto_union[AliasType.C] = [list[Oto]]
-        oto_union[AliasType.CV] = [list[Oto]]
-        oto_union[AliasType.VC] = [list[Oto]]
-        oto_union[AliasType.VCV] = [list[Oto]]
-        oto_union[AliasType.VR] = [list[Oto]]
-        return oto_union
-        
-    def __setitem__(self, key: ..., item: ...) -> None:
-        if self.__is_frozen and key not in self:
-            raise ValueError("can't add new keys")
-        return super().__setitem__(key, item)
-    
-    def __str__(self) -> str:
-        oto_str = []
-        for section in self.__dict__:
-            for oto in section:
-                oto_str.append(str(oto))
-        return '\n'.join(oto_str)
+from cvv_dataclasses import Reclist, AliasType, AliasUnion, Oto, OtoUnion
 
 
 class OtoGenerator:
@@ -74,31 +24,31 @@ class OtoGenerator:
             if len(row) == 3 and row[0] == row[1] == row[2]:
                 if (c_head := row[0].get_lsd_c()) in alias_union.c_head:
                     c_head_alias = f'- {c_head}'
-                    c_head_oto = self.get_oto(AliasType.C, wav, c_head_alias, 0, bpm)
+                    c_head_oto = self._get_oto(AliasType.C, wav, c_head_alias, 0, bpm)
                     self.oto_union[AliasType.C].append(c_head_oto)
                     alias_union.c_head.discard(c_head)
                 if (cv_head := row[0].get_cv(is_full_cv)) in alias_union.cv_head:
                     cv_head_alias = f'- {cv_head}'
-                    cv_head_oto = self.get_oto(AliasType.CV, wav, cv_head_alias, 0, bpm)
+                    cv_head_oto = self._get_oto(AliasType.CV, wav, cv_head_alias, 0, bpm)
                     self.oto_union[AliasType.CV].append(cv_head_oto)
                     alias_union.cv_head.discard(cv_head)
                 if (cv := row[1].get_cv(is_full_cv)) in alias_union.cv:
                     cv_L_alias = f'{cv}_L'
-                    cv_oto = self.get_oto(AliasType.CV, wav, cv, 1, bpm)
-                    cv_L_oto = self.get_oto(AliasType.CV, wav, cv_L_alias, 2, bpm)
+                    cv_oto = self._get_oto(AliasType.CV, wav, cv, 1, bpm)
+                    cv_L_oto = self._get_oto(AliasType.CV, wav, cv_L_alias, 2, bpm)
                     self.oto_union[AliasType.CV].extend((cv_oto, cv_L_oto))
                     alias_union.cv.discard(cv)
                 if (vc := (row[0].v, row[1].c)) in alias_union.vc:
-                    vc_oto = self.get_oto(AliasType.VC, wav, vc, 1, bpm)
+                    vc_oto = self._get_oto(AliasType.VC, wav, vc, 1, bpm)
                     self.oto_union[AliasType.VC].append(vc_oto)
                     alias_union.vc.discard(vc)
                 if (vcv := (row[0].v, row[1].get_cv())) in alias_union.vcv:
-                    vcv_oto = self.get_oto(AliasType.VCV, wav, vcv, 1, bpm)
+                    vcv_oto = self._get_oto(AliasType.VCV, wav, vcv, 1, bpm)
                     self.oto_union[AliasType.VCV].append(vcv_oto)
                     alias_union.vcv.discard(vcv)
                 if (vr := row[2].v) in alias_union.vr:
                     vr_alias = f'{vr} R'
-                    vr_oto = self.get_oto(AliasType.VR, wav, vr_alias, 2, bpm)
+                    vr_oto = self._get_oto(AliasType.VR, wav, vr_alias, 2, bpm)
                     self.oto_union[AliasType.VR].append(vr_oto)
                     alias_union.vr.discard(vr)
             else:
@@ -106,39 +56,39 @@ class OtoGenerator:
                     if idx == 0:
                         if (c_head := cvv.get_lsd_c()) in alias_union.c_head:
                             c_head_alias = f'- {c_head}'
-                            c_head_oto = self.get_oto(AliasType.C, wav, c_head_alias, idx, bpm)
+                            c_head_oto = self._get_oto(AliasType.C, wav, c_head_alias, idx, bpm)
                             self.oto_union[AliasType.C].append(c_head_oto)
                         cv = cvv.get_cv(is_full_cv)
                         if cv in alias_union.cv_head:
                             cv_head_alias = f'- {cv}'
-                            oto = self.get_oto(AliasType.CV, wav, cv_head_alias, idx, bpm)
+                            oto = self._get_oto(AliasType.CV, wav, cv_head_alias, idx, bpm)
                             self.oto_union[AliasType.CV].append(oto)
                             alias_union.cv_head.discard(cv)
                         if cv in alias_union.cv and cv not in cv_mid:
-                            oto = self.get_oto(AliasType.CV, wav, cv, idx, bpm)
+                            oto = self._get_oto(AliasType.CV, wav, cv, idx, bpm)
                             self.oto_union[AliasType.CV].append(oto)
                             alias_union.cv_head.discard(cv)
                     elif idx <= len(row)-1:
                         if (cv := cvv.get_cv(is_full_cv)) in alias_union.cv:
-                            oto = self.get_oto(AliasType.CV, wav, cv, idx, bpm)
+                            oto = self._get_oto(AliasType.CV, wav, cv, idx, bpm)
                             self.oto_union[AliasType.CV].append(oto)
                             alias_union.cv_head.discard(cv)
                         if (vc := (row[idx-1].v, cvv.c)) in alias_union.vc:
-                            oto = self.get_oto(AliasType.VC, wav, vc, idx, bpm)
+                            oto = self._get_oto(AliasType.VC, wav, vc, idx, bpm)
                             self.oto_union[AliasType.VC].append(oto)
                             alias_union.vc.discard(vc)
                         if (vcv := (row[idx-1].v, cvv.get_cv())) in alias_union.vcv:
-                            oto = self.get_oto(AliasType.VCV, wav, vcv, idx, bpm)
+                            oto = self._get_oto(AliasType.VCV, wav, vcv, idx, bpm)
                             self.oto_union[AliasType.VCV].append(oto)
                             alias_union.vcv.discard(vcv)
                     if idx == len(row)-1 and (vr := row[idx].v) in alias_union.vr:
                         vr_alias = f'{vr} R'
-                        oto = self.get_oto(AliasType.VR, wav, vr_alias, idx, bpm)
+                        oto = self._get_oto(AliasType.VR, wav, vr_alias, idx, bpm)
                         self.oto_union[AliasType.VR].append(oto)
                         alias_union.vr.discard(vr)
         alias_union = alias_union_backup.copy()
                         
-    def get_oto(self, alias_type: AliasType, wav: str, alias: str | tuple[str, str], position: int, bpm: float) -> Oto:
+    def _get_oto(self, alias_type: AliasType, wav: str, alias: str | tuple[str, str], position: int, bpm: float) -> Oto:
         """Get one single oto.
 
         Args:
@@ -201,3 +151,4 @@ class OtoGenerator:
         """
         with open(oto_dir, 'w', encoding='utf-8') as f:
             f.write(str(self.oto_union))
+            

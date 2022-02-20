@@ -1,7 +1,5 @@
 from typing import Optional
-from alias import AliasUnion
-from reclist import Reclist, Cvv
-
+from cvv_dataclasses import Cvv, Reclist, AliasUnion
 
 class ReclistChecker:
     """a checker to check integrity"""
