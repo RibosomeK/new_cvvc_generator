@@ -3,8 +3,7 @@ import configparser
 from dataclasses import dataclass, field
 from enum import Enum
 from random import choice
-from re import A
-from telnetlib import Telnet
+import re
 from typing import Optional, Iterable
 
 
@@ -380,7 +379,74 @@ class CvvWorkshop:
                     self.cv_dict.setdefault(word.cv, []).append(word)
                 self.c_dict.setdefault(c, []).append(word)
                 self.v_dict.setdefault(v, []).append(word)
+                
+    def read_presamp(self, presamp_dir: str) -> None:
+        """read presamp.ini file, do not support simplified format.
+        simplified means word A does not shows up in CONSONANT section or neither.
 
+        Args:
+            presamp_dir (str): presamp.ini file path
+        """
+        presamp_config = configparser.ConfigParser(allow_no_value=True)
+        presamp_config.read(presamp_dir)
+        
+        cv_dict: dict[str, list[str]] = {}
+                
+        for vowel, line in presamp_config['VOWEL'].items():
+            cv_list = [cv for cv in line.split('=')[1].split(',')]
+            for cv in cv_list:
+                cv_dict.setdefault(cv, []).append(vowel)
+                
+        for consonant, line in presamp_config['CONSONANT'].items():
+            cv_list = [cv for cv in line.split('=')[0].split(',')]
+            for cv in cv_list:
+                try:
+                    cv_dict[cv].append(consonant)
+                except AttributeError:
+                    raise SyntaxError(f'{cv} does not show up in [CONSONANT] section, please check again.')
+        
+        for cv, component in cv_dict.items():
+            if len(component) > 2:
+                raise SyntaxError(f'{cv} seems to appeared in [VOWEL] section or [CONSONANT] section multipul times.')
+            elif len(component) == 1:
+                v = c = component[0]
+            else:
+                v, c = component
+            cvv = Cvv.new((cv, c, v))
+            self.cvv_set.add(cvv)
+            self.cvv_dict.setdefault(cv, cvv)
+            self.c_dict.setdefault(c, []).append(cvv)
+            self.v_dict.setdefault(v, []).append(cvv)
+            
+    def read_lsd(self, lsd_dir: str) -> None:
+        """read .lsd file, does not support comment at this moment. does not support multi syllable.
+
+        Args:
+            lsd_dir (str): .lsd file path
+        """
+        with open(lsd_dir, mode='r', encoding='utf-8') as f:
+            same_c_and_v_check: set = set()
+            cv, c, v = '000'
+            idx = 0
+            for line in f.read().split('\n'):
+                if re.match(r'\s*', line) is None:
+                    continue
+                if idx % 2 == 0:
+                    cv = line
+                else:
+                    c, v = line.split('#')
+                    if c == '':
+                        c = v
+                    if (c, v) in same_c_and_v_check:
+                        continue
+                    same_c_and_v_check.add((c, v))
+                    cvv = Cvv.new((cv, c, v, c, v))
+                    self.cvv_set.add(cvv)
+                    self.cvv_dict.setdefault(cv, cvv)
+                    self.c_dict.setdefault(c, []).append(cvv)
+                    self.v_dict.setdefault(v, []).append(cvv)
+                idx += 1
+            
     def find_cvv(self, cvv: str = None, c: str = None, v: str = None, exception: Optional[set[str]] = None) -> Cvv:
         """find a cvv class by a cvv, c, or v
 
