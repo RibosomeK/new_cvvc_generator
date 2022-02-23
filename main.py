@@ -35,7 +35,7 @@ def main():
         reclist=reclist, alias_union=alias_union_vs, bpm=120, cv_mid=None)
     
     generator.save_reclist('./result/reclist.txt')
-    oto_generator.save_oto('./result/oto.txt')
+    oto_generator.save_oto('./result/oto.ini')
     vsdxmf_generator.save_vsdxmf('./result/vsdxmf.vsdxmf')
     cvv_workshop.save_presamp('./result/presamp.ini')
     cvv_workshop.save_lsd('./result/lsd.lsd')
