@@ -34,10 +34,10 @@ class Ui_MainWindow(object):
         MainWindow.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
         self.load_action = QAction(MainWindow)
         self.load_action.setObjectName(u"load_action")
-        self.save_action = QAction(MainWindow)
-        self.save_action.setObjectName(u"save_action")
-        self.save_as_action = QAction(MainWindow)
-        self.save_as_action.setObjectName(u"save_as_action")
+        self.export_action = QAction(MainWindow)
+        self.export_action.setObjectName(u"export_action")
+        self.export_as_action = QAction(MainWindow)
+        self.export_as_action.setObjectName(u"export_as_action")
         self.set_english_action = QAction(MainWindow)
         self.set_english_action.setObjectName(u"set_english_action")
         self.set_simplified_chinese_action = QAction(MainWindow)
@@ -68,60 +68,63 @@ class Ui_MainWindow(object):
         self.dict_file_button = QPushButton(self.centralwidget)
         self.dict_file_button.setObjectName(u"dict_file_button")
         self.dict_file_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.dict_file_button.setCheckable(False)
 
         self.dict_file_layout.addWidget(self.dict_file_button)
 
 
         self.overall_layout.addLayout(self.dict_file_layout)
 
-        self.redirect_file_layout = QHBoxLayout()
-        self.redirect_file_layout.setObjectName(u"redirect_file_layout")
-        self.redirect_file_label = QLabel(self.centralwidget)
-        self.redirect_file_label.setObjectName(u"redirect_file_label")
-        self.redirect_file_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.redirect_config_layout = QHBoxLayout()
+        self.redirect_config_layout.setObjectName(u"redirect_config_layout")
+        self.redirect_config_label = QLabel(self.centralwidget)
+        self.redirect_config_label.setObjectName(u"redirect_config_label")
+        self.redirect_config_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
 
-        self.redirect_file_layout.addWidget(self.redirect_file_label)
+        self.redirect_config_layout.addWidget(self.redirect_config_label)
 
-        self.redirect_file_lineEdit = QLineEdit(self.centralwidget)
-        self.redirect_file_lineEdit.setObjectName(u"redirect_file_lineEdit")
-        self.redirect_file_lineEdit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.redirect_file_lineEdit.setReadOnly(True)
+        self.redirect_config_lineEdit = QLineEdit(self.centralwidget)
+        self.redirect_config_lineEdit.setObjectName(u"redirect_config_lineEdit")
+        self.redirect_config_lineEdit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.redirect_config_lineEdit.setReadOnly(True)
 
-        self.redirect_file_layout.addWidget(self.redirect_file_lineEdit)
+        self.redirect_config_layout.addWidget(self.redirect_config_lineEdit)
 
-        self.redirect_file_button = QPushButton(self.centralwidget)
-        self.redirect_file_button.setObjectName(u"redirect_file_button")
-        self.redirect_file_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.redirect_config_button = QPushButton(self.centralwidget)
+        self.redirect_config_button.setObjectName(u"redirect_config_button")
+        self.redirect_config_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.redirect_config_button.setCheckable(False)
 
-        self.redirect_file_layout.addWidget(self.redirect_file_button)
-
-
-        self.overall_layout.addLayout(self.redirect_file_layout)
-
-        self.alias_file_layout = QHBoxLayout()
-        self.alias_file_layout.setObjectName(u"alias_file_layout")
-        self.alias_file_label = QLabel(self.centralwidget)
-        self.alias_file_label.setObjectName(u"alias_file_label")
-        self.alias_file_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.alias_file_layout.addWidget(self.alias_file_label)
-
-        self.alias_file_lineEdit = QLineEdit(self.centralwidget)
-        self.alias_file_lineEdit.setObjectName(u"alias_file_lineEdit")
-        self.alias_file_lineEdit.setEnabled(True)
-        self.alias_file_lineEdit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.alias_file_lineEdit.setReadOnly(True)
-
-        self.alias_file_layout.addWidget(self.alias_file_lineEdit)
-
-        self.alias_file_button = QPushButton(self.centralwidget)
-        self.alias_file_button.setObjectName(u"alias_file_button")
-        self.alias_file_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.alias_file_layout.addWidget(self.alias_file_button)
+        self.redirect_config_layout.addWidget(self.redirect_config_button)
 
 
-        self.overall_layout.addLayout(self.alias_file_layout)
+        self.overall_layout.addLayout(self.redirect_config_layout)
+
+        self.alias_config_layout = QHBoxLayout()
+        self.alias_config_layout.setObjectName(u"alias_config_layout")
+        self.alias_config_label = QLabel(self.centralwidget)
+        self.alias_config_label.setObjectName(u"alias_config_label")
+        self.alias_config_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+
+        self.alias_config_layout.addWidget(self.alias_config_label)
+
+        self.alias_config_lineEdit = QLineEdit(self.centralwidget)
+        self.alias_config_lineEdit.setObjectName(u"alias_config_lineEdit")
+        self.alias_config_lineEdit.setEnabled(True)
+        self.alias_config_lineEdit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.alias_config_lineEdit.setReadOnly(True)
+
+        self.alias_config_layout.addWidget(self.alias_config_lineEdit)
+
+        self.alias_config_button = QPushButton(self.centralwidget)
+        self.alias_config_button.setObjectName(u"alias_config_button")
+        self.alias_config_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.alias_config_button.setCheckable(False)
+
+        self.alias_config_layout.addWidget(self.alias_config_button)
+
+
+        self.overall_layout.addLayout(self.alias_config_layout)
 
         self.reclist_style_layout = QHBoxLayout()
         self.reclist_style_layout.setObjectName(u"reclist_style_layout")
@@ -268,6 +271,7 @@ class Ui_MainWindow(object):
         self.save_path_button = QPushButton(self.centralwidget)
         self.save_path_button.setObjectName(u"save_path_button")
         self.save_path_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.save_path_button.setCheckable(False)
 
         self.save_path_layout.addWidget(self.save_path_button)
 
@@ -308,12 +312,14 @@ class Ui_MainWindow(object):
         self.preview_button = QPushButton(self.centralwidget)
         self.preview_button.setObjectName(u"preview_button")
         self.preview_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.preview_button.setCheckable(False)
 
         self.bottom_button_layout.addWidget(self.preview_button)
 
         self.save_button = QPushButton(self.centralwidget)
         self.save_button.setObjectName(u"save_button")
         self.save_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.save_button.setCheckable(False)
 
         self.bottom_button_layout.addWidget(self.save_button)
 
@@ -335,8 +341,8 @@ class Ui_MainWindow(object):
         self.menuBar.addAction(self.menuFile.menuAction())
         self.menuBar.addAction(self.menuSetting.menuAction())
         self.menuFile.addAction(self.load_action)
-        self.menuFile.addAction(self.save_action)
-        self.menuFile.addAction(self.save_as_action)
+        self.menuFile.addAction(self.export_action)
+        self.menuFile.addAction(self.export_as_action)
         self.menuSetting.addAction(self.menuLanguage.menuAction())
         self.menuLanguage.addAction(self.set_english_action)
         self.menuLanguage.addAction(self.set_simplified_chinese_action)
@@ -349,22 +355,22 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QMainWindow.tr(u"cvvc reclist generator", None))
-        self.load_action.setText(QMainWindow.tr(u"Open", None))
+        self.load_action.setText(QMainWindow.tr(u"Load", None))
 #if QT_CONFIG(tooltip)
         self.load_action.setToolTip(QMainWindow.tr(u"Load", None))
 #endif // QT_CONFIG(tooltip)
-        self.save_action.setText(QMainWindow.tr(u"Save", None))
-        self.save_as_action.setText(QMainWindow.tr(u"Save as ...", None))
+        self.export_action.setText(QMainWindow.tr(u"Export", None))
+        self.export_as_action.setText(QMainWindow.tr(u"Export as ...", None))
         self.set_english_action.setText(QMainWindow.tr(u"English", None))
         self.set_simplified_chinese_action.setText(QMainWindow.tr(u"\u7b80\u4f53\u4e2d\u6587", None))
         self.action.setText(QMainWindow.tr(u"\u7e41\u9ad4\u4e2d\u6587\uff08\u81fa\u7063\uff09", None))
         self.set_japanese_action.setText(QMainWindow.tr(u"\u65e5\u672c\u8a9e", None))
         self.dict_file_label.setText(QMainWindow.tr(u"Dict file: ", None))
         self.dict_file_button.setText(QMainWindow.tr(u"Select", None))
-        self.redirect_file_label.setText(QMainWindow.tr(u"Redirect file: ", None))
-        self.redirect_file_button.setText(QMainWindow.tr(u"Select", None))
-        self.alias_file_label.setText(QMainWindow.tr(u"Alias file", None))
-        self.alias_file_button.setText(QMainWindow.tr(u"Select", None))
+        self.redirect_config_label.setText(QMainWindow.tr(u"Redirect config: ", None))
+        self.redirect_config_button.setText(QMainWindow.tr(u"Select", None))
+        self.alias_config_label.setText(QMainWindow.tr(u"Alias config: ", None))
+        self.alias_config_button.setText(QMainWindow.tr(u"Select", None))
         self.reclist_style_label.setText(QMainWindow.tr(u"Reclist style: ", None))
         self.two_mora_checkBox.setText(QMainWindow.tr(u"2 mora", None))
         self.haru_style_checkBox.setText(QMainWindow.tr(u"Haru.J style", None))
