@@ -1,5 +1,5 @@
 from typing import Optional
-from cvv_dataclasses import Cvv, RecLine, Reclist, AliasUnion, CvvWorkshop
+from .cvv_dataclasses import Cvv, RecLine, Reclist, AliasUnion, CvvWorkshop
         
 
     

@@ -1,6 +1,6 @@
 import configparser
 from typing import Optional
-from cvv_dataclasses import CvvWorkshop, VcSet, AliasUnion
+from .cvv_dataclasses import CvvWorkshop, VcSet, AliasUnion
 
 
 class AliasUnionGenerator:

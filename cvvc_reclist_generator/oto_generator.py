@@ -1,4 +1,5 @@
-from cvv_dataclasses import Reclist, AliasType, AliasUnion, Oto, OtoUnion
+from .cvv_dataclasses import Reclist, AliasType, AliasUnion, Oto, OtoUnion
+from typing import Optional
 
 
 class OtoGenerator:
@@ -7,7 +8,7 @@ class OtoGenerator:
     def __init__(self) -> None:
         self.oto_union = OtoUnion()
     
-    def gen_oto(self, reclist: Reclist, alias_union: AliasUnion, bpm: float, is_full_cv: bool = True, cv_mid: set[str]=None) -> None:
+    def gen_oto(self, reclist: Reclist, alias_union: AliasUnion, bpm: float, is_full_cv: bool = True, cv_mid: Optional[set[str]]=None) -> None:
         """generate oto from reclist according to needed alias
 
         Args:

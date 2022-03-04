@@ -1,9 +1,9 @@
-from cvv_dataclasses import *
-from alias_union_generator import AliasUnionGenerator
-from reclist_generator import ReclistGenerator
-from reclist_checker import ReclistChecker
-from oto_generator import OtoGenerator
-from vsdxmf_generator import VsdxmfGenerator
+from cvvc_reclist_generator.cvv_dataclasses import *
+from cvvc_reclist_generator.alias_union_generator import AliasUnionGenerator
+from cvvc_reclist_generator.reclist_generator import ReclistGenerator
+from cvvc_reclist_generator.reclist_checker import ReclistChecker
+from cvvc_reclist_generator.oto_generator import OtoGenerator
+from cvvc_reclist_generator.vsdxmf_generator import VsdxmfGenerator
 
 def main():
     cvv_workshop = CvvWorkshop()
@@ -27,12 +27,12 @@ def main():
     alias_union_utau = alias_union_backup.copy()
     alias_union_utau.c_head.clear()
     oto_generator.gen_oto(
-        reclist=reclist, alias_union=alias_union_utau, bpm=120, is_full_cv=True, cv_mid=None)
+        reclist=reclist, alias_union=alias_union_utau, bpm=120, is_full_cv=True)
     
     vsdxmf_generator = VsdxmfGenerator(cvv_workshop)
     alias_union_vs = alias_union_backup.copy()
     vsdxmf_generator.gen_vsdxmf(
-        reclist=reclist, alias_union=alias_union_vs, bpm=120, cv_mid=None)
+        reclist=reclist, alias_union=alias_union_vs, bpm=120)
     
     generator.save_reclist('./result/reclist.txt')
     oto_generator.save_oto('./result/oto.ini')
