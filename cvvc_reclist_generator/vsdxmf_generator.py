@@ -1,5 +1,5 @@
 from .cvv_dataclasses import Reclist, AliasType, AliasUnion, Vsdxmf, VsdxmfUnion, CvvWorkshop
-from typing import Optional
+from typing import Iterable, Optional
     
     
 class VsdxmfGenerator:
@@ -9,7 +9,7 @@ class VsdxmfGenerator:
         self.vsdxmf_union = VsdxmfUnion()
         self.cvv_workshop = cvv_workshop
                 
-    def gen_vsdxmf(self, reclist: Reclist, alias_union: AliasUnion, bpm: float, is_full_cv: bool = False, cv_mid: Optional[set[str]]=None) -> None:
+    def gen_vsdxmf(self, reclist: Reclist, alias_union: AliasUnion, bpm: float, is_full_cv: bool = False, cv_mid: Optional[Iterable[str]]=None) -> None:
         """Generate vsdxmf for vocalsharp.
 
         Args:

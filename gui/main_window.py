@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(336, 340)
+        MainWindow.resize(415, 338)
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -167,6 +167,18 @@ class Ui_MainWindow(object):
         self.reclist_detail_layout_a.setObjectName(u"reclist_detail_layout_a")
         self.reclist_detail_layout_a1 = QHBoxLayout()
         self.reclist_detail_layout_a1.setObjectName(u"reclist_detail_layout_a1")
+        self.length_spinBox = QSpinBox(self.centralwidget)
+        self.length_spinBox.setObjectName(u"length_spinBox")
+        self.length_spinBox.setMinimum(3)
+        self.length_spinBox.setMaximum(100)
+
+        self.reclist_detail_layout_a1.addWidget(self.length_spinBox)
+
+        self.length_label = QLabel(self.centralwidget)
+        self.length_label.setObjectName(u"length_label")
+
+        self.reclist_detail_layout_a1.addWidget(self.length_label)
+
         self.cv_head_checkBox = QCheckBox(self.centralwidget)
         self.cv_head_checkBox.setObjectName(u"cv_head_checkBox")
         self.cv_head_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
@@ -280,6 +292,12 @@ class Ui_MainWindow(object):
 
         self.save_file_types_layout = QHBoxLayout()
         self.save_file_types_layout.setObjectName(u"save_file_types_layout")
+        self.reclist_checkBox = QCheckBox(self.centralwidget)
+        self.reclist_checkBox.setObjectName(u"reclist_checkBox")
+        self.reclist_checkBox.setChecked(True)
+
+        self.save_file_types_layout.addWidget(self.reclist_checkBox)
+
         self.oto_checkBox = QCheckBox(self.centralwidget)
         self.oto_checkBox.setObjectName(u"oto_checkBox")
         self.oto_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
@@ -329,7 +347,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menuBar = QMenuBar(MainWindow)
         self.menuBar.setObjectName(u"menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 336, 22))
+        self.menuBar.setGeometry(QRect(0, 0, 415, 22))
         self.menuFile = QMenu(self.menuBar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuSetting = QMenu(self.menuBar)
@@ -376,6 +394,7 @@ class Ui_MainWindow(object):
         self.haru_style_checkBox.setText(QMainWindow.tr(u"Haru.J style", None))
         self.mora_x_checkBox.setText(QMainWindow.tr(u"mora x", None))
         self.reclist_detail_label.setText(QMainWindow.tr(u"Reclist detail: ", None))
+        self.length_label.setText(QMainWindow.tr(u"Length", None))
         self.cv_head_checkBox.setText(QMainWindow.tr(u"CV head", None))
         self.full_cv_checkBox.setText(QMainWindow.tr(u"Full CV", None))
         self.c_head_checkBox.setText(QMainWindow.tr(u"C head", None))
@@ -383,9 +402,10 @@ class Ui_MainWindow(object):
         self.labeling_style_label.setText(QMainWindow.tr(u"Labeling style: ", None))
         self.bpm_label.setText(QMainWindow.tr(u"bpm", None))
         self.blank_beat_label.setText(QMainWindow.tr(u"blank beat", None))
-        self.save_path_label.setText(QMainWindow.tr(u"Save path", None))
+        self.save_path_label.setText(QMainWindow.tr(u"Save path: ", None))
         self.save_path_lineEdit.setText(QMainWindow.tr(u"./result", None))
         self.save_path_button.setText(QMainWindow.tr(u"Select", None))
+        self.reclist_checkBox.setText(QMainWindow.tr(u"reclist", None))
         self.oto_checkBox.setText(QMainWindow.tr(u"oto", None))
         self.presamp_checkBox.setText(QMainWindow.tr(u"presamp", None))
         self.vsdxmf_checkBox.setText(QMainWindow.tr(u"vsdxmf", None))

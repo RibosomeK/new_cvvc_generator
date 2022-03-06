@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>413</width>
-    <height>357</height>
+    <width>592</width>
+    <height>275</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,13 +25,31 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <widget class="QWidget" name="reclist_tab">
+      <attribute name="title">
+       <string>reclist</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QTextEdit" name="reclist_textEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="oto_tab">
       <attribute name="title">
        <string>oto</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QListView" name="oto_listView"/>
+        <widget class="QTextEdit" name="oto_textEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -39,9 +57,13 @@
       <attribute name="title">
        <string>presamp</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
-        <widget class="QListView" name="presamp_listView"/>
+        <widget class="QTextEdit" name="presamp_textEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -49,9 +71,13 @@
       <attribute name="title">
        <string>vsdxmf</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QListView" name="vsdxmf_listView"/>
+        <widget class="QTextEdit" name="vsdxmf_textEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -61,7 +87,11 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QListView" name="lsd_listView"/>
+        <widget class="QTextEdit" name="lsd_textEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

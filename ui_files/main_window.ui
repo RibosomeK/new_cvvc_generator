@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>336</width>
-    <height>340</height>
+    <width>415</width>
+    <height>338</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -199,6 +199,23 @@
         <item>
          <layout class="QHBoxLayout" name="reclist_detail_layout_a1">
           <item>
+           <widget class="QSpinBox" name="length_spinBox">
+            <property name="minimum">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="length_label">
+            <property name="text">
+             <string>Length</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="cv_head_checkBox">
             <property name="locale">
              <locale language="English" country="UnitedStates"/>
@@ -332,7 +349,7 @@
          <locale language="English" country="UnitedStates"/>
         </property>
         <property name="text">
-         <string>Save path</string>
+         <string>Save path: </string>
         </property>
        </widget>
       </item>
@@ -366,6 +383,16 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="save_file_types_layout">
+      <item>
+       <widget class="QCheckBox" name="reclist_checkBox">
+        <property name="text">
+         <string>reclist</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QCheckBox" name="oto_checkBox">
         <property name="locale">
@@ -445,7 +472,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>336</width>
+     <width>415</width>
      <height>22</height>
     </rect>
    </property>

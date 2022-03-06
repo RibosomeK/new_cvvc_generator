@@ -447,7 +447,7 @@ class CvvWorkshop:
                     self.v_dict.setdefault(v, []).append(cvv)
                 idx += 1
             
-    def find_cvv(self, cvv: str = None, c: str = None, v: str = None, exception: Optional[set[str]] = None) -> Cvv:
+    def find_cvv(self, cvv: Optional[str]=None, c: Optional[str]=None, v: Optional[str]=None, exception: Optional[set[str]] = None) -> Cvv:
         """find a cvv class by a cvv, c, or v
 
         Args:
@@ -563,8 +563,8 @@ class CvvWorkshop:
             raise TypeError('Given wrong alias type!')
         
         return redirect_phoneme
-
-    def save_presamp(self, presamp_dir: str) -> None:
+    
+    def get_presamp_str(self) -> str:
         presamp_ini: list[str] = ['[VERSION]\n'
                                   '1.7']
         presamp_ini.append('[VOWEL]')
@@ -583,17 +583,23 @@ class CvvWorkshop:
                            '%v% R\n'
                            '[ENDFLAG]\n'
                            '1')
+        return '\n'.join(presamp_ini)
+
+    def save_presamp(self, presamp_dir: str) -> None:
         with open(presamp_dir, mode='w', encoding='utf-8') as f:
-            f.write('\n'.join(presamp_ini))
+            f.write(self.get_presamp_str())
+            
+    def get_lsd_str(self) -> str:
+        lsd_str = []
+        for cvv in sorted(self.cvv_set, key=Cvv.get_lsd_c):
+            cv, c, v = cvv.get_lsd_cvv()
+            if c == v:
+                lsd_str.append(f'{cv}\n#{v}')
+            else:
+                lsd_str.append(f'{cv}\n{c}#{v}')
+        return '\n'.join(lsd_str)
 
     def save_lsd(self, lsd_dir: str) -> None:
         with open(lsd_dir, mode='w', encoding='utf-8') as f:
-            lsd_str = []
-            for cvv in sorted(self.cvv_set, key=Cvv.get_lsd_c):
-                cv, c, v = cvv.get_lsd_cvv()
-                if c == v:
-                    lsd_str.append(f'{cv}\n#{v}')
-                else:
-                    lsd_str.append(f'{cv}\n{c}#{v}')
-            f.write('\n'.join(lsd_str))
+            f.write(self.get_lsd_str())
             

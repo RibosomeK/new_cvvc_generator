@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Iterable, Optional
 from .cvv_dataclasses import Cvv, RecLine, Reclist, AliasUnion, CvvWorkshop
         
 
@@ -86,7 +86,7 @@ class ReclistGenerator:
         alias_union.cv_head.clear()
         return alias_union
 
-    def gen_mora_x(self, alias_union: AliasUnion, length: int, cv_mid: Optional[set[str]]=None) -> None:
+    def gen_mora_x(self, alias_union: AliasUnion, length: int, cv_mid: Optional[Iterable[str]]=None) -> None:
         """Generate given x length long pre row of reclist.
 
         Args:

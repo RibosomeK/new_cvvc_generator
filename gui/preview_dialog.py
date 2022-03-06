@@ -15,59 +15,74 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout, QListView,
-    QPushButton, QSizePolicy, QTabWidget, QVBoxLayout,
+from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout, QPushButton,
+    QSizePolicy, QTabWidget, QTextEdit, QVBoxLayout,
     QWidget)
 
 class Ui_PreviewDialog(object):
     def setupUi(self, PreviewDialog):
         if not PreviewDialog.objectName():
             PreviewDialog.setObjectName(u"PreviewDialog")
-        PreviewDialog.resize(413, 357)
+        PreviewDialog.resize(592, 275)
         PreviewDialog.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
         self.verticalLayout = QVBoxLayout(PreviewDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.preview_tab = QTabWidget(PreviewDialog)
         self.preview_tab.setObjectName(u"preview_tab")
         self.preview_tab.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.reclist_tab = QWidget()
+        self.reclist_tab.setObjectName(u"reclist_tab")
+        self.verticalLayout_3 = QVBoxLayout(self.reclist_tab)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.reclist_textEdit = QTextEdit(self.reclist_tab)
+        self.reclist_textEdit.setObjectName(u"reclist_textEdit")
+        self.reclist_textEdit.setReadOnly(True)
+
+        self.verticalLayout_3.addWidget(self.reclist_textEdit)
+
+        self.preview_tab.addTab(self.reclist_tab, "")
         self.oto_tab = QWidget()
         self.oto_tab.setObjectName(u"oto_tab")
-        self.horizontalLayout_2 = QHBoxLayout(self.oto_tab)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.oto_listView = QListView(self.oto_tab)
-        self.oto_listView.setObjectName(u"oto_listView")
+        self.verticalLayout_4 = QVBoxLayout(self.oto_tab)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.oto_textEdit = QTextEdit(self.oto_tab)
+        self.oto_textEdit.setObjectName(u"oto_textEdit")
+        self.oto_textEdit.setReadOnly(True)
 
-        self.horizontalLayout_2.addWidget(self.oto_listView)
+        self.verticalLayout_4.addWidget(self.oto_textEdit)
 
         self.preview_tab.addTab(self.oto_tab, "")
         self.presamp_tab = QWidget()
         self.presamp_tab.setObjectName(u"presamp_tab")
-        self.horizontalLayout_3 = QHBoxLayout(self.presamp_tab)
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.presamp_listView = QListView(self.presamp_tab)
-        self.presamp_listView.setObjectName(u"presamp_listView")
+        self.verticalLayout_5 = QVBoxLayout(self.presamp_tab)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.presamp_textEdit = QTextEdit(self.presamp_tab)
+        self.presamp_textEdit.setObjectName(u"presamp_textEdit")
+        self.presamp_textEdit.setReadOnly(True)
 
-        self.horizontalLayout_3.addWidget(self.presamp_listView)
+        self.verticalLayout_5.addWidget(self.presamp_textEdit)
 
         self.preview_tab.addTab(self.presamp_tab, "")
         self.vsdxmf_tab = QWidget()
         self.vsdxmf_tab.setObjectName(u"vsdxmf_tab")
-        self.horizontalLayout_4 = QHBoxLayout(self.vsdxmf_tab)
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.vsdxmf_listView = QListView(self.vsdxmf_tab)
-        self.vsdxmf_listView.setObjectName(u"vsdxmf_listView")
+        self.verticalLayout_6 = QVBoxLayout(self.vsdxmf_tab)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.vsdxmf_textEdit = QTextEdit(self.vsdxmf_tab)
+        self.vsdxmf_textEdit.setObjectName(u"vsdxmf_textEdit")
+        self.vsdxmf_textEdit.setReadOnly(True)
 
-        self.horizontalLayout_4.addWidget(self.vsdxmf_listView)
+        self.verticalLayout_6.addWidget(self.vsdxmf_textEdit)
 
         self.preview_tab.addTab(self.vsdxmf_tab, "")
         self.lsd_tab = QWidget()
         self.lsd_tab.setObjectName(u"lsd_tab")
         self.verticalLayout_2 = QVBoxLayout(self.lsd_tab)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.lsd_listView = QListView(self.lsd_tab)
-        self.lsd_listView.setObjectName(u"lsd_listView")
+        self.lsd_textEdit = QTextEdit(self.lsd_tab)
+        self.lsd_textEdit.setObjectName(u"lsd_textEdit")
+        self.lsd_textEdit.setReadOnly(True)
 
-        self.verticalLayout_2.addWidget(self.lsd_listView)
+        self.verticalLayout_2.addWidget(self.lsd_textEdit)
 
         self.preview_tab.addTab(self.lsd_tab, "")
 
@@ -101,6 +116,7 @@ class Ui_PreviewDialog(object):
 
     def retranslateUi(self, PreviewDialog):
         PreviewDialog.setWindowTitle(QDialog.tr(u"Preview", None))
+        self.preview_tab.setTabText(self.preview_tab.indexOf(self.reclist_tab), QDialog.tr(u"reclist", None))
         self.preview_tab.setTabText(self.preview_tab.indexOf(self.oto_tab), QDialog.tr(u"oto", None))
         self.preview_tab.setTabText(self.preview_tab.indexOf(self.presamp_tab), QDialog.tr(u"presamp", None))
         self.preview_tab.setTabText(self.preview_tab.indexOf(self.vsdxmf_tab), QDialog.tr(u"vsdxmf", None))
