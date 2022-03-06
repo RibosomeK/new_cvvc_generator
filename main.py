@@ -1,9 +1,7 @@
-from cvvc_reclist_generator.cvv_dataclasses import *
-from cvvc_reclist_generator.alias_union_generator import AliasUnionGenerator
-from cvvc_reclist_generator.reclist_generator import ReclistGenerator
-from cvvc_reclist_generator.reclist_checker import ReclistChecker
-from cvvc_reclist_generator.oto_generator import OtoGenerator
-from cvvc_reclist_generator.vsdxmf_generator import VsdxmfGenerator
+from cvvc_reclist_generator import (
+    CvvWorkshop, AliasUnionGenerator, ReclistGenerator, 
+    ReclistChecker, OtoGenerator, VsdxmfGenerator
+    )
 
 def main():
     cvv_workshop = CvvWorkshop()
