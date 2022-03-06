@@ -247,7 +247,7 @@ class Oto(namedtuple("OTO", "wav prefix alias suffix l con r pre ovl")):
             alias = self.prefix + self.alias
         if self.suffix:
             alias += self.suffix
-        return "{}={},{},{},{},{},{}".format(self.wav, alias, *self[-5:])
+        return "{}={},{:1f},{:.1f},{:.1f},{:.1f},{:.1f}".format(self.wav, alias, *self[-5:])
     
 
 class OtoUnion(dict[AliasType, list[Oto]]):
@@ -287,7 +287,10 @@ class Vsdxmf(namedtuple("VS_OTO", "phoneme wav l pre con r ovl")):
     __slot__ = ()
     
     def __str__(self) -> str:
-        return ','.join(str(ele) for ele in self)
+        if self.l == self.pre == self.con == self.r == self.ovl == 0:
+            return ','.join(str(ele) for ele in self)
+        else:
+            return '{},{},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}'.format(*self)
     
     @staticmethod
     def get_redirect(phoneme: str, redirect_phoneme: str) -> "Vsdxmf":
