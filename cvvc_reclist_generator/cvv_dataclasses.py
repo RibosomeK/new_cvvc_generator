@@ -247,7 +247,7 @@ class Oto(namedtuple("OTO", "wav prefix alias suffix l con r pre ovl")):
             alias = self.prefix + self.alias
         if self.suffix:
             alias += self.suffix
-        return "{}={},{:1f},{:.1f},{:.1f},{:.1f},{:.1f}".format(self.wav, alias, *self[-5:])
+        return "{}={},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}".format(self.wav, alias, *self[-5:])
     
 
 class OtoUnion(dict[AliasType, list[Oto]]):

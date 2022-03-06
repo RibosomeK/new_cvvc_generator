@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 import re
-from cvvc_reclist_generator.cvv_dataclasses import CvvWorkshop
-from cvvc_reclist_generator.alias_union_generator import AliasUnionGenerator
-from cvvc_reclist_generator.reclist_generator import ReclistGenerator
-from cvvc_reclist_generator.oto_generator import OtoGenerator
-from cvvc_reclist_generator.vsdxmf_generator import VsdxmfGenerator
+from cvvc_reclist_generator import (
+    CvvWorkshop, AliasUnionGenerator, ReclistGenerator, 
+    ReclistChecker, OtoGenerator, VsdxmfGenerator
+    )
 
 
 @dataclass

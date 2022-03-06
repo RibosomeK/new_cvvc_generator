@@ -1,9 +1,12 @@
 import configparser
 from typing import Any
+
+from cvvc_reclist_generator import vsdxmf_generator
 from .main_window import Ui_MainWindow
 from .preview_dialog import Ui_PreviewDialog
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QDialog, QMessageBox
 from .cvvc_reclist_generator_model import Parameters, CvvcReclistGeneratorModel
+from .label_highlighter import OtoHighlighter, VsdxmfHighlighter
 
 
 class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
@@ -208,6 +211,9 @@ class PreviewDialog(QDialog, Ui_PreviewDialog):
         
         self.cancel_button.clicked.connect(self.close_dialog)
         self.save_button.clicked.connect(self.save_files)
+        
+        oto_highlighter = OtoHighlighter(self.oto_textEdit.document())
+        vsdxmf_highligher = VsdxmfHighlighter(self.vsdxmf_textEdit.document())
         
         self.show()
         
