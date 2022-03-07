@@ -108,9 +108,11 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             preview_dialog.receive_model(generator)
             preview_dialog.reclist_textEdit.setText(generator.get_reclist_str())
             preview_dialog.oto_textEdit.setText(generator.get_oto_str())
-            preview_dialog.presamp_textEdit.setText(generator.get_presamp_str())
+            if parameters.do_save_presamp:
+                preview_dialog.presamp_textEdit.setText(generator.get_presamp_str())
             preview_dialog.vsdxmf_textEdit.setText(generator.get_vsdxmf_str())
-            preview_dialog.lsd_textEdit.setText(generator.get_lsd_str())
+            if parameters.do_save_lsd:
+                preview_dialog.lsd_textEdit.setText(generator.get_lsd_str())
             
             preview_dialog.exec()
         

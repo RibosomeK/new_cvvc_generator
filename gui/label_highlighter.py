@@ -52,7 +52,7 @@ class OtoHighlighter(LabelHighlighter):
             (r'[0-9]+\.?[0-9]*,[0-9]+\.?[0-9]*,-?[0-9]+\.?[0-9]*,[0-9]+\.?[0-9]*,[0-9]+\.?[0-9]*', 
              LABEL_STYLES['numbers'])
         )
-        rules.append((r'[a-z,A-Z,_]+\.wav', LABEL_STYLES['wav']))
+        rules.append((r'\S+\.wav', LABEL_STYLES['wav']))
         rules.append((r'(?<==).*?(?=,)', LABEL_STYLES['alias']))
         
         self.rules: list[tuple[QRegularExpression, QTextCharFormat]] = []

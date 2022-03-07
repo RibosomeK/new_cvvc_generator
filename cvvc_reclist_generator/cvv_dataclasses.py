@@ -218,13 +218,18 @@ class RecLine(tuple[Cvv, ...]):
 
     def __str__(self, split_symbol: str = "_") -> str:
         if isinstance(self[0], Cvv):
-            line: str = split_symbol + split_symbol.join(str(e) for e in self)
+            if re.match(u"[\u30a0-\u30ff\u3040-\u309f]+", self[0].get_cv()):
+                line: str = split_symbol + ''.join(str(e) for e in self)
+            else:
+                line: str = split_symbol + split_symbol.join(str(e) for e in self)
         else:
             line: str = split_symbol.join(str(e) for e in self)
-        if "R" in line or line.islower():
-            return line
-        else:
-            return f"{line}_UpperCase"
+        
+        if not line.islower():
+            if line.lower().islower():
+               if re.sub(r'_R_?', '', line).lower().islower():
+                   return f"{line}_UpperCase"
+        return line
         
         
 class Reclist(UserList[RecLine]):
@@ -367,14 +372,9 @@ class CvvWorkshop:
             dict_content = dict_file.read()
 
         for line in dict_content.splitlines():
-            if line:
-                if "," in line:
-                    split_symbol = ','
-                elif "\t" in line:
-                    split_symbol = '\t'
-                else:
-                    raise SyntaxError
-                word = Cvv.new(line.split(split_symbol))
+            if line := line.strip():
+                # also support full-width comma, semicolon for chinese user
+                word = Cvv.new(re.split(r' *[,;\t ，；] *', line))
                 cvv, c, v, *_ = word
                 self.cvv_set.add(word)
                 self.cvv_dict.setdefault(cvv, word)
