@@ -1,5 +1,6 @@
 import configparser
 from typing import Any
+import os
 
 from cvvc_reclist_generator import vsdxmf_generator
 from .main_window import Ui_MainWindow
@@ -39,6 +40,11 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             self, self.tr('Select a dictionary file'), './',
             self.tr('Dict file (*.txt);;Presamp file (*.ini);;LSD file (*.lsd)'))[0]
         if file_name:
+            # try to get relative path
+            try:
+                file_name = os.path.relpath(file_name)
+            except ValueError:
+                pass
             self.dict_file_lineEdit.setText(file_name)
             
     def select_alias_config(self):
@@ -46,6 +52,11 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             self, self.tr('Select an alias config'), './',
             self.tr('Alias file (*.ini)'))[0]
         if file_name:
+            # try to get relative path
+            try:
+                file_name = os.path.relpath(file_name)
+            except ValueError:
+                pass
             self.alias_config_lineEdit.setText(file_name)
             
     def select_redirect_config(self):
@@ -53,12 +64,22 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             self, self.tr('Select a redirect config'), './',
             self.tr('Redirect file (*.ini)'))[0]
         if file_name:
+            # try to get relative path
+            try:
+                file_name = os.path.relpath(file_name)
+            except ValueError:
+                pass
             self.redirect_config_lineEdit.setText(file_name)
             
     def select_save_path(self):
         path_name = QFileDialog.getExistingDirectory(
             self, self.tr('Select a save path'), './')
         if path_name:
+            # try to get relative path
+            try:
+                path_name = os.path.relpath(path_name)
+            except ValueError:
+                pass
             self.save_path_lineEdit.setText(path_name)
             
     def disable_mora_x_checkBox(self):
@@ -213,7 +234,7 @@ class PreviewDialog(QDialog, Ui_PreviewDialog):
         self.save_button.clicked.connect(self.save_files)
         
         oto_highlighter = OtoHighlighter(self.oto_textEdit.document())
-        vsdxmf_highligher = VsdxmfHighlighter(self.vsdxmf_textEdit.document())
+        vsdxmf_highlighter = VsdxmfHighlighter(self.vsdxmf_textEdit.document())
         
         self.show()
         
