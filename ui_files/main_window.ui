@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>415</width>
-    <height>338</height>
+    <width>414</width>
+    <height>341</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -445,6 +445,9 @@
         <property name="text">
          <string>Preview</string>
         </property>
+        <property name="shortcut">
+         <string>Ctrl+P</string>
+        </property>
         <property name="checkable">
          <bool>false</bool>
         </property>
@@ -457,6 +460,9 @@
         </property>
         <property name="text">
          <string>Save</string>
+        </property>
+        <property name="shortcut">
+         <string>Return</string>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -472,7 +478,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>415</width>
+     <width>414</width>
      <height>22</height>
     </rect>
    </property>
@@ -508,15 +514,24 @@
    <property name="toolTip">
     <string>Load</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="export_action">
    <property name="text">
     <string>Export</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="export_as_action">
    <property name="text">
     <string>Export as ...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
   <action name="set_english_action">
