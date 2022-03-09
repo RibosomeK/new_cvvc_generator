@@ -115,19 +115,19 @@ class Ui_PreviewDialog(object):
     # setupUi
 
     def retranslateUi(self, PreviewDialog):
-        PreviewDialog.setWindowTitle(QCoreApplication.translate("PreviewDialog", u"Preview", None))
-        self.preview_tab.setTabText(self.preview_tab.indexOf(self.reclist_tab), QCoreApplication.translate("PreviewDialog", u"reclist", None))
-        self.preview_tab.setTabText(self.preview_tab.indexOf(self.oto_tab), QCoreApplication.translate("PreviewDialog", u"oto", None))
-        self.preview_tab.setTabText(self.preview_tab.indexOf(self.presamp_tab), QCoreApplication.translate("PreviewDialog", u"presamp", None))
-        self.preview_tab.setTabText(self.preview_tab.indexOf(self.vsdxmf_tab), QCoreApplication.translate("PreviewDialog", u"vsdxmf", None))
-        self.preview_tab.setTabText(self.preview_tab.indexOf(self.lsd_tab), QCoreApplication.translate("PreviewDialog", u"lsd", None))
-        self.cancel_button.setText(QCoreApplication.translate("PreviewDialog", u"Cancel", None))
+        PreviewDialog.setWindowTitle(QDialog.tr(u"Preview", None))
+        self.preview_tab.setTabText(self.preview_tab.indexOf(self.reclist_tab), QDialog.tr(u"reclist", None))
+        self.preview_tab.setTabText(self.preview_tab.indexOf(self.oto_tab), QDialog.tr(u"oto", None))
+        self.preview_tab.setTabText(self.preview_tab.indexOf(self.presamp_tab), QDialog.tr(u"presamp", None))
+        self.preview_tab.setTabText(self.preview_tab.indexOf(self.vsdxmf_tab), QDialog.tr(u"vsdxmf", None))
+        self.preview_tab.setTabText(self.preview_tab.indexOf(self.lsd_tab), QDialog.tr(u"lsd", None))
+        self.cancel_button.setText(QDialog.tr(u"Cancel", None))
 #if QT_CONFIG(shortcut)
-        self.cancel_button.setShortcut(QCoreApplication.translate("PreviewDialog", u"Ctrl+C", None))
+        self.cancel_button.setShortcut(QDialog.tr(u"Ctrl+C", None))
 #endif // QT_CONFIG(shortcut)
-        self.save_button.setText(QCoreApplication.translate("PreviewDialog", u"Save", None))
+        self.save_button.setText(QDialog.tr(u"Save", None))
 #if QT_CONFIG(shortcut)
-        self.save_button.setShortcut(QCoreApplication.translate("PreviewDialog", u"Return", None))
+        self.save_button.setShortcut(QDialog.tr(u"Return", None))
 #endif // QT_CONFIG(shortcut)
     # retranslateUi
 
