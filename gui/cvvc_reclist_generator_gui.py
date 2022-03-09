@@ -183,7 +183,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         self.setWindowTitle(f'{self.windowTitle()} {config_name}')
         
         config = configparser.ConfigParser()
-        config.read(config_path)
+        config.read(config_path, encoding='utf-8')
         self.dict_file_lineEdit.setText(config['PARAMETERS']['dict_file'])
         self.redirect_config_lineEdit.setText(config['PARAMETERS']['redirect_config'])
         self.alias_config_lineEdit.setText(config['PARAMETERS']['alias_config'])

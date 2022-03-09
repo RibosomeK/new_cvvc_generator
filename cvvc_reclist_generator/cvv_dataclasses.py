@@ -391,7 +391,7 @@ class CvvWorkshop:
             presamp_dir (str): presamp.ini file path
         """
         presamp_config = configparser.ConfigParser(allow_no_value=True)
-        presamp_config.read(presamp_dir)
+        presamp_config.read(presamp_dir, encoding="utf-8")
         
         cv_dict: dict[str, list[str]] = {}
                 
