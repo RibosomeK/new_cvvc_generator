@@ -1,19 +1,43 @@
-from PySide6.QtGui import QUndoCommand, QUndoStack
+from re import S
+from PySide6.QtGui import QUndoCommand
 from PySide6.QtWidgets import QLineEdit
+from .cvvc_reclist_generator_model import Parameters
 
 
-class SelectFile(QUndoCommand):
-    """a QUndoCommand that selects a file or directory"""
+class LineEditSetText(QUndoCommand):
+    """a QUndoCommand that set lineEdit's text"""
     
-    file: str
-    old_file: str
+    new_str: str
+    old_str: str
     line_edit: QLineEdit
     
+    def __init__(self, line_edit: QLineEdit, file: str):
+        super().__init__()
+        self.new_str = file
+        self.old_str = line_edit.text()
+        self.line_edit = line_edit
+    
     def undo(self) -> None:
-        self.line_edit.setText(self.old_file)
+        self.line_edit.setText(self.old_str)
         
     def redo(self) -> None:
-        self.line_edit.setText(self.file)
+        self.line_edit.setText(self.new_str)
+        
+        
+class LoadParametersCommand(QUndoCommand):
+    """a QUndoCommand that can load config"""
+    
+    def __init__(self, new_parameters: Parameters, generator):
+        super().__init__()
+        self.new_parameters = new_parameters
+        self.old_parameters = generator.get_parameters()
+        self.generator = generator
+        
+    def undo(self) -> None:
+        self.generator.load_parameters(self.old_parameters)
+        
+    def redo(self) -> None:
+        self.generator.load_parameters(self.new_parameters)
         
         
 class ClearCommand(QUndoCommand):

@@ -1,4 +1,5 @@
 import configparser
+from tkinter.tix import Select
 from typing import Any
 import os
 
@@ -6,6 +7,8 @@ from cvvc_reclist_generator import vsdxmf_generator
 from .main_window import Ui_MainWindow
 from .preview_dialog import Ui_PreviewDialog
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QDialog, QMessageBox
+from PySide6.QtGui import QUndoStack
+from .undo_framework import LineEditSetText, LoadParametersCommand
 from .cvvc_reclist_generator_model import Parameters, CvvcReclistGeneratorModel
 from .label_highlighter import OtoHighlighter, VsdxmfHighlighter
 
@@ -16,6 +19,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         
         self.parameters_config_path: str = ''
+        self.undo_stack = QUndoStack()
         
         self.dict_file_button.clicked.connect(self.select_dict_file)
         self.alias_config_button.clicked.connect(self.select_alias_config)
@@ -31,6 +35,9 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         self.export_as_action.triggered.connect(self.export_parameters_config)
         self.load_action.triggered.connect(self.load_parameters_config)
         
+        self.undo_action.triggered.connect(self.undo_stack.undo)
+        self.redo_action.triggered.connect(self.undo_stack.redo)
+        
         self.save_button.clicked.connect(self.save_files)
         
         self.show()
@@ -42,9 +49,11 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         if file_name:
             # try to get relative path
             try:
-                file_name = os.path.relpath(file_name)
+                file_name: str = os.path.relpath(file_name)
             except ValueError:
                 pass
+            
+            self.undo_stack.push(LineEditSetText(self.dict_file_lineEdit, file_name))
             self.dict_file_lineEdit.setText(file_name)
             
     def select_alias_config(self):
@@ -54,9 +63,11 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         if file_name:
             # try to get relative path
             try:
-                file_name = os.path.relpath(file_name)
+                file_name: str = os.path.relpath(file_name)
             except ValueError:
                 pass
+            
+            self.undo_stack.push(LineEditSetText(self.alias_config_lineEdit, file_name))
             self.alias_config_lineEdit.setText(file_name)
             
     def select_redirect_config(self):
@@ -66,9 +77,10 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         if file_name:
             # try to get relative path
             try:
-                file_name = os.path.relpath(file_name)
+                file_name: str = os.path.relpath(file_name)
             except ValueError:
                 pass
+            self.undo_stack.push(LineEditSetText(self.redirect_config_lineEdit, file_name))
             self.redirect_config_lineEdit.setText(file_name)
             
     def select_save_path(self):
@@ -80,6 +92,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
                 path_name = os.path.relpath(path_name)
             except ValueError:
                 pass
+            self.undo_stack.push(LineEditSetText(self.save_path_lineEdit, path_name))
             self.save_path_lineEdit.setText(path_name)
             
     def disable_mora_x_checkBox(self):
@@ -170,7 +183,62 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             with open(config_path, mode='w', encoding='utf-8') as f:
                 config.write(f)
             
-    def load_parameters_config(self) -> None:
+    def read_parameters_config(self, config_path: str) -> Parameters:
+        config = configparser.ConfigParser()
+        config.read(config_path, encoding='utf-8')
+        parameters = Parameters(
+            dict_file=config['PARAMETERS']['dict_file'],
+            alias_config=config['PARAMETERS']['alias_config'],
+            redirect_config=config['PARAMETERS']['redirect_config'],
+            save_path=config['PARAMETERS']['save_path'],
+            
+            is_two_mora=config['PARAMETERS'].getboolean('is_two_mora'),
+            is_haru_style=config['PARAMETERS'].getboolean('is_haru_style'),
+            is_mora_x=config['PARAMETERS'].getboolean('is_mora_x'),
+            
+            length=config['PARAMETERS'].getint('length'),
+            is_full_cv=config['PARAMETERS'].getboolean('is_full_cv'),
+            is_cv_head=config['PARAMETERS'].getboolean('is_cv_head'),
+            is_c_head=config['PARAMETERS'].getboolean('is_c_head'),
+            cv_mid=config['PARAMETERS']['cv_mid'],
+            
+            bpm=config['PARAMETERS'].getint('bpm'),
+            blank_beat=config['PARAMETERS'].getint('blank_beat'),
+            
+            do_save_reclist=config['PARAMETERS'].getboolean('do_save_reclist'),
+            do_save_oto=config['PARAMETERS'].getboolean('do_save_oto'),
+            do_save_presamp=config['PARAMETERS'].getboolean('do_save_presamp'),
+            do_save_vsdxmf=config['PARAMETERS'].getboolean('do_save_vsdxmf'),
+            do_save_lsd=config['PARAMETERS'].getboolean('do_save_lsd')
+        )
+        return parameters
+        
+    def load_parameters(self, parameters: Parameters) -> None:
+        self.dict_file_lineEdit.setText(parameters.dict_file)
+        self.redirect_config_lineEdit.setText(parameters.redirect_config)
+        self.alias_config_lineEdit.setText(parameters.alias_config)
+        self.save_path_lineEdit.setText(parameters.save_path)
+        
+        self.two_mora_checkBox.setChecked(parameters.is_two_mora)
+        self.haru_style_checkBox.setChecked(parameters.is_haru_style)
+        self.mora_x_checkBox.setChecked(parameters.is_mora_x)
+            
+        self.length_spinBox.setValue(parameters.length)
+        self.full_cv_checkBox.setChecked(parameters.is_full_cv)
+        self.cv_head_checkBox.setChecked(parameters.is_cv_head)
+        self.c_head_checkBox.setChecked(parameters.is_c_head)
+        self.cv_mid_lineEdit.setText(parameters.cv_mid)
+            
+        self.bpm_spinBox.setValue(parameters.bpm)
+        self.blank_beat_spinBox.setValue(parameters.blank_beat)
+            
+        self.reclist_checkBox.setChecked(parameters.do_save_reclist)
+        self.oto_checkBox.setChecked(parameters.do_save_oto)
+        self.presamp_checkBox.setChecked(parameters.do_save_presamp)
+        self.vsdxmf_checkBox.setChecked(parameters.do_save_vsdxmf)
+        self.lsd_checkBox.setChecked(parameters.do_save_lsd)
+        
+    def load_parameters_config(self):
         config_path = QFileDialog.getOpenFileName(
             self,
             self.tr('Select a parameters config'), 
@@ -180,33 +248,11 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         self.parameters_config_path = config_path
         
         config_name = config_path.split('/')[-1]
-        self.setWindowTitle(f'{self.windowTitle()} {config_name}')
+        self.setWindowTitle(f'{self.windowTitle()} - {config_name}')
         
-        config = configparser.ConfigParser()
-        config.read(config_path, encoding='utf-8')
-        self.dict_file_lineEdit.setText(config['PARAMETERS']['dict_file'])
-        self.redirect_config_lineEdit.setText(config['PARAMETERS']['redirect_config'])
-        self.alias_config_lineEdit.setText(config['PARAMETERS']['alias_config'])
-        self.save_path_lineEdit.setText(config['PARAMETERS']['save_path'])
-        
-        self.two_mora_checkBox.setChecked(config['PARAMETERS'].getboolean('is_two_mora'))
-        self.haru_style_checkBox.setChecked(config['PARAMETERS'].getboolean('is_haru_style'))
-        self.mora_x_checkBox.setChecked(config['PARAMETERS'].getboolean('is_mora_x'))
-            
-        self.length_spinBox.setValue(config['PARAMETERS'].getint('length'))
-        self.full_cv_checkBox.setChecked(config['PARAMETERS'].getboolean('is_full_cv'))
-        self.cv_head_checkBox.setChecked(config['PARAMETERS'].getboolean('is_cv_head'))
-        self.c_head_checkBox.setChecked(config['PARAMETERS'].getboolean('is_c_head'))
-        self.cv_mid_lineEdit.setText(config['PARAMETERS']['cv_mid'])
-            
-        self.bpm_spinBox.setValue(config['PARAMETERS'].getint('bpm'))
-        self.blank_beat_spinBox.setValue(config['PARAMETERS'].getint('blank_beat'))
-            
-        self.reclist_checkBox.setChecked(config['PARAMETERS'].getboolean('do_save_reclist'))
-        self.oto_checkBox.setChecked(config['PARAMETERS'].getboolean('do_save_oto'))
-        self.presamp_checkBox.setChecked(config['PARAMETERS'].getboolean('do_save_presamp'))
-        self.vsdxmf_checkBox.setChecked(config['PARAMETERS'].getboolean('do_save_vsdxmf'))
-        self.lsd_checkBox.setChecked(config['PARAMETERS'].getboolean('do_save_lsd'))
+        parameters = self.read_parameters_config(config_path)
+        self.undo_stack.push(LoadParametersCommand(parameters, self))
+        self.load_parameters(parameters)
         
     def save_files(self):
         parameters = self.get_parameters()
