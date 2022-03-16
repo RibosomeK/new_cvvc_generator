@@ -5,6 +5,7 @@ from enum import Enum
 from random import choice
 import re
 from typing import Optional, Iterable
+from .errors import *
 
 
 class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
@@ -32,7 +33,7 @@ class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
             param = []
             for idx, value in enumerate(components):
                 if idx > length:
-                    raise SyntaxError(f'More than {length} arguments are given.')
+                    raise WrongArgumentsNumberError(f'More than {length} arguments are given.')
                 if value == '':
                     value = None
                 param.append(value)
@@ -80,7 +81,7 @@ class AliasType(Enum):
     CV = 'CV'
     VC = 'VC'
     VCV = 'VCV'
-    VR = 'VR'
+    V = 'VR'
     
     
 class VcSet(set[tuple[str, str]]):
@@ -149,7 +150,7 @@ class VcSet(set[tuple[str, str]]):
             self.discard(aimed_vc)
             return aimed_vc
         else:
-            raise ValueError
+            raise ValueError('pop from an empty set()')
 
     def __sub__(self, __iterable: Iterable[tuple[str, str]]) -> "VcSet":
         for value in __iterable:
@@ -272,7 +273,7 @@ class OtoUnion(dict[AliasType, list[Oto]]):
         self[AliasType.CV] = []
         self[AliasType.VC] = []
         self[AliasType.VCV] = []
-        self[AliasType.VR] = []
+        self[AliasType.V] = []
         self.__is_frozen = True
         
     def __setitem__(self, key: ..., item: ...) -> None:
@@ -320,7 +321,7 @@ class VsdxmfUnion(dict[AliasType, list[Vsdxmf]]):
         self[AliasType.CV] = []
         self[AliasType.VC] = []
         self[AliasType.VCV] = []
-        self[AliasType.VR] = []
+        self[AliasType.V] = []
         self.__is_frozen = True
         
     def __setitem__(self, key: ..., item: ...) -> None:
@@ -383,6 +384,10 @@ class CvvWorkshop:
                 self.c_dict.setdefault(c, []).append(word)
                 self.v_dict.setdefault(v, []).append(word)
                 
+                '''lsd_c, lsd_v = str(word.get_lsd_c), str(word.get_lsd_v)
+                self.c_dict.setdefault(lsd_c, []).append(word)
+                self.v_dict.setdefault(lsd_v, []).append(word)'''
+                
     def read_presamp(self, presamp_dir: str) -> None:
         """read presamp.ini file, do not support simplified format.
         simplified means word A does not shows up in CONSONANT section or neither.
@@ -406,11 +411,13 @@ class CvvWorkshop:
                 try:
                     cv_dict[cv].append(consonant)
                 except AttributeError:
-                    raise SyntaxError(f'{cv} does not show up in [CONSONANT] section, please check again.')
+                    raise MissingCvInPresampError(
+                        f'{cv} does not show up in [CONSONANT] section, please check again.')
         
         for cv, component in cv_dict.items():
             if len(component) > 2:
-                raise SyntaxError(f'{cv} seems to appeared in [VOWEL] section or [CONSONANT] section multipul times.')
+                raise MultiCvInPresampError(
+                    f'{cv} seems to appeared in [VOWEL] section or [CONSONANT] section multipul times.')
             elif len(component) == 1:
                 v = c = component[0]
             else:
@@ -475,7 +482,7 @@ class CvvWorkshop:
                 if cv_list := self.cv_dict.get(cvv):
                     return choice(cv_list)
                 else:
-                    raise ValueError
+                    raise CantFindCvvError(f'no cvv has a {cv} attribute')
         if c and not v:
             if cvv_list := self.c_dict.get(c):
                 if exception:
@@ -485,7 +492,7 @@ class CvvWorkshop:
                             new_cvv_list.append(cv)
                     cvv_list = new_cvv_list
                 if not cvv_list:
-                    raise ValueError
+                    raise CantFindCvvError(f'no cvv has consonant of {c}')
                 return choice(cvv_list)
         if v and not c:
             if cvv_list := self.v_dict.get(v):
@@ -496,7 +503,7 @@ class CvvWorkshop:
                             new_cvv_list.append(cv)
                     cvv_list = new_cvv_list
                 if not cvv_list:
-                    raise ValueError
+                    raise CantFindCvvError(f'no cvv has vowel {v}')
                 return choice(cvv_list)
         if c and v:
             if cvv_list := self.c_dict.get(c):
@@ -504,15 +511,14 @@ class CvvWorkshop:
                     if cv.v == v:
                         return cv
                 else:
-                    raise ValueError
-        raise SyntaxError
+                    raise CantFindCvvError(f'no cvv has {c} and {v} at the same time')
+        raise ArgumentTypeError('invalid arguments are given')
 
     def find_next(self, vc: tuple[str, str], vc_max_v: str) -> Cvv:
         try:
-            next_cv = self.find_cvv(c=vc[1], v=vc_max_v)
-        except ValueError:
-            next_cv = self.find_cvv(c=vc[1])
-        return next_cv
+            return self.find_cvv(c=vc[1], v=vc_max_v)
+        except CantFindCvvError:
+            raise CantFindNextCvvError
 
     def read_redirect_config(self, redirect_config_dir) -> None:
         redirect_config = configparser.ConfigParser(allow_no_value=True)
@@ -558,12 +564,12 @@ class CvvWorkshop:
                     for redirect_consonant in redirect_consonant_dict[c]:
                         redirect_phoneme.append(f'{redirect_vowel} {redirect_consonant}')
                         
-        elif alias_type == AliasType.VR:
+        elif alias_type == AliasType.V:
             for redirect_vowel in self.redirect_vowel_dict.get(str(phoneme), []):
                 redirect_phoneme.append(f'{redirect_vowel} ')
                 
         else:
-            raise TypeError('Given wrong alias type!')
+            raise ArgumentTypeError('type of given alias is wrong')
         
         return redirect_phoneme
     

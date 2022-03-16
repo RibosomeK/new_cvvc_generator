@@ -1,3 +1,4 @@
+from cvvc_reclist_generator.errors import AliasTypeError
 from .cvv_dataclasses import Reclist, AliasType, AliasUnion, Vsdxmf, VsdxmfUnion, CvvWorkshop
 from typing import Iterable, Optional
     
@@ -46,8 +47,8 @@ class VsdxmfGenerator:
                     vcv_vsdxmf_list.append(vcv_vsdxmf)
                     alias.vcv.discard(vcv)'''
                 if (vr := row[2].v) in alias_union.vr:
-                    vr_vsdxmf = self._get_vs_oto(AliasType.VR, wav, vr, 2, bpm)
-                    self.vsdxmf_union[AliasType.VR].extend(vr_vsdxmf)
+                    vr_vsdxmf = self._get_vs_oto(AliasType.V, wav, vr, 2, bpm)
+                    self.vsdxmf_union[AliasType.V].extend(vr_vsdxmf)
                     alias_union.vr.discard(vr)
             else:
                 for idx, cvv in enumerate(row):
@@ -75,8 +76,8 @@ class VsdxmfGenerator:
                             vcv_vsdxmf_list.append(vsdxmf)
                             alias.vcv.discard(vcv)'''
                     if idx == len(row)-1 and (vr := row[idx].v) in alias_union.vr:
-                        vsdxmf = self._get_vs_oto(AliasType.VR, wav, vr, idx, bpm)
-                        self.vsdxmf_union[AliasType.VR].extend(vsdxmf)
+                        vsdxmf = self._get_vs_oto(AliasType.V, wav, vr, idx, bpm)
+                        self.vsdxmf_union[AliasType.V].extend(vsdxmf)
                         alias_union.vr.discard(vr)
                             
     def _get_vs_oto(self, alias_type: AliasType, wav: str, alias: str | tuple[str, str], position: int, bpm: float) -> list[Vsdxmf]:
@@ -100,7 +101,7 @@ class VsdxmfGenerator:
             consonant = 0.25*500*bpm_param + preutterance
             cutoff = consonant + 0.75*500*bpm_param
             overlap = offset + CONSONANT_VEL / 2
-        elif alias_type == AliasType.VR:
+        elif alias_type == AliasType.V:
             phoneme = f'{alias} '
             offset = beat + 500*bpm_param - OVL - VOWEL_VEL
             preutterance = offset + OVL + VOWEL_VEL
@@ -124,7 +125,7 @@ class VsdxmfGenerator:
             overlap = offset + OVL
             '''
         else:
-            raise TypeError
+            raise AliasTypeError
         vsdxmf = Vsdxmf(phoneme, wav, offset, preutterance, consonant, cutoff, overlap)
         vsdxmf_list.append(vsdxmf)
 

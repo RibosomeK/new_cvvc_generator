@@ -1,5 +1,6 @@
 from .cvv_dataclasses import Reclist, AliasType, AliasUnion, Oto, OtoUnion
 from typing import Iterable, Optional
+from .errors import AliasTypeError
 
 
 class OtoGenerator:
@@ -49,8 +50,8 @@ class OtoGenerator:
                     alias_union.vcv.discard(vcv)
                 if (vr := row[2].v) in alias_union.vr:
                     vr_alias = f'{vr} R'
-                    vr_oto = self._get_oto(AliasType.VR, wav, vr_alias, 2, bpm)
-                    self.oto_union[AliasType.VR].append(vr_oto)
+                    vr_oto = self._get_oto(AliasType.V, wav, vr_alias, 2, bpm)
+                    self.oto_union[AliasType.V].append(vr_oto)
                     alias_union.vr.discard(vr)
             else:
                 for idx, cvv in enumerate(row):
@@ -84,8 +85,8 @@ class OtoGenerator:
                             alias_union.vcv.discard(vcv)
                     if idx == len(row)-1 and (vr := row[idx].v) in alias_union.vr:
                         vr_alias = f'{vr} R'
-                        oto = self._get_oto(AliasType.VR, wav, vr_alias, idx, bpm)
-                        self.oto_union[AliasType.VR].append(oto)
+                        oto = self._get_oto(AliasType.V, wav, vr_alias, idx, bpm)
+                        self.oto_union[AliasType.V].append(oto)
                         alias_union.vr.discard(vr)
         alias_union = alias_union_backup.copy()
                         
@@ -118,7 +119,7 @@ class OtoGenerator:
             cutoff = -(beat + 0.75*500*bpm_param)
             preutterance = CONSONANT_VEL
             overlap = CONSONANT_VEL / 2
-        elif alias_type == AliasType.VR:
+        elif alias_type == AliasType.V:
             offset = beat + 500*bpm_param - OVL - VOWEL_VEL
             consonant = OVL + VOWEL_VEL + 100
             cutoff = -(consonant + 100)
@@ -139,7 +140,7 @@ class OtoGenerator:
             preutterance = OVL + VOWEL_VEL + CONSONANT_VEL
             overlap = OVL
         else:
-            raise TypeError
+            raise AliasTypeError('Given type of alias is invalid.')
             
         oto = Oto(wav, None, alias, None, offset, consonant, cutoff, preutterance, overlap)
         return oto

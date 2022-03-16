@@ -1,7 +1,6 @@
 from typing import Iterable, Optional
 from .cvv_dataclasses import Cvv, RecLine, Reclist, AliasUnion, CvvWorkshop
-        
-
+from .errors import CantFindNextCvvError, CantFindCvvError
     
 
 class ReclistGenerator:
@@ -23,9 +22,6 @@ class ReclistGenerator:
                 alias_union.vc.discard((cvv.v, cvv.c))
                 alias_union.vcv.discard((cvv.v, cvv.get_cv()))
                 alias_union.vr.discard(cvv.v)
-            else:
-                print(f"{cv}= has no match word.")
-                raise ValueError
             
         if alias_union.vcv:
             vcv_list = list(alias_union.vcv)
@@ -80,8 +76,7 @@ class ReclistGenerator:
                 alias_union.vc.discard((cv.v, cv.c))
                 alias_union.vr.discard(cv.v)
                 alias_union.vcv.discard((cv.v, cv.get_cv()))
-            else:
-                raise ValueError
+
         alias_union.cv.clear()
         alias_union.cv_head.clear()
         return alias_union
@@ -147,7 +142,7 @@ class ReclistGenerator:
                     alias_union.vc.discard((vcv[0], next_cv.c))
                     row.append(next_cv)
                     i += 1
-                except ValueError:
+                except CantFindNextCvvError:
                     if i <= length - 2:
                         vcv = alias_union.vcv.pop()
                         cv1 = self.cvv_workshop.find_cvv(v=vcv[0])
@@ -192,13 +187,13 @@ class ReclistGenerator:
                     vc = alias_union.vc.pop(v=row[-1].v)
                     row.append(self.cvv_workshop.find_next(vc, alias_union.vc.max_v[0]))
                     i += 1
-                except ValueError:
+                except CantFindNextCvvError:
                     if i <= length - 2:
                         vc = alias_union.vc.pop()
                         cv1 = self.cvv_workshop.find_cvv(v=vc[0])
                         try:
                             cv2 = self.cvv_workshop.find_cvv(c=vc[1], v=alias_union.vc.max_v[0])
-                        except ValueError:
+                        except CantFindCvvError:
                             cv2 = self.cvv_workshop.find_cvv(c=vc[1])
                         row.extend([cv1, cv2])
                         i += 2
@@ -250,7 +245,7 @@ class ReclistGenerator:
                         c_head = cvv
                         break
                 else:
-                    raise AttributeError
+                    raise CantFindCvvError(f'no cvv has consonant {c_head}')
                 row.extend((c_head, self.emptyCvv))
                 alias_union.vr.discard(c_head.v)
             if row[-1] == self.emptyCvv:

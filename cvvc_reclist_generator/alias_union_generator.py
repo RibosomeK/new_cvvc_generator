@@ -1,6 +1,8 @@
 import configparser
+import re
 from typing import Optional
-from .cvv_dataclasses import CvvWorkshop, VcSet, AliasUnion
+from .cvv_dataclasses import AliasType, CvvWorkshop, VcSet, AliasUnion
+from .errors import AliasConfigTypeError, AliasNotExistError, AliasTypeError, CantFindCvvError
 
 
 class AliasUnionGenerator:
@@ -66,11 +68,13 @@ class AliasUnionGenerator:
         unneeded, needed = AliasUnion(), AliasUnion()
         config = configparser.ConfigParser()
         config.read(alias_config, encoding="utf-8")
-        for key, value in config["UNNEEDED"].items():
-            if not value or value.upper() == "NONE":
-                continue
-            if key == "cv_head" or key == "cv":
-                for cv in value.split(","):
+        for alias_type, alias_str in config["UNNEEDED"].items():
+            if not alias_str or alias_str.upper() == "NONE":
+                continue 
+            alias_pack = self.split_type_and_alias(alias_str)
+            if alias_type == "cv_head" or alias_type == "cv":
+                
+                for cv in alias_str.split(","):
                     if self.cvv_workshop.find_cvv(cvv=cv):
                         unneeded.__dict__[cv].add(cv)
                     elif cv in self.cvv_workshop.c_dict:
@@ -79,8 +83,8 @@ class AliasUnionGenerator:
                         )
                     else:
                         raise ValueError
-            elif key == "vc":
-                for vc in value.split(","):
+            elif alias_type == "vc":
+                for vc in alias_str.split(","):
                     if vc in self.cvv_workshop.c_dict:
                         unneeded.vc.update((v, vc) for v in self.cvv_workshop.v_dict)
                     if vc in self.cvv_workshop.v_dict:
@@ -89,12 +93,12 @@ class AliasUnionGenerator:
                         unneeded.vc.add(tuple(vc.split(" ")))
                     else:
                         raise ValueError
-            elif key == "vr":
-                unneeded.vr.update(value.split(","))
-            elif key == "c_head":
-                unneeded.c_head.update(value.split(","))
-            elif key == "vcv":
-                for vcv in value.split(","):
+            elif alias_type == "vr":
+                unneeded.vr.update(alias_str.split(","))
+            elif alias_type == "c_head":
+                unneeded.c_head.update(alias_str.split(","))
+            elif alias_type == "vcv":
+                for vcv in alias_str.split(","):
                     if vcv in self.cvv_workshop.c_dict:
                         unneeded.vcv.update(
                             (v, cvv.get_cv())
@@ -131,3 +135,77 @@ class AliasUnionGenerator:
                 elif " " in vcv:
                     needed.vcv.add(tuple(vcv.split(" ")))
         return unneeded, needed
+
+    def split_type_and_alias(self, alias_str: str) -> list[tuple[AliasType, list[str]]]:
+        """spliting string like 'c: c1, c2...; cv: cv1, cv2...' into
+        [(AliasType.C, [c1, c2, ...]),
+         (AliasType.CV, [cv1, cv2, ...])
+
+        """
+        alias_pack = []
+        type_: AliasType
+        type_sections = re.split(r' *; *', alias_str)
+        
+        for section in type_sections:
+            alias_type, alias = re.split(r' *: *', section)
+            match alias_type.upper():
+                case 'C':
+                    type_ = AliasType.C
+                case 'CV':
+                    type_ = AliasType.CV    
+                case 'V':
+                    type_ = AliasType.V
+                case 'VC':
+                    type_ = AliasType.VC
+                case 'VCV':
+                    type_ = AliasType.VCV
+                case _:
+                    raise AliasConfigTypeError(f'wrong alias type {alias_type}')
+            alias_pack.append((type_, re.split(r' *, *', alias)))
+        
+        return alias_pack
+    
+    def get_c_alias(self, alias_pack: list[tuple[AliasType, list[str]]]) -> set[str]:
+        """return a consonant set from alias pack"""
+        
+        c_set = set()
+        for type_, alias_list in alias_pack:
+            if type_ != AliasType.C:
+                raise AliasTypeError(f'{type_} does not exist')
+            for alias in alias_list:
+                if alias not in self.cvv_workshop.c_dict:
+                    raise AliasNotExistError(f'{alias} does not exist in given config')
+                c_set.add(alias)
+        return c_set
+    
+    def get_cv_alias(self, alias_pack: list[tuple[AliasType, list[str]]]) -> set[str]:
+        """return a cv set from given alias pack"""
+        
+        cv_set = set()
+        for type_, alias_list in alias_pack:
+            if type_ == AliasType.C:
+                for alias in alias_list:
+                    try:
+                        cvv = self.cvv_workshop.find_cvv(c=alias)
+                        cv_set.add(cvv.get_cv())
+                    except CantFindCvvError:
+                        raise AliasNotExistError(f'no cvv has consonant {alias}')
+            elif type_ == AliasType.CV:
+                for alias in alias_list:
+                    if (alias not in self.cvv_workshop.cvv_dict and 
+                        alias not in self.cvv_workshop.cv_dict):
+                        raise AliasNotExistError(f'word {alias} does not exist')
+                    cv_set.add(alias)
+            else:
+                raise AliasTypeError(f'{type_} does not exist')
+        return cv_set
+    
+    def get_vc_alias(self, alias_pack: list[tuple[AliasType, list[str]]]) -> set[tuple[str, str]]:
+        """return a vc set from given alias pack"""
+        
+        vc_set = set()
+        for type_, alias_list in alias_pack:
+            if type_ == AliasType.C:
+                pass
+        
+        return vc_set
