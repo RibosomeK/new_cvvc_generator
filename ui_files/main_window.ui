@@ -504,7 +504,15 @@
     </widget>
     <addaction name="menuLanguage"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="undo_action"/>
+    <addaction name="redo_action"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuSetting"/>
   </widget>
   <action name="load_action">
@@ -552,6 +560,22 @@
   <action name="set_japanese_action">
    <property name="text">
     <string>日本語</string>
+   </property>
+  </action>
+  <action name="undo_action">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="redo_action">
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
    </property>
   </action>
  </widget>

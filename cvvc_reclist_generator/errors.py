@@ -34,3 +34,7 @@ class AliasTypeError(Exception):
     
 class AliasNotExistError(Exception):
     """alias does not exist in given dict config"""
+    
+    
+class PopError(Exception):
+    """no qualified vc in set"""
