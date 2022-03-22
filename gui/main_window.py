@@ -167,63 +167,36 @@ class Ui_MainWindow(object):
 
         self.reclist_detail_layout.addWidget(self.reclist_detail_label)
 
-        self.reclist_detail_layout_a = QVBoxLayout()
-        self.reclist_detail_layout_a.setObjectName(u"reclist_detail_layout_a")
-        self.reclist_detail_layout_a1 = QHBoxLayout()
-        self.reclist_detail_layout_a1.setObjectName(u"reclist_detail_layout_a1")
         self.length_spinBox = QSpinBox(self.centralwidget)
         self.length_spinBox.setObjectName(u"length_spinBox")
         self.length_spinBox.setMinimum(3)
         self.length_spinBox.setMaximum(100)
 
-        self.reclist_detail_layout_a1.addWidget(self.length_spinBox)
+        self.reclist_detail_layout.addWidget(self.length_spinBox)
 
         self.length_label = QLabel(self.centralwidget)
         self.length_label.setObjectName(u"length_label")
 
-        self.reclist_detail_layout_a1.addWidget(self.length_label)
+        self.reclist_detail_layout.addWidget(self.length_label)
 
         self.cv_head_checkBox = QCheckBox(self.centralwidget)
         self.cv_head_checkBox.setObjectName(u"cv_head_checkBox")
         self.cv_head_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
 
-        self.reclist_detail_layout_a1.addWidget(self.cv_head_checkBox)
+        self.reclist_detail_layout.addWidget(self.cv_head_checkBox)
 
         self.full_cv_checkBox = QCheckBox(self.centralwidget)
         self.full_cv_checkBox.setObjectName(u"full_cv_checkBox")
         self.full_cv_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
         self.full_cv_checkBox.setChecked(True)
 
-        self.reclist_detail_layout_a1.addWidget(self.full_cv_checkBox)
+        self.reclist_detail_layout.addWidget(self.full_cv_checkBox)
 
         self.c_head_checkBox = QCheckBox(self.centralwidget)
         self.c_head_checkBox.setObjectName(u"c_head_checkBox")
         self.c_head_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
 
-        self.reclist_detail_layout_a1.addWidget(self.c_head_checkBox)
-
-
-        self.reclist_detail_layout_a.addLayout(self.reclist_detail_layout_a1)
-
-        self.reclist_detail_layout_a2 = QHBoxLayout()
-        self.reclist_detail_layout_a2.setObjectName(u"reclist_detail_layout_a2")
-        self.cv_mid_label = QLabel(self.centralwidget)
-        self.cv_mid_label.setObjectName(u"cv_mid_label")
-        self.cv_mid_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.reclist_detail_layout_a2.addWidget(self.cv_mid_label)
-
-        self.cv_mid_lineEdit = QLineEdit(self.centralwidget)
-        self.cv_mid_lineEdit.setObjectName(u"cv_mid_lineEdit")
-        self.cv_mid_lineEdit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.reclist_detail_layout_a2.addWidget(self.cv_mid_lineEdit)
-
-
-        self.reclist_detail_layout_a.addLayout(self.reclist_detail_layout_a2)
-
-
-        self.reclist_detail_layout.addLayout(self.reclist_detail_layout_a)
+        self.reclist_detail_layout.addWidget(self.c_head_checkBox)
 
 
         self.overall_layout.addLayout(self.reclist_detail_layout)
@@ -424,7 +397,6 @@ class Ui_MainWindow(object):
         self.cv_head_checkBox.setText(QMainWindow.tr(u"CV head", None))
         self.full_cv_checkBox.setText(QMainWindow.tr(u"Full CV", None))
         self.c_head_checkBox.setText(QMainWindow.tr(u"C head", None))
-        self.cv_mid_label.setText(QMainWindow.tr(u"CV mid", None))
         self.labeling_style_label.setText(QMainWindow.tr(u"Labeling style: ", None))
         self.bpm_label.setText(QMainWindow.tr(u"bpm", None))
         self.blank_beat_label.setText(QMainWindow.tr(u"blank beat", None))

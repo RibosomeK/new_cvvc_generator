@@ -15,15 +15,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout, QPushButton,
-    QSizePolicy, QTabWidget, QTextEdit, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout, QLabel,
+    QPushButton, QSizePolicy, QTabWidget, QTextEdit,
+    QVBoxLayout, QWidget)
 
 class Ui_PreviewDialog(object):
     def setupUi(self, PreviewDialog):
         if not PreviewDialog.objectName():
             PreviewDialog.setObjectName(u"PreviewDialog")
-        PreviewDialog.resize(592, 275)
+        PreviewDialog.resize(592, 310)
         PreviewDialog.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
         self.verticalLayout = QVBoxLayout(PreviewDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -40,6 +40,11 @@ class Ui_PreviewDialog(object):
 
         self.verticalLayout_3.addWidget(self.reclist_textEdit)
 
+        self.reclist_number_label = QLabel(self.reclist_tab)
+        self.reclist_number_label.setObjectName(u"reclist_number_label")
+
+        self.verticalLayout_3.addWidget(self.reclist_number_label)
+
         self.preview_tab.addTab(self.reclist_tab, "")
         self.oto_tab = QWidget()
         self.oto_tab.setObjectName(u"oto_tab")
@@ -50,6 +55,11 @@ class Ui_PreviewDialog(object):
         self.oto_textEdit.setReadOnly(True)
 
         self.verticalLayout_4.addWidget(self.oto_textEdit)
+
+        self.oto_number_label = QLabel(self.oto_tab)
+        self.oto_number_label.setObjectName(u"oto_number_label")
+
+        self.verticalLayout_4.addWidget(self.oto_number_label)
 
         self.preview_tab.addTab(self.oto_tab, "")
         self.presamp_tab = QWidget()
@@ -72,6 +82,11 @@ class Ui_PreviewDialog(object):
         self.vsdxmf_textEdit.setReadOnly(True)
 
         self.verticalLayout_6.addWidget(self.vsdxmf_textEdit)
+
+        self.vsdxmf_number_label = QLabel(self.vsdxmf_tab)
+        self.vsdxmf_number_label.setObjectName(u"vsdxmf_number_label")
+
+        self.verticalLayout_6.addWidget(self.vsdxmf_number_label)
 
         self.preview_tab.addTab(self.vsdxmf_tab, "")
         self.lsd_tab = QWidget()
@@ -116,9 +131,12 @@ class Ui_PreviewDialog(object):
 
     def retranslateUi(self, PreviewDialog):
         PreviewDialog.setWindowTitle(QDialog.tr(u"Preview", None))
+        self.reclist_number_label.setText(QDialog.tr(u"total lines: ", None))
         self.preview_tab.setTabText(self.preview_tab.indexOf(self.reclist_tab), QDialog.tr(u"reclist", None))
+        self.oto_number_label.setText(QDialog.tr(u"total lines: ", None))
         self.preview_tab.setTabText(self.preview_tab.indexOf(self.oto_tab), QDialog.tr(u"oto", None))
         self.preview_tab.setTabText(self.preview_tab.indexOf(self.presamp_tab), QDialog.tr(u"presamp", None))
+        self.vsdxmf_number_label.setText(QDialog.tr(u"total lines: ", None))
         self.preview_tab.setTabText(self.preview_tab.indexOf(self.vsdxmf_tab), QDialog.tr(u"vsdxmf", None))
         self.preview_tab.setTabText(self.preview_tab.indexOf(self.lsd_tab), QDialog.tr(u"lsd", None))
         self.cancel_button.setText(QDialog.tr(u"Cancel", None))

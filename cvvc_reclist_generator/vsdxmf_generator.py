@@ -23,7 +23,6 @@ class VsdxmfGenerator:
         alias_union: AliasUnion,
         bpm: float,
         is_full_cv: bool = False,
-        cv_mid: Optional[Iterable[str]] = None,
     ) -> None:
         """Generate vsdxmf for vocalsharp.
 
@@ -34,7 +33,6 @@ class VsdxmfGenerator:
             cv_mid (Set[str], optional): [description]. Defaults to None.
             redirect_config_dir (Optional[str], optional): [description]. Defaults to None.
         """
-        cv_mid = cv_mid if cv_mid else set()
 
         for row in reclist:
             wav = f"{row}.wav"
@@ -74,7 +72,7 @@ class VsdxmfGenerator:
                             self.vsdxmf_union[AliasType.C].extend(vsdxmf)
                             alias_union.c_head.discard(c)
                         cv = cvv.get_cv(is_full_cv)
-                        if cv in alias_union.cv and cv not in cv_mid and cvv.c != cvv.v:
+                        if cv in alias_union.cv and cv not in alias_union.cv_mid and cvv.c != cvv.v:
                             vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv, idx, bpm)
                             self.vsdxmf_union[AliasType.CV].extend(vsdxmf)
                             alias_union.cv_head.discard(cv)

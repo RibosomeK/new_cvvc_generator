@@ -184,6 +184,7 @@ class AliasUnion:
     vc: VcSet = field(default_factory=VcSet)
     vr: set[str] = field(default_factory=set)
     vcv: VcSet = field(default_factory=VcSet)
+    cv_mid: set[str] = field(default_factory=set)
 
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -213,7 +214,7 @@ class AliasUnion:
 
     def add(self, other: "AliasUnion") -> None:
         for key, value in other.__dict__.items():
-            self.__dict__[key].__or__(value)
+            self.__dict__[key].update(value)
 
     def discard(self, other: "AliasUnion") -> None:
         for key, value in other.__dict__.items():

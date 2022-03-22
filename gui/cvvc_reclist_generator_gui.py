@@ -160,7 +160,6 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             is_full_cv=self.full_cv_checkBox.isChecked(),
             is_cv_head=self.cv_head_checkBox.isChecked(),
             is_c_head=self.c_head_checkBox.isChecked(),
-            cv_mid=self.cv_mid_lineEdit.text(),
             bpm=self.bpm_spinBox.value(),
             blank_beat=self.blank_beat_spinBox.value(),
             do_save_reclist=self.reclist_checkBox.isChecked(),
@@ -204,7 +203,6 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             is_full_cv=config["PARAMETERS"].getboolean("is_full_cv"),
             is_cv_head=config["PARAMETERS"].getboolean("is_cv_head"),
             is_c_head=config["PARAMETERS"].getboolean("is_c_head"),
-            cv_mid=config["PARAMETERS"]["cv_mid"],
             bpm=config["PARAMETERS"].getint("bpm"),
             blank_beat=config["PARAMETERS"].getint("blank_beat"),
             do_save_reclist=config["PARAMETERS"].getboolean("do_save_reclist"),
@@ -229,7 +227,6 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         self.full_cv_checkBox.setChecked(parameters.is_full_cv)
         self.cv_head_checkBox.setChecked(parameters.is_cv_head)
         self.c_head_checkBox.setChecked(parameters.is_c_head)
-        self.cv_mid_lineEdit.setText(parameters.cv_mid)
 
         self.bpm_spinBox.setValue(parameters.bpm)
         self.blank_beat_spinBox.setValue(parameters.blank_beat)

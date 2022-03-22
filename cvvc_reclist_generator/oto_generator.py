@@ -15,7 +15,6 @@ class OtoGenerator:
         alias_union: AliasUnion,
         bpm: float,
         is_full_cv: bool = True,
-        cv_mid: Optional[Iterable[str]] = None,
     ) -> None:
         """generate oto from reclist according to needed alias
 
@@ -24,10 +23,7 @@ class OtoGenerator:
             alias_union (AliasUnion): needed alias
             bpm (float): bpm of the recording BGM
             is_full_cv (bool, optional): wheather use full cv in oto. Defaults to True.
-            cv_mid (set[str], optional): wheather to use beginning cv as a middle cv. Defaults to None.
         """
-        alias_union_backup = alias_union.copy()
-        cv_mid = cv_mid if cv_mid else set()
         for row in reclist:
             wav = f"{row}.wav"
             if len(row) == 3 and row[0] == row[1] == row[2]:
@@ -79,7 +75,7 @@ class OtoGenerator:
                             )
                             self.oto_union[AliasType.CV].append(oto)
                             alias_union.cv_head.discard(cv)
-                        if cv in alias_union.cv and cv not in cv_mid:
+                        if cv in alias_union.cv and cv not in alias_union.cv_mid:
                             oto = self._get_oto(AliasType.CV, wav, cv, idx, bpm)
                             self.oto_union[AliasType.CV].append(oto)
                             alias_union.cv_head.discard(cv)
@@ -101,7 +97,6 @@ class OtoGenerator:
                         oto = self._get_oto(AliasType.V, wav, vr_alias, idx, bpm)
                         self.oto_union[AliasType.V].append(oto)
                         alias_union.vr.discard(vr)
-        alias_union = alias_union_backup.copy()
 
     def _get_oto(
         self,

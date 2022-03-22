@@ -23,9 +23,7 @@ def main():
     alias_union_backup = alias_union.copy()
 
     generator = ReclistGenerator(cvv_workshop)
-    generator.gen_mora_x(
-        alias_union=generator.gen_plan_b(alias_union), length=8, cv_mid=None
-    )
+    generator.gen_mora_x(alias_union=generator.gen_plan_b(alias_union), length=8)
     reclist = generator.reclist
 
     reclist_checker = ReclistChecker(

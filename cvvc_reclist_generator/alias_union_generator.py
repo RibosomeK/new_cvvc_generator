@@ -106,6 +106,16 @@ class AliasUnionGenerator:
         elif vcv_value.upper() != "NONE":
             alias_pack = self.split_type_and_alias(vcv_value)
             needed.vcv.update(self.get_vcv_alias(alias_pack, is_full_cv))
+
+        cv_mid_value = config["NEEDED"]["cv_mid"]
+        if cv_mid_value.upper() == "ALL":
+            needed.cv_mid.update(
+                cv.get_cv(is_full_cv) for cv in self.cvv_workshop.cvv_set
+            )
+        elif cv_mid_value.upper() != "NONE":
+            alias_pack = self.split_type_and_alias(cv_mid_value)
+            needed.cv_mid.update(self.get_cv_alias(alias_pack, is_full_cv))
+
         return unneeded, needed
 
     def split_type_and_alias(self, alias_str: str) -> list[tuple[AliasType, list[str]]]:
@@ -149,6 +159,16 @@ class AliasUnionGenerator:
                     raise AliasNotExistError(f"{alias} does not exist in given config")
                 c_set.add(alias)
         return c_set
+    
+    def get_cv_from_c(self, c_list: list[str], is_full_cv: bool=True) -> set[str]:
+        cv_set = set()
+        for c in c_list:
+            if c not in self.cvv_workshop.c_dict:
+                raise AliasNotExistError(f'consonant {c} does not exist')
+            cv_set.update(
+                cv.get_cv(is_full_cv) for cv in self.cvv_workshop.c_dict[c]
+            )
+        return cv_set
 
     def get_cv_alias(
         self, alias_pack: list[tuple[AliasType, list[str]]], is_full_cv: bool = True
@@ -158,12 +178,8 @@ class AliasUnionGenerator:
         cv_set = set()
         for type_, alias_list in alias_pack:
             if type_ == AliasType.C:
-                for alias in alias_list:
-                    try:
-                        cvv = self.cvv_workshop.find_cvv(c=alias)
-                        cv_set.add(cvv.get_cv(is_full_cv))
-                    except CantFindCvvError:
-                        raise AliasNotExistError(f"no cvv has consonant {alias}")
+                cv_set.update(self.get_cv_from_c(alias_list, is_full_cv))
+
             elif type_ == AliasType.CV:
                 for alias in alias_list:
                     if (

@@ -48,13 +48,13 @@ class ReclistChecker:
         cv_head_log = ", ".join(cv_set) if cv_set else "None"
         return cv_head_log
 
-    def check_cv_integrity(
-        self, cv_set: set[str], cv_mid: Optional[set[str]] = None
-    ) -> str:
-        cv_mid = cv_mid if cv_mid else set()
+    def check_cv_integrity(self, cv_set: set[str]) -> str:
         for row in self.reclist:
             for idx, cvv in enumerate(row):
-                if idx == 0 and (cvv.cv in cv_mid or cvv.cvv in cv_mid):
+                if idx == 0 and (
+                    cvv.cv in self.alias_union.cv_mid
+                    or cvv.cvv in self.alias_union.cv_mid
+                ):
                     continue
                 cv_set.discard(cvv.cvv)
                 cv_set.discard(cvv.cv)

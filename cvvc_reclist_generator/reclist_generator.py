@@ -85,7 +85,6 @@ class ReclistGenerator:
         self,
         alias_union: AliasUnion,
         length: int,
-        cv_mid: Optional[Iterable[str]] = None,
     ) -> None:
         """Generate given x length long pre row of reclist.
 
@@ -99,36 +98,39 @@ class ReclistGenerator:
 
         Returns: None
         """
-        cv_mid = cv_mid if cv_mid else set()
 
         cv_list = sorted(alias_union.cv, reverse=True)
+        row: list[Cvv] = []
         while cv_list:
-            row: list[Cvv] = []
-            cv_mid_switch = False
-            for i in range(length):
-                if not cv_list:
-                    break
-                if cv_mid_switch:
-                    continue
-                cv = self.cvv_workshop.find_cvv(cvv=cv_list.pop())
-                row.append(cv)
-                if i == 0:
-                    alias_union.c_head.discard(cv.get_lsd_c())
-                    alias_union.cv_head.discard(cv.cvv)
-                    alias_union.cv_head.discard(cv.cv)
-                    if (cv.cvv in cv_mid) or (cv.cv in cv_mid):
-                        row.append(cv)
-                        cv_mid_switch = not cv_mid_switch
-                elif i < length - 1:
-                    alias_union.vc.discard((row[i - 1].v, cv.c))
-                    alias_union.vcv.discard((row[i - 1].v, cv.get_cv()))
+            
+            cv = cv_list.pop()
+            cvv = self.cvv_workshop.find_cvv(cvv=cv)
+            if len(row) == 0:
+                if cv in alias_union.cv_mid:
+                    row.extend((cvv, cvv))
+                    alias_union.vc.discard((cvv.v, cvv.c))
+                    alias_union.vcv.discard((cvv.v, cvv.get_cv()))
                 else:
-                    alias_union.vr.discard(cv.v)
+                    row.append(cvv)
+                alias_union.cv_head.discard(cvv.get_cv())
+            elif len(row) < length:
+                pre_cvv = row[-1]
+                row.append(cvv)
+                alias_union.vc.discard((pre_cvv.v, cvv.c))
+                alias_union.vcv.discard((pre_cvv.v, cvv.get_cv()))
+                
+            if len(row) == length:
+                self.reclist.append(RecLine(*row))
+                alias_union.vr.discard(cvv.v)
+                row.clear()
+                
+        if row:
             self.reclist.append(RecLine(*row))
-        alias_union.cv.clear()
+            alias_union.vr.discard(row[-1].v)
+            row.clear()
+                    
 
         # complete vcv part
-        row: list[Cvv] = []
         i = 0
         while True:
             if not alias_union.vcv:
@@ -184,8 +186,10 @@ class ReclistGenerator:
                 current_vc = alias_union.vc.pop(v=current_v)
                 row.append(current_cv)
                 try:
-                    
-                    next_cv = self.cvv_workshop.find_next(current_vc, alias_union.vc.max_v[0])
+
+                    next_cv = self.cvv_workshop.find_next(
+                        current_vc, alias_union.vc.max_v[0]
+                    )
                 except CantFindNextCvvError:
                     next_cv = self.cvv_workshop.find_cvv(c=current_vc[1])
                 row.append(next_cv)
@@ -194,7 +198,9 @@ class ReclistGenerator:
                 try:
                     vc = alias_union.vc.pop(v=row[-1].v)
                     try:
-                        row.append(self.cvv_workshop.find_next(vc, alias_union.vc.max_v[0]))
+                        row.append(
+                            self.cvv_workshop.find_next(vc, alias_union.vc.max_v[0])
+                        )
                     except CantFindNextCvvError:
                         row.append(self.cvv_workshop.find_cvv(c=vc[1]))
                     i += 1

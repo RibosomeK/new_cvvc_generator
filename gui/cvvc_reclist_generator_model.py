@@ -25,7 +25,6 @@ class Parameters:
     is_full_cv: bool
     is_cv_head: bool
     is_c_head: bool
-    cv_mid: str
 
     bpm: float
     blank_beat: int
@@ -64,11 +63,6 @@ class CvvcReclistGeneratorModel:
             alias_config,
         )
 
-        if parameters.cv_mid:
-            cv_mid = re.split(r"[;,\s]\s*", parameters.cv_mid)
-        else:
-            cv_mid = None
-
         self.reclist_generator = ReclistGenerator(self.cvv_workshop)
         if parameters.is_haru_style:
             rest_alias = self.reclist_generator.gen_plan_b(alias_union.copy())
@@ -77,7 +71,7 @@ class CvvcReclistGeneratorModel:
         if parameters.is_two_mora:
             self.reclist_generator.gen_2mora(rest_alias)
         elif parameters.is_mora_x or parameters.length:
-            self.reclist_generator.gen_mora_x(rest_alias, parameters.length, cv_mid)
+            self.reclist_generator.gen_mora_x(rest_alias, parameters.length)
 
         self.oto_generator = OtoGenerator()
         if parameters.do_save_oto:
@@ -86,7 +80,6 @@ class CvvcReclistGeneratorModel:
                 alias_union.copy(),
                 parameters.bpm,
                 parameters.is_full_cv,
-                cv_mid,
             )
 
         self.vsdxmf_generator = VsdxmfGenerator(self.cvv_workshop)
@@ -96,7 +89,6 @@ class CvvcReclistGeneratorModel:
                 alias_union.copy(),
                 parameters.bpm,
                 parameters.is_full_cv,
-                cv_mid,
             )
 
     def get_reclist_str(self) -> str | None:
