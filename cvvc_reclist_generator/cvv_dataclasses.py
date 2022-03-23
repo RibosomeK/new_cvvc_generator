@@ -234,11 +234,14 @@ class RecLine(tuple[Cvv, ...]):
                 line: str = split_symbol + split_symbol.join(str(e) for e in self)
         else:
             line: str = split_symbol.join(str(e) for e in self)
+            
+        # replace R and japanease characters
+        sub_str = f'{split_symbol}R{split_symbol}'
+        sub_line = re.sub("[\u30a0-\u30ff\u3040-\u309f]", '', line)
+        sub_line = re.sub(f"{sub_str}", '', sub_line)
 
-        if not line.islower():
-            if line.lower().islower():
-                if re.sub(r"_R_?", "", line).lower().islower():
-                    return f"{line}_UpperCase"
+        if not sub_line.islower():
+            return f"{line}_UpperCase"
         return line
 
 

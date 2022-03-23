@@ -29,7 +29,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         self.preview_button.clicked.connect(self.pop_preview_dialog)
 
         self.export_action.triggered.connect(self.export_parameters_config)
-        self.export_as_action.triggered.connect(self.export_parameters_config)
+        self.export_as_action.triggered.connect(self.export_parameters_as_config)
         self.load_action.triggered.connect(self.load_parameters_config)
 
         self.undo_action.triggered.connect(self.undo_stack.undo)
@@ -183,6 +183,27 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             )[0]
         else:
             config_path = self.parameters_config_path
+            
+        config_name = config_path.split("/")[-1]
+        self.setWindowTitle(f"{self.windowTitle()} - {config_name}")
+
+        if config_path:
+            with open(config_path, mode="w", encoding="utf-8") as f:
+                config.write(f)
+                
+    def export_parameters_as_config(self) -> None:
+        config = configparser.ConfigParser()
+        config["PARAMETERS"] = self.get_parameters().__dict__
+
+        config_path = QFileDialog.getSaveFileName(
+                self,
+                self.tr("Select a save path"),
+                "./config.ini",
+                self.tr("Config file (*.ini)"),
+        )[0]
+        
+        config_name = config_path.split("/")[-1]
+        self.setWindowTitle(f"{self.windowTitle()} - {config_name}")
 
         if config_path:
             with open(config_path, mode="w", encoding="utf-8") as f:
