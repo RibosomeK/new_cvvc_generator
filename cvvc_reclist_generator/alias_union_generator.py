@@ -5,8 +5,7 @@ from .cvv_dataclasses import AliasType, CvvWorkshop, VcSet, AliasUnion
 from .errors import (
     AliasConfigTypeError,
     AliasNotExistError,
-    AliasTypeError,
-    CantFindCvvError,
+    AliasTypeError
 )
 
 
@@ -15,6 +14,7 @@ class AliasUnionGenerator:
 
     def __init__(self, cvv_workshop: CvvWorkshop) -> None:
         self.cvv_workshop = cvv_workshop
+        self.is_full_cv = True
 
     def get_needed_alias(
         self,
@@ -37,6 +37,8 @@ class AliasUnionGenerator:
             AliasUnion
         """
         alias_union = AliasUnion()
+        self.is_full_cv = is_full_cv
+
         if is_c_head:
             alias_union.c_head = {
                 x.get_lsd_c() for x in self.cvv_workshop.cvv_set if x.v != x.get_lsd_c()
@@ -51,8 +53,8 @@ class AliasUnionGenerator:
         alias_union.vr = {v for v in self.cvv_workshop.v_dict}
         if alias_config:
             unneeded, needed = self.read_alias_config(alias_config)
-            alias_union.add(needed)
-            alias_union.discard(unneeded)
+            alias_union.update(needed)
+            alias_union.difference_update(unneeded)
         if alias_union.vcv:
             alias_union.vcv = alias_union.vcv - alias_union.vc
         self.alias = alias_union
@@ -159,15 +161,13 @@ class AliasUnionGenerator:
                     raise AliasNotExistError(f"{alias} does not exist in given config")
                 c_set.add(alias)
         return c_set
-    
-    def get_cv_from_c(self, c_list: list[str], is_full_cv: bool=True) -> set[str]:
+
+    def get_cv_from_c(self, c_list: list[str], is_full_cv: bool = True) -> set[str]:
         cv_set = set()
         for c in c_list:
             if c not in self.cvv_workshop.c_dict:
-                raise AliasNotExistError(f'consonant {c} does not exist')
-            cv_set.update(
-                cv.get_cv(is_full_cv) for cv in self.cvv_workshop.c_dict[c]
-            )
+                raise AliasNotExistError(f"consonant {c} does not exist")
+            cv_set.update(cv.get_cv(is_full_cv) for cv in self.cvv_workshop.c_dict[c])
         return cv_set
 
     def get_cv_alias(

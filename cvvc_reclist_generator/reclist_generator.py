@@ -1,4 +1,3 @@
-from typing import Iterable, Optional
 from .cvv_dataclasses import Cvv, RecLine, Reclist, AliasUnion, CvvWorkshop
 from .errors import CantFindNextCvvError, CantFindCvvError, PopError
 
@@ -9,7 +8,7 @@ class ReclistGenerator:
     def __init__(self, cvv_workshop: CvvWorkshop) -> None:
         self.cvv_workshop = cvv_workshop
         self.reclist = Reclist()
-        self.emptyCvv = Cvv.new()
+        self.EMPTY_CVV = Cvv.new()
 
     def gen_2mora(self, alias_union: AliasUnion) -> None:
         cv_list = list(alias_union.cv | alias_union.cv_head)
@@ -46,7 +45,7 @@ class ReclistGenerator:
                 c_head = c_head_list.pop()
                 c_head = Cvv.new(("", "", "", c_head))
                 if len(row) < 3:
-                    row.extend([c_head, self.emptyCvv])
+                    row.extend([c_head, self.EMPTY_CVV])
                 else:
                     self.reclist.append(RecLine(*row))
                     row.clear()
@@ -59,7 +58,7 @@ class ReclistGenerator:
                 vr = vr_list.pop()
                 vr = Cvv.new(("", "", vr))
                 if len(row) < 3:
-                    row.extend([vr, self.emptyCvv])
+                    row.extend([vr, self.EMPTY_CVV])
                 else:
                     self.reclist.append(RecLine(*row))
                     row.clear()
@@ -102,7 +101,7 @@ class ReclistGenerator:
         cv_list = sorted(alias_union.cv, reverse=True)
         row: list[Cvv] = []
         while cv_list:
-            
+
             cv = cv_list.pop()
             cvv = self.cvv_workshop.find_cvv(cvv=cv)
             if len(row) == 0:
@@ -118,17 +117,18 @@ class ReclistGenerator:
                 row.append(cvv)
                 alias_union.vc.discard((pre_cvv.v, cvv.c))
                 alias_union.vcv.discard((pre_cvv.v, cvv.get_cv()))
-                
+
             if len(row) == length:
                 self.reclist.append(RecLine(*row))
                 alias_union.vr.discard(cvv.v)
                 row.clear()
-                
+
         if row:
             self.reclist.append(RecLine(*row))
             alias_union.vr.discard(row[-1].v)
             row.clear()
-                    
+
+        alias_union.cv.clear()
 
         # complete vcv part
         i = 0
@@ -244,8 +244,8 @@ class ReclistGenerator:
                 row.append(self.cvv_workshop.find_cvv(cvv=cv_head_list.pop()))
                 alias_union.vr.discard(row[-1].v)
                 alias_union.c_head.discard(row[-1].get_lsd_c())
-                row.append(self.emptyCvv)
-            if row[-1] == self.emptyCvv:
+                row.append(self.EMPTY_CVV)
+            if row[-1] == self.EMPTY_CVV:
                 row.pop()
             self.reclist.append(RecLine(*row))
             row: list[Cvv] = []
@@ -265,9 +265,9 @@ class ReclistGenerator:
                         break
                 else:
                     raise CantFindCvvError(f"no cvv has consonant {c_head}")
-                row.extend((c_head, self.emptyCvv))
+                row.extend((c_head, self.EMPTY_CVV))
                 alias_union.vr.discard(c_head.v)
-            if row[-1] == self.emptyCvv:
+            if row[-1] == self.EMPTY_CVV:
                 row.pop()
             self.reclist.append(RecLine(*row))
             row.clear()
@@ -281,8 +281,8 @@ class ReclistGenerator:
                 if not vr_list:
                     break
                 row.append(self.cvv_workshop.find_cvv(v=vr_list.pop()))
-                row.append(self.emptyCvv)
-            if row[-1] == self.emptyCvv:
+                row.append(self.EMPTY_CVV)
+            if row[-1] == self.EMPTY_CVV:
                 row.pop()
             self.reclist.append(RecLine(*row))
             row: list[Cvv] = []

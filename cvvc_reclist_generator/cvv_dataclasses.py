@@ -176,49 +176,111 @@ class VcSet(set[tuple[str, str]]):
         return new_vc_set
 
 
-@dataclass
 class AliasUnion:
-    c_head: set[str] = field(default_factory=set)
-    cv_head: set[str] = field(default_factory=set)
-    cv: set[str] = field(default_factory=set)
-    vc: VcSet = field(default_factory=VcSet)
-    vr: set[str] = field(default_factory=set)
-    vcv: VcSet = field(default_factory=VcSet)
-    cv_mid: set[str] = field(default_factory=set)
+    def __init__(self) -> None:
+        self.__data = {
+            "c_head": set(),
+            "cv_head": set(),
+            "cv": set(),
+            "vc": VcSet(),
+            "vr": set(),
+            "vcv": VcSet(),
+            "cv_mid": set(),
+        }
+
+        self.is_full_cv: bool = True
+
+    @property
+    def c_head(self) -> set[str]:
+        return self.__data["c_head"]
+
+    @c_head.setter
+    def c_head(self, value: set[str]):
+        self.__data["c_head"] = value
+
+    @property
+    def cv_head(self) -> set[str]:
+        return self.__data["cv_head"]
+
+    @cv_head.setter
+    def cv_head(self, value: set[str]):
+        self.__data["cv_head"] = value
+
+    @property
+    def cv(self) -> set[str]:
+        return self.__data["cv"]
+
+    @cv.setter
+    def cv(self, value: set[str]):
+        self.__data["cv"] = value
+
+    @property
+    def vc(self) -> VcSet:
+        return self.__data["vc"]
+
+    @vc.setter
+    def vc(self, value: VcSet):
+        self.__data["vc"] = value
+
+    @property
+    def vr(self) -> set[str]:
+        return self.__data["vr"]
+
+    @vr.setter
+    def vr(self, value: set):
+        self.__data["vr"] = value
+
+    @property
+    def vcv(self) -> VcSet:
+        return self.__data["vcv"]
+
+    @vcv.setter
+    def vcv(self, value: VcSet):
+        self.__data["vcv"] = value
+
+    @property
+    def cv_mid(self) -> set[str]:
+        return self.__data["cv_mid"]
+
+    @cv_mid.setter
+    def cv_mid(self, value: set[str]):
+        self.__data["cv_mid"] = value
 
     def __len__(self) -> int:
-        return len(self.__dict__)
+        return len(self.__data)
 
-    def __getitem__(self, key: str) -> set | VcSet:
-        return self.__dict__[key]
+    def __getitem__(self, key: str) -> set:
+        return self.__data[key]
 
     def __iter__(self):
-        for values in self.__dict__.values():
-            yield values
+        for value in self.__data.values():
+            yield value
 
     def __bool__(self) -> bool:
-        for container in self:
-            if container:
+        for value in self:
+            if value:
                 return True
         else:
             return False
 
     def copy(self) -> "AliasUnion":
-        union = AliasUnion()
-        for key in self.__dict__:
-            union.__dict__[key] = self.__dict__[key].copy()
-        return union
+        new_copy = AliasUnion()
+
+        new_copy.update(self)
+        new_copy.is_full_cv = self.is_full_cv
+
+        return new_copy
+
+    def update(self, other: "AliasUnion") -> None:
+        for key, value in other.__data.items():
+            self.__data[key].update(value)
+
+    def difference_update(self, other: "AliasUnion") -> None:
+        for key, value in other.__data.items():
+            self.__data[key].difference_update(value)
 
     def __repr__(self) -> str:
         return ", ".join(f"{key}={value}" for key, value in self.__dict__.items())
-
-    def add(self, other: "AliasUnion") -> None:
-        for key, value in other.__dict__.items():
-            self.__dict__[key].update(value)
-
-    def discard(self, other: "AliasUnion") -> None:
-        for key, value in other.__dict__.items():
-            self.__dict__[key].__sub__(value)
 
 
 class RecLine(tuple[Cvv, ...]):
@@ -234,11 +296,11 @@ class RecLine(tuple[Cvv, ...]):
                 line: str = split_symbol + split_symbol.join(str(e) for e in self)
         else:
             line: str = split_symbol.join(str(e) for e in self)
-            
+
         # replace R and japanease characters
-        sub_str = f'{split_symbol}R{split_symbol}'
-        sub_line = re.sub("[\u30a0-\u30ff\u3040-\u309f]", '', line)
-        sub_line = re.sub(f"{sub_str}", '', sub_line)
+        sub_str = f"{split_symbol}R{split_symbol}"
+        sub_line = re.sub("[\u30a0-\u30ff\u3040-\u309f]", "", line)
+        sub_line = re.sub(f"{sub_str}", "", sub_line)
 
         if not sub_line.islower():
             return f"{line}_UpperCase"
@@ -304,6 +366,12 @@ class OtoUnion(dict[AliasType, list[Oto]]):
                 oto_str.append(str(oto))
         return "\n".join(oto_str)
 
+    def __len__(self) -> int:
+        length = 0
+        for section in self.values():
+            length += len(section)
+        return length
+
 
 class Vsdxmf(namedtuple("VS_OTO", "phoneme wav l pre con r ovl")):
     __slot__ = ()
@@ -351,6 +419,12 @@ class VsdxmfUnion(dict[AliasType, list[Vsdxmf]]):
             for vsdxmf in section:
                 vsdxmf_str.append(str(vsdxmf))
         return "\n".join(vsdxmf_str)
+
+    def __len__(self) -> int:
+        length = 0
+        for section in self.values():
+            length += len(section)
+        return length
 
 
 @dataclass

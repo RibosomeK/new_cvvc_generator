@@ -114,7 +114,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             self.two_mora_checkBox.setEnabled(True)
 
     def pop_preview_dialog(self):
-        if error_message := self.check_essential_input():
+        if error_message := self.check_essential_parameter():
             warning_message_box = QMessageBox()
             warning_message_box.setWindowTitle(self.tr("Warning"))
             warning_message_box.setIcon(QMessageBox.Warning)
@@ -125,17 +125,31 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             parameters = self.get_parameters()
             generator = CvvcReclistGeneratorModel(parameters)
             preview_dialog.receive_model(generator)
+
             preview_dialog.reclist_textEdit.setText(generator.get_reclist_str())
+            preview_dialog.reclist_number_label.setText(
+                self.tr(f"total lines: {len(generator.reclist_generator.reclist)}")
+            )
+
             preview_dialog.oto_textEdit.setText(generator.get_oto_str())
+            preview_dialog.oto_number_label.setText(
+                self.tr(f"total lines: {len(generator.oto_generator.oto_union)}")
+            )
+
             if parameters.do_save_presamp:
                 preview_dialog.presamp_textEdit.setText(generator.get_presamp_str())
+
             preview_dialog.vsdxmf_textEdit.setText(generator.get_vsdxmf_str())
+            preview_dialog.vsdxmf_number_label.setText(
+                self.tr(f"total lines: {len(generator.vsdxmf_generator.vsdxmf_union)}")
+            )
+
             if parameters.do_save_lsd:
                 preview_dialog.lsd_textEdit.setText(generator.get_lsd_str())
 
             preview_dialog.exec()
 
-    def check_essential_input(self) -> str | None:
+    def check_essential_parameter(self) -> str | None:
         if not self.dict_file_lineEdit.text():
             return self.tr("Dictionary file is not selected.")
 
@@ -183,25 +197,25 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             )[0]
         else:
             config_path = self.parameters_config_path
-            
+
         config_name = config_path.split("/")[-1]
         self.setWindowTitle(f"{self.windowTitle()} - {config_name}")
 
         if config_path:
             with open(config_path, mode="w", encoding="utf-8") as f:
                 config.write(f)
-                
+
     def export_parameters_as_config(self) -> None:
         config = configparser.ConfigParser()
         config["PARAMETERS"] = self.get_parameters().__dict__
 
         config_path = QFileDialog.getSaveFileName(
-                self,
-                self.tr("Select a save path"),
-                "./config.ini",
-                self.tr("Config file (*.ini)"),
+            self,
+            self.tr("Select a save path"),
+            "./config.ini",
+            self.tr("Config file (*.ini)"),
         )[0]
-        
+
         config_name = config_path.split("/")[-1]
         self.setWindowTitle(f"{self.windowTitle()} - {config_name}")
 
