@@ -17,6 +17,8 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
 
         self.parameters_config_path: str = ""
         self.undo_stack = QUndoStack()
+        
+        self.title = self.windowTitle()
 
         self.dict_file_button.clicked.connect(self.select_dict_file)
         self.alias_config_button.clicked.connect(self.select_alias_config)
@@ -199,7 +201,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
             config_path = self.parameters_config_path
 
         config_name = config_path.split("/")[-1]
-        self.setWindowTitle(f"{self.windowTitle()} - {config_name}")
+        self.setWindowTitle(f"{self.title} - {config_name}")
 
         if config_path:
             with open(config_path, mode="w", encoding="utf-8") as f:
@@ -217,7 +219,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         )[0]
 
         config_name = config_path.split("/")[-1]
-        self.setWindowTitle(f"{self.windowTitle()} - {config_name}")
+        self.setWindowTitle(f"{self.title} - {config_name}")
 
         if config_path:
             with open(config_path, mode="w", encoding="utf-8") as f:

@@ -1,4 +1,4 @@
-from .cvv_dataclasses import Reclist, AliasType, AliasUnion, Oto, OtoUnion
+from .cvv_dataclasses import Cvv, Reclist, AliasType, AliasUnion, Oto, OtoUnion
 from typing import Iterable, Optional
 from .errors import AliasTypeError
 
@@ -8,13 +8,13 @@ class OtoGenerator:
 
     def __init__(self) -> None:
         self.oto_union = OtoUnion()
+        self.EMPTY_CVV = Cvv.new()
 
     def gen_oto(
         self,
         reclist: Reclist,
         alias_union: AliasUnion,
-        bpm: float,
-        is_full_cv: bool = True,
+        bpm: float
     ) -> None:
         """generate oto from reclist according to needed alias
 
@@ -32,14 +32,14 @@ class OtoGenerator:
                     c_head_oto = self._get_oto(AliasType.C, wav, c_head_alias, 0, bpm)
                     self.oto_union[AliasType.C].append(c_head_oto)
                     alias_union.c_head.discard(c_head)
-                if (cv_head := row[0].get_cv(is_full_cv)) in alias_union.cv_head:
+                if (cv_head := row[0].get_cv(alias_union.is_full_cv)) in alias_union.cv_head:
                     cv_head_alias = f"- {cv_head}"
                     cv_head_oto = self._get_oto(
                         AliasType.CV, wav, cv_head_alias, 0, bpm
                     )
                     self.oto_union[AliasType.CV].append(cv_head_oto)
                     alias_union.cv_head.discard(cv_head)
-                if (cv := row[1].get_cv(is_full_cv)) in alias_union.cv:
+                if (cv := row[1].get_cv(alias_union.is_full_cv)) in alias_union.cv:
                     cv_L_alias = f"{cv}_L"
                     cv_oto = self._get_oto(AliasType.CV, wav, cv, 1, bpm)
                     cv_L_oto = self._get_oto(AliasType.CV, wav, cv_L_alias, 2, bpm)
@@ -67,7 +67,7 @@ class OtoGenerator:
                                 AliasType.C, wav, c_head_alias, idx, bpm
                             )
                             self.oto_union[AliasType.C].append(c_head_oto)
-                        cv = cvv.get_cv(is_full_cv)
+                        cv = cvv.get_cv(alias_union.is_full_cv)
                         if cv in alias_union.cv_head:
                             cv_head_alias = f"- {cv}"
                             oto = self._get_oto(
@@ -78,12 +78,25 @@ class OtoGenerator:
                         if cv in alias_union.cv and cv not in alias_union.cv_mid:
                             oto = self._get_oto(AliasType.CV, wav, cv, idx, bpm)
                             self.oto_union[AliasType.CV].append(oto)
-                            alias_union.cv_head.discard(cv)
+                            alias_union.cv.discard(cv)
                     elif idx <= len(row) - 1:
-                        if (cv := cvv.get_cv(is_full_cv)) in alias_union.cv:
+                        cv = cvv.get_cv(alias_union.is_full_cv)
+                        if row[idx-1] == self.EMPTY_CVV:
+                            if cv in alias_union.cv_head:
+                                cv_head =  f'- {cv}'
+                                oto = self._get_oto(AliasType.CV, wav, cv_head, idx, bpm)
+                                self.oto_union[AliasType.CV].append(oto)
+                                
+                            if cv in alias_union.cv and cv not in alias_union.cv_mid:
+                                oto = self._get_oto(AliasType.CV, wav, cv, idx, bpm)
+                                self.oto_union[AliasType.CV].append(oto)
+                                
+                            continue
+                                
+                        if (cv := cvv.get_cv(alias_union.is_full_cv)) in alias_union.cv:
                             oto = self._get_oto(AliasType.CV, wav, cv, idx, bpm)
                             self.oto_union[AliasType.CV].append(oto)
-                            alias_union.cv_head.discard(cv)
+                            alias_union.cv.discard(cv)
                         if (vc := (row[idx - 1].v, cvv.c)) in alias_union.vc:
                             oto = self._get_oto(AliasType.VC, wav, vc, idx, bpm)
                             self.oto_union[AliasType.VC].append(oto)
@@ -97,6 +110,13 @@ class OtoGenerator:
                         oto = self._get_oto(AliasType.V, wav, vr_alias, idx, bpm)
                         self.oto_union[AliasType.V].append(oto)
                         alias_union.vr.discard(vr)
+                        
+                    if idx < len(row) - 1 and row[idx+1] == self.EMPTY_CVV:
+                        if (vr := row[idx].v) in alias_union.vr:
+                            vr_alias = f"{vr} R"
+                            oto = self._get_oto(AliasType.V, wav, vr_alias, idx, bpm)
+                            self.oto_union[AliasType.V].append(oto)
+                            alias_union.vr.discard(vr)
 
     def _get_oto(
         self,

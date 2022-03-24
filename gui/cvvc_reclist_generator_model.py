@@ -78,8 +78,7 @@ class CvvcReclistGeneratorModel:
             self.oto_generator.gen_oto(
                 self.reclist_generator.reclist,
                 alias_union.copy(),
-                parameters.bpm,
-                parameters.is_full_cv,
+                parameters.bpm
             )
 
         self.vsdxmf_generator = VsdxmfGenerator(self.cvv_workshop)

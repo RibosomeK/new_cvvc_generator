@@ -35,7 +35,7 @@ def main():
     alias_union_utau = alias_union_backup.copy()
     alias_union_utau.c_head.clear()
     oto_generator.gen_oto(
-        reclist=reclist, alias_union=alias_union_utau, bpm=120, is_full_cv=True
+        reclist=reclist, alias_union=alias_union_utau, bpm=120
     )
 
     vsdxmf_generator = VsdxmfGenerator(cvv_workshop)
