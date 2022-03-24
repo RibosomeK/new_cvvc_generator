@@ -2,11 +2,7 @@ import configparser
 import re
 from typing import Optional
 from .cvv_dataclasses import AliasType, CvvWorkshop, VcSet, AliasUnion
-from .errors import (
-    AliasConfigTypeError,
-    AliasNotExistError,
-    AliasTypeError
-)
+from .errors import AliasConfigTypeError, AliasNotExistError, AliasTypeError
 
 
 class AliasUnionGenerator:
@@ -14,7 +10,6 @@ class AliasUnionGenerator:
 
     def __init__(self, cvv_workshop: CvvWorkshop) -> None:
         self.cvv_workshop = cvv_workshop
-        self.is_full_cv = True
 
     def get_needed_alias(
         self,
@@ -22,7 +17,7 @@ class AliasUnionGenerator:
         is_cv_head: bool = True,
         is_full_cv: bool = True,
         alias_config: Optional[str] = None,
-    ) -> "AliasUnion":
+    ) -> AliasUnion:
         """Get needed alias.
 
         Args:
@@ -56,8 +51,7 @@ class AliasUnionGenerator:
             alias_union.update(needed)
             alias_union.difference_update(unneeded)
         if alias_union.vcv:
-            alias_union.vcv = alias_union.vcv - alias_union.vc
-        self.alias = alias_union
+            alias_union.vcv.difference_update(alias_union.vc)
         return alias_union
 
     def read_alias_config(
@@ -94,7 +88,7 @@ class AliasUnionGenerator:
             elif alias_type == "v":
                 unneeded.vr.update(self.get_v_alias(alias_pack))
             elif alias_type == "vcv":
-                unneeded.vcv.update(self.get_vcv_alias(alias_pack, is_full_cv))
+                unneeded.vcv.update(self.get_vcv_alias(alias_pack))
             else:
                 raise AliasTypeError(f"{alias_type} does not exist")
 
@@ -228,7 +222,7 @@ class AliasUnionGenerator:
         return vc_set
 
     def get_vcv_alias(
-        self, alias_pack: list[tuple[AliasType, list[str]]], is_full_cv: bool = True
+        self, alias_pack: list[tuple[AliasType, list[str]]], is_full_cv: bool = False
     ) -> set[tuple[str, str]]:
         """return a vcv set from given alias pack"""
 

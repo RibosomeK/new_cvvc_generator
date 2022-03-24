@@ -16,13 +16,7 @@ class VsdxmfGenerator:
         self.vsdxmf_union = VsdxmfUnion()
         self.cvv_workshop = cvv_workshop
 
-    def gen_vsdxmf(
-        self,
-        reclist: Reclist,
-        alias_union: AliasUnion,
-        bpm: float,
-        is_full_cv: bool = False,
-    ) -> None:
+    def gen_vsdxmf(self, reclist: Reclist, alias_union: AliasUnion, bpm: float) -> None:
         """Generate vsdxmf for vocalsharp.
 
         Args:
@@ -40,10 +34,10 @@ class VsdxmfGenerator:
                     c_vsdxmf = self._get_vs_oto(AliasType.C, wav, c, 0, bpm)
                     self.vsdxmf_union[AliasType.C].extend(c_vsdxmf)
                     alias_union.c_head.discard(c)
-                if (cv := row[1].get_cv(is_full_cv)) in alias_union.cv and row[
-                    0
-                ].c != row[0].v:
-                    cv_alias = row[1].get_cv(is_full_cv)
+                if (
+                    cv := row[1].get_cv(alias_union.is_full_cv)
+                ) in alias_union.cv and row[0].c != row[0].v:
+                    cv_alias = row[1].get_cv(alias_union.is_full_cv)
                     cv_vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv_alias, 1, bpm)
                     cv_L_vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv_alias, 2, bpm)
                     for L_vsdxmf in cv_L_vsdxmf:
@@ -70,7 +64,7 @@ class VsdxmfGenerator:
                             vsdxmf = self._get_vs_oto(AliasType.C, wav, c, idx, bpm)
                             self.vsdxmf_union[AliasType.C].extend(vsdxmf)
                             alias_union.c_head.discard(c)
-                        cv = cvv.get_cv(is_full_cv)
+                        cv = cvv.get_cv(alias_union.is_full_cv)
                         if (
                             cv in alias_union.cv
                             and cv not in alias_union.cv_mid
@@ -81,7 +75,7 @@ class VsdxmfGenerator:
                             alias_union.cv_head.discard(cv)
                     elif idx <= len(row) - 1:
                         if (
-                            cv := cvv.get_cv(is_full_cv)
+                            cv := cvv.get_cv(alias_union.is_full_cv)
                         ) in alias_union.cv and cvv.c != cvv.v:
                             vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv, idx, bpm)
                             self.vsdxmf_union[AliasType.CV].extend(vsdxmf)

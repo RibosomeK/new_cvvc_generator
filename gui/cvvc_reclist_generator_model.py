@@ -86,8 +86,7 @@ class CvvcReclistGeneratorModel:
             self.vsdxmf_generator.gen_vsdxmf(
                 self.reclist_generator.reclist,
                 alias_union.copy(),
-                parameters.bpm,
-                parameters.is_full_cv,
+                parameters.bpm
             )
 
     def get_reclist_str(self) -> str | None:

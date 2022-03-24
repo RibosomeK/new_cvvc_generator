@@ -42,7 +42,17 @@ class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
             param.extend([None] * (length - len(param)))
             return Cvv(*param)
 
-    def get_cv(self, is_full_cv: Optional[bool] = True) -> str:
+    def get_cv(self, is_full_cv: Optional[bool] = False) -> str:
+        """return full cv or simplified cv
+
+        Args:
+            is_full_cv (Optional[bool], optional): Defaults to False.
+            By default we use simplified cv if there is one, 
+            or set parameter is_full_cv to True.
+
+        Returns:
+            str: cv
+        """
         if is_full_cv:
             return self.cvv
         else:

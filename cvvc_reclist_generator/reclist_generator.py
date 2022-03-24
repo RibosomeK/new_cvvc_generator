@@ -111,7 +111,7 @@ class ReclistGenerator:
                     alias_union.vcv.discard((cvv.v, cvv.get_cv()))
                 else:
                     row.append(cvv)
-                alias_union.cv_head.discard(cvv.get_cv())
+                alias_union.cv_head.discard(cvv.get_cv(alias_union.is_full_cv))
             elif len(row) < length:
                 pre_cvv = row[-1]
                 row.append(cvv)
@@ -165,16 +165,14 @@ class ReclistGenerator:
                 self.reclist.append(RecLine(*row))
                 alias_union.vr.discard(row[-1].v)
                 alias_union.c_head.discard(row[0].get_lsd_c())
-                alias_union.cv_head.discard(row[0].cvv)
-                alias_union.cv_head.discard(row[0].cv)
+                alias_union.cv_head.discard(row[0].get_cv(alias_union.is_full_cv))
                 row: list[Cvv] = []
                 i = 0
         if row:
             self.reclist.append(RecLine(*row))
             alias_union.vr.discard(row[-1].v)
             alias_union.c_head.discard(row[0].get_lsd_c())
-            alias_union.cv_head.discard(row[0].cvv)
-            alias_union.cv_head.discard(row[0].cv)
+            alias_union.cv_head.discard(row[0].get_cv(alias_union.is_full_cv))
 
         # complete the vc part
         row: list[Cvv] = []
@@ -223,16 +221,14 @@ class ReclistGenerator:
                 self.reclist.append(RecLine(*row))
                 alias_union.vr.discard(row[-1].v)
                 alias_union.c_head.discard(row[0].get_lsd_c())
-                alias_union.cv_head.discard(row[0].cvv)
-                alias_union.cv_head.discard(row[0].cv)
+                alias_union.cv_head.discard(row[0].get_cv(alias_union.is_full_cv))
                 row: list[Cvv] = []
                 i = 0
         if row:
             self.reclist.append(RecLine(*row))
             alias_union.vr.discard(row[-1].v)
             alias_union.c_head.discard(row[0].get_lsd_c())
-            alias_union.cv_head.discard(row[0].cvv)
-            alias_union.cv_head.discard(row[0].cv)
+            alias_union.cv_head.discard(row[0].get_cv(alias_union.is_full_cv))
 
         # complete cv head part
         cv_head_list = sorted(alias_union.cv_head, reverse=True)
