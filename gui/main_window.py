@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(414, 341)
+        MainWindow.resize(466, 306)
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -182,6 +182,7 @@ class Ui_MainWindow(object):
         self.cv_head_checkBox = QCheckBox(self.centralwidget)
         self.cv_head_checkBox.setObjectName(u"cv_head_checkBox")
         self.cv_head_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.cv_head_checkBox.setChecked(True)
 
         self.reclist_detail_layout.addWidget(self.cv_head_checkBox)
 
@@ -192,11 +193,11 @@ class Ui_MainWindow(object):
 
         self.reclist_detail_layout.addWidget(self.full_cv_checkBox)
 
-        self.c_head_checkBox = QCheckBox(self.centralwidget)
-        self.c_head_checkBox.setObjectName(u"c_head_checkBox")
-        self.c_head_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        self.c_head_4_utau_checkBox = QCheckBox(self.centralwidget)
+        self.c_head_4_utau_checkBox.setObjectName(u"c_head_4_utau_checkBox")
+        self.c_head_4_utau_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
 
-        self.reclist_detail_layout.addWidget(self.c_head_checkBox)
+        self.reclist_detail_layout.addWidget(self.c_head_4_utau_checkBox)
 
 
         self.overall_layout.addLayout(self.reclist_detail_layout)
@@ -324,7 +325,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menuBar = QMenuBar(MainWindow)
         self.menuBar.setObjectName(u"menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 414, 22))
+        self.menuBar.setGeometry(QRect(0, 0, 466, 22))
         self.menuFile = QMenu(self.menuBar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuSetting = QMenu(self.menuBar)
@@ -396,7 +397,7 @@ class Ui_MainWindow(object):
         self.length_label.setText(QMainWindow.tr(u"Length", None))
         self.cv_head_checkBox.setText(QMainWindow.tr(u"CV head", None))
         self.full_cv_checkBox.setText(QMainWindow.tr(u"Full CV", None))
-        self.c_head_checkBox.setText(QMainWindow.tr(u"C head", None))
+        self.c_head_4_utau_checkBox.setText(QMainWindow.tr(u"C head for UTAU", None))
         self.labeling_style_label.setText(QMainWindow.tr(u"Labeling style: ", None))
         self.bpm_label.setText(QMainWindow.tr(u"bpm", None))
         self.blank_beat_label.setText(QMainWindow.tr(u"blank beat", None))
