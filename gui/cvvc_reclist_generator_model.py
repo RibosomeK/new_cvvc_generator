@@ -24,7 +24,7 @@ class Parameters:
     length: int
     is_full_cv: bool
     is_cv_head: bool
-    is_c_head: bool
+    is_c_head_4_utau: bool
 
     bpm: float
     blank_beat: int
@@ -56,12 +56,21 @@ class CvvcReclistGeneratorModel:
             alias_config = parameters.alias_config
         else:
             alias_config = None
+            
+        if parameters.is_c_head_4_utau or parameters.do_save_vsdxmf:
+            is_c_head = True
+        else:
+            is_c_head = False
         alias_union = self.alias_union_generator.get_needed_alias(
-            parameters.is_c_head,
+            is_c_head,
             parameters.is_cv_head,
             parameters.is_full_cv,
             alias_config,
         )
+        
+        alias_union_4_utau = alias_union.copy()
+        if not parameters.is_c_head_4_utau:
+            alias_union_4_utau.c_head.clear()
 
         self.reclist_generator = ReclistGenerator(self.cvv_workshop)
         if parameters.is_haru_style:
@@ -77,7 +86,7 @@ class CvvcReclistGeneratorModel:
         if parameters.do_save_oto:
             self.oto_generator.gen_oto(
                 self.reclist_generator.reclist,
-                alias_union.copy(),
+                alias_union_4_utau.copy(),
                 parameters.bpm
             )
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>414</width>
-    <height>341</height>
+    <width>466</width>
+    <height>306</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -219,6 +219,9 @@
         <property name="text">
          <string>CV head</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
@@ -235,12 +238,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="c_head_checkBox">
+       <widget class="QCheckBox" name="c_head_4_utau_checkBox">
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
         <property name="text">
-         <string>C head</string>
+         <string>C head for UTAU</string>
         </property>
        </widget>
       </item>
@@ -449,7 +452,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>414</width>
+     <width>466</width>
      <height>22</height>
     </rect>
    </property>

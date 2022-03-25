@@ -132,9 +132,7 @@ class ReclistGenerator:
 
         # complete vcv part
         i = 0
-        while True:
-            if not alias_union.vcv:
-                break
+        while alias_union.vcv:
             if i == 0:
                 vcv = alias_union.vcv.pop(v=alias_union.vcv.max_v[0])
                 v_cvv = self.cvv_workshop.find_cvv(v=vcv[0])
@@ -145,11 +143,14 @@ class ReclistGenerator:
             elif i <= length - 1:
                 try:
                     vcv = alias_union.vcv.pop(v=row[-1].v)
-                    next_cv = self.cvv_workshop.find_cvv(cvv=vcv[1])
+                    try:
+                        next_cv = self.cvv_workshop.find_cvv(cvv=vcv[1])
+                    except CantFindNextCvvError:
+                        next_cv = self.cvv_workshop.find_cvv(c=vcv[1])
                     alias_union.vc.discard((vcv[0], next_cv.c))
                     row.append(next_cv)
                     i += 1
-                except CantFindNextCvvError:
+                except PopError:
                     if i <= length - 2:
                         vcv = alias_union.vcv.pop()
                         cv1 = self.cvv_workshop.find_cvv(v=vcv[0])
