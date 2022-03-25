@@ -718,3 +718,13 @@ class CvvWorkshop:
     def save_lsd(self, lsd_dir: str) -> None:
         with open(lsd_dir, mode="w", encoding="utf-8") as f:
             f.write(self.get_lsd_str())
+            
+    def get_simplified_cv(self) -> list[tuple[str, str]]:
+        """return a list that contain (simplified cv, full cv)"""
+        
+        cv_list = []
+        for key, values in self.cv_dict.items():
+            for value in values:
+                cv_list.append((key, value.cvv))
+                
+        return cv_list

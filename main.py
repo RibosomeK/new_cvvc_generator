@@ -5,12 +5,13 @@ from cvvc_reclist_generator import (
     ReclistChecker,
     OtoGenerator,
     VsdxmfGenerator,
+    CvReplicationJsonGenerator,
 )
 
 
 def main():
     cvv_workshop = CvvWorkshop()
-    cvv_workshop.read_dict("./dict_files/CHN_extendForVS.txt")
+    cvv_workshop.read_dict("./dict_files/CHN_simplified_cv.txt")
     cvv_workshop.read_redirect_config("./config/redirect.ini")
 
     alias_union_generator = AliasUnionGenerator(cvv_workshop)
@@ -34,13 +35,19 @@ def main():
     oto_generator = OtoGenerator()
     alias_union_utau = alias_union_backup.copy()
     alias_union_utau.c_head.clear()
-    oto_generator.gen_oto(
-        reclist=reclist, alias_union=alias_union_utau, bpm=120
-    )
+    oto_generator.gen_oto(reclist=reclist, alias_union=alias_union_utau, bpm=120)
 
     vsdxmf_generator = VsdxmfGenerator(cvv_workshop)
     alias_union_vs = alias_union_backup.copy()
     vsdxmf_generator.gen_vsdxmf(reclist=reclist, alias_union=alias_union_vs, bpm=120)
+
+    simplified_cv_list = cvv_workshop.get_simplified_cv()
+    json_generator = CvReplicationJsonGenerator(
+        CvReplicationJsonGenerator.get_json_rules(simplified_cv_list, patterns=['- {}', '{}_L'])
+    )
+
+    if simplified_cv_list:
+        json_generator.save_json(file_path="./result")
 
     generator.save_reclist("./result/reclist.txt")
     oto_generator.save_oto("./result/oto.ini")
