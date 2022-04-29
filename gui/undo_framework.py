@@ -1,4 +1,3 @@
-from re import S
 from PySide6.QtGui import QUndoCommand
 from PySide6.QtWidgets import QLineEdit
 from .cvvc_reclist_generator_model import Parameters

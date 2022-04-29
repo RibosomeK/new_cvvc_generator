@@ -1,6 +1,5 @@
-from ast import pattern
 from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QTextDocument
-from PySide6.QtCore import QRegularExpression, QRegularExpressionMatch
+from PySide6.QtCore import QRegularExpression
 
 
 def format(color: str, style: str = "") -> QTextCharFormat:

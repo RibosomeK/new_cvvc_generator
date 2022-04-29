@@ -1,425 +1,298 @@
-# -*- coding: utf-8 -*-
-
-################################################################################
-## Form generated from reading UI file 'main_window.ui'
-##
-## Created by: Qt User Interface Compiler version 6.2.3
-##
-## WARNING! All changes made in this file will be lost when recompiling UI file!
-################################################################################
-
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
-    QCursor, QFont, QFontDatabase, QGradient,
-    QIcon, QImage, QKeySequence, QLinearGradient,
-    QPainter, QPalette, QPixmap, QRadialGradient,
-    QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QHBoxLayout, QLabel,
-    QLineEdit, QMainWindow, QMenu, QMenuBar,
-    QPushButton, QSizePolicy, QSpinBox, QVBoxLayout,
-    QWidget)
-
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        if not MainWindow.objectName():
-            MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(466, 306)
-        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
-        MainWindow.setSizePolicy(sizePolicy)
-        MainWindow.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.load_action = QAction(MainWindow)
-        self.load_action.setObjectName(u"load_action")
-        self.export_action = QAction(MainWindow)
-        self.export_action.setObjectName(u"export_action")
-        self.export_as_action = QAction(MainWindow)
-        self.export_as_action.setObjectName(u"export_as_action")
-        self.set_english_action = QAction(MainWindow)
-        self.set_english_action.setObjectName(u"set_english_action")
-        self.set_simplified_chinese_action = QAction(MainWindow)
-        self.set_simplified_chinese_action.setObjectName(u"set_simplified_chinese_action")
-        self.action = QAction(MainWindow)
-        self.action.setObjectName(u"action")
-        self.set_japanese_action = QAction(MainWindow)
-        self.set_japanese_action.setObjectName(u"set_japanese_action")
-        self.undo_action = QAction(MainWindow)
-        self.undo_action.setObjectName(u"undo_action")
-        self.redo_action = QAction(MainWindow)
-        self.redo_action.setObjectName(u"redo_action")
-        self.centralwidget = QWidget(MainWindow)
-        self.centralwidget.setObjectName(u"centralwidget")
-        self.overall_layout = QVBoxLayout(self.centralwidget)
-        self.overall_layout.setObjectName(u"overall_layout")
-        self.dict_file_layout = QHBoxLayout()
-        self.dict_file_layout.setObjectName(u"dict_file_layout")
-        self.dict_file_label = QLabel(self.centralwidget)
-        self.dict_file_label.setObjectName(u"dict_file_label")
-        self.dict_file_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.dict_file_layout.addWidget(self.dict_file_label)
-
-        self.dict_file_lineEdit = QLineEdit(self.centralwidget)
-        self.dict_file_lineEdit.setObjectName(u"dict_file_lineEdit")
-        self.dict_file_lineEdit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.dict_file_lineEdit.setReadOnly(True)
-
-        self.dict_file_layout.addWidget(self.dict_file_lineEdit)
-
-        self.dict_file_button = QPushButton(self.centralwidget)
-        self.dict_file_button.setObjectName(u"dict_file_button")
-        self.dict_file_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.dict_file_button.setCheckable(False)
-
-        self.dict_file_layout.addWidget(self.dict_file_button)
-
-
-        self.overall_layout.addLayout(self.dict_file_layout)
-
-        self.redirect_config_layout = QHBoxLayout()
-        self.redirect_config_layout.setObjectName(u"redirect_config_layout")
-        self.redirect_config_label = QLabel(self.centralwidget)
-        self.redirect_config_label.setObjectName(u"redirect_config_label")
-        self.redirect_config_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.redirect_config_layout.addWidget(self.redirect_config_label)
-
-        self.redirect_config_lineEdit = QLineEdit(self.centralwidget)
-        self.redirect_config_lineEdit.setObjectName(u"redirect_config_lineEdit")
-        self.redirect_config_lineEdit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.redirect_config_lineEdit.setReadOnly(True)
-
-        self.redirect_config_layout.addWidget(self.redirect_config_lineEdit)
-
-        self.redirect_config_button = QPushButton(self.centralwidget)
-        self.redirect_config_button.setObjectName(u"redirect_config_button")
-        self.redirect_config_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.redirect_config_button.setCheckable(False)
-
-        self.redirect_config_layout.addWidget(self.redirect_config_button)
-
-
-        self.overall_layout.addLayout(self.redirect_config_layout)
-
-        self.alias_config_layout = QHBoxLayout()
-        self.alias_config_layout.setObjectName(u"alias_config_layout")
-        self.alias_config_label = QLabel(self.centralwidget)
-        self.alias_config_label.setObjectName(u"alias_config_label")
-        self.alias_config_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.alias_config_layout.addWidget(self.alias_config_label)
-
-        self.alias_config_lineEdit = QLineEdit(self.centralwidget)
-        self.alias_config_lineEdit.setObjectName(u"alias_config_lineEdit")
-        self.alias_config_lineEdit.setEnabled(True)
-        self.alias_config_lineEdit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.alias_config_lineEdit.setReadOnly(True)
-
-        self.alias_config_layout.addWidget(self.alias_config_lineEdit)
-
-        self.alias_config_button = QPushButton(self.centralwidget)
-        self.alias_config_button.setObjectName(u"alias_config_button")
-        self.alias_config_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.alias_config_button.setCheckable(False)
-
-        self.alias_config_layout.addWidget(self.alias_config_button)
-
-
-        self.overall_layout.addLayout(self.alias_config_layout)
-
-        self.reclist_style_layout = QHBoxLayout()
-        self.reclist_style_layout.setObjectName(u"reclist_style_layout")
-        self.reclist_style_label = QLabel(self.centralwidget)
-        self.reclist_style_label.setObjectName(u"reclist_style_label")
-        self.reclist_style_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.reclist_style_layout.addWidget(self.reclist_style_label)
-
-        self.two_mora_checkBox = QCheckBox(self.centralwidget)
-        self.two_mora_checkBox.setObjectName(u"two_mora_checkBox")
-        self.two_mora_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.reclist_style_layout.addWidget(self.two_mora_checkBox)
-
-        self.haru_style_checkBox = QCheckBox(self.centralwidget)
-        self.haru_style_checkBox.setObjectName(u"haru_style_checkBox")
-        self.haru_style_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.reclist_style_layout.addWidget(self.haru_style_checkBox)
-
-        self.mora_x_checkBox = QCheckBox(self.centralwidget)
-        self.mora_x_checkBox.setObjectName(u"mora_x_checkBox")
-        self.mora_x_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.reclist_style_layout.addWidget(self.mora_x_checkBox)
-
-
-        self.overall_layout.addLayout(self.reclist_style_layout)
-
-        self.reclist_detail_layout = QHBoxLayout()
-        self.reclist_detail_layout.setObjectName(u"reclist_detail_layout")
-        self.reclist_detail_label = QLabel(self.centralwidget)
-        self.reclist_detail_label.setObjectName(u"reclist_detail_label")
-        self.reclist_detail_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.reclist_detail_layout.addWidget(self.reclist_detail_label)
-
-        self.length_spinBox = QSpinBox(self.centralwidget)
-        self.length_spinBox.setObjectName(u"length_spinBox")
-        self.length_spinBox.setMinimum(3)
-        self.length_spinBox.setMaximum(100)
-
-        self.reclist_detail_layout.addWidget(self.length_spinBox)
-
-        self.length_label = QLabel(self.centralwidget)
-        self.length_label.setObjectName(u"length_label")
-
-        self.reclist_detail_layout.addWidget(self.length_label)
-
-        self.cv_head_checkBox = QCheckBox(self.centralwidget)
-        self.cv_head_checkBox.setObjectName(u"cv_head_checkBox")
-        self.cv_head_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.cv_head_checkBox.setChecked(True)
-
-        self.reclist_detail_layout.addWidget(self.cv_head_checkBox)
-
-        self.full_cv_checkBox = QCheckBox(self.centralwidget)
-        self.full_cv_checkBox.setObjectName(u"full_cv_checkBox")
-        self.full_cv_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.full_cv_checkBox.setChecked(True)
-
-        self.reclist_detail_layout.addWidget(self.full_cv_checkBox)
-
-        self.c_head_4_utau_checkBox = QCheckBox(self.centralwidget)
-        self.c_head_4_utau_checkBox.setObjectName(u"c_head_4_utau_checkBox")
-        self.c_head_4_utau_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.reclist_detail_layout.addWidget(self.c_head_4_utau_checkBox)
-
-
-        self.overall_layout.addLayout(self.reclist_detail_layout)
-
-        self.labeling_style_layout = QHBoxLayout()
-        self.labeling_style_layout.setObjectName(u"labeling_style_layout")
-        self.labeling_style_label = QLabel(self.centralwidget)
-        self.labeling_style_label.setObjectName(u"labeling_style_label")
-        self.labeling_style_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.labeling_style_layout.addWidget(self.labeling_style_label)
-
-        self.bpm_spinBox = QSpinBox(self.centralwidget)
-        self.bpm_spinBox.setObjectName(u"bpm_spinBox")
-        self.bpm_spinBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.bpm_spinBox.setMinimum(100)
-        self.bpm_spinBox.setMaximum(200)
-        self.bpm_spinBox.setSingleStep(10)
-        self.bpm_spinBox.setValue(130)
-
-        self.labeling_style_layout.addWidget(self.bpm_spinBox)
-
-        self.bpm_label = QLabel(self.centralwidget)
-        self.bpm_label.setObjectName(u"bpm_label")
-        self.bpm_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.labeling_style_layout.addWidget(self.bpm_label)
-
-        self.blank_beat_spinBox = QSpinBox(self.centralwidget)
-        self.blank_beat_spinBox.setObjectName(u"blank_beat_spinBox")
-        self.blank_beat_spinBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.blank_beat_spinBox.setMaximum(10)
-        self.blank_beat_spinBox.setValue(2)
-
-        self.labeling_style_layout.addWidget(self.blank_beat_spinBox)
-
-        self.blank_beat_label = QLabel(self.centralwidget)
-        self.blank_beat_label.setObjectName(u"blank_beat_label")
-        self.blank_beat_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.labeling_style_layout.addWidget(self.blank_beat_label)
-
-
-        self.overall_layout.addLayout(self.labeling_style_layout)
-
-        self.save_path_layout = QHBoxLayout()
-        self.save_path_layout.setObjectName(u"save_path_layout")
-        self.save_path_label = QLabel(self.centralwidget)
-        self.save_path_label.setObjectName(u"save_path_label")
-        self.save_path_label.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.save_path_layout.addWidget(self.save_path_label)
-
-        self.save_path_lineEdit = QLineEdit(self.centralwidget)
-        self.save_path_lineEdit.setObjectName(u"save_path_lineEdit")
-        self.save_path_lineEdit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.save_path_lineEdit.setReadOnly(True)
-
-        self.save_path_layout.addWidget(self.save_path_lineEdit)
-
-        self.save_path_button = QPushButton(self.centralwidget)
-        self.save_path_button.setObjectName(u"save_path_button")
-        self.save_path_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.save_path_button.setCheckable(False)
-
-        self.save_path_layout.addWidget(self.save_path_button)
-
-
-        self.overall_layout.addLayout(self.save_path_layout)
-
-        self.save_file_types_layout = QHBoxLayout()
-        self.save_file_types_layout.setObjectName(u"save_file_types_layout")
-        self.reclist_checkBox = QCheckBox(self.centralwidget)
-        self.reclist_checkBox.setObjectName(u"reclist_checkBox")
-        self.reclist_checkBox.setChecked(True)
-
-        self.save_file_types_layout.addWidget(self.reclist_checkBox)
-
-        self.oto_checkBox = QCheckBox(self.centralwidget)
-        self.oto_checkBox.setObjectName(u"oto_checkBox")
-        self.oto_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.save_file_types_layout.addWidget(self.oto_checkBox)
-
-        self.presamp_checkBox = QCheckBox(self.centralwidget)
-        self.presamp_checkBox.setObjectName(u"presamp_checkBox")
-        self.presamp_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.save_file_types_layout.addWidget(self.presamp_checkBox)
-
-        self.vsdxmf_checkBox = QCheckBox(self.centralwidget)
-        self.vsdxmf_checkBox.setObjectName(u"vsdxmf_checkBox")
-        self.vsdxmf_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.save_file_types_layout.addWidget(self.vsdxmf_checkBox)
-
-        self.lsd_checkBox = QCheckBox(self.centralwidget)
-        self.lsd_checkBox.setObjectName(u"lsd_checkBox")
-        self.lsd_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-
-        self.save_file_types_layout.addWidget(self.lsd_checkBox)
-
-
-        self.overall_layout.addLayout(self.save_file_types_layout)
-
-        self.bottom_button_layout = QHBoxLayout()
-        self.bottom_button_layout.setObjectName(u"bottom_button_layout")
-        self.preview_button = QPushButton(self.centralwidget)
-        self.preview_button.setObjectName(u"preview_button")
-        self.preview_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.preview_button.setCheckable(False)
-
-        self.bottom_button_layout.addWidget(self.preview_button)
-
-        self.save_button = QPushButton(self.centralwidget)
-        self.save_button.setObjectName(u"save_button")
-        self.save_button.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        self.save_button.setCheckable(False)
-
-        self.bottom_button_layout.addWidget(self.save_button)
-
-
-        self.overall_layout.addLayout(self.bottom_button_layout)
-
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menuBar = QMenuBar(MainWindow)
-        self.menuBar.setObjectName(u"menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 466, 22))
-        self.menuFile = QMenu(self.menuBar)
-        self.menuFile.setObjectName(u"menuFile")
-        self.menuSetting = QMenu(self.menuBar)
-        self.menuSetting.setObjectName(u"menuSetting")
-        self.menuLanguage = QMenu(self.menuSetting)
-        self.menuLanguage.setObjectName(u"menuLanguage")
-        self.menuEdit = QMenu(self.menuBar)
-        self.menuEdit.setObjectName(u"menuEdit")
-        MainWindow.setMenuBar(self.menuBar)
-
-        self.menuBar.addAction(self.menuFile.menuAction())
-        self.menuBar.addAction(self.menuEdit.menuAction())
-        self.menuBar.addAction(self.menuSetting.menuAction())
-        self.menuFile.addAction(self.load_action)
-        self.menuFile.addAction(self.export_action)
-        self.menuFile.addAction(self.export_as_action)
-        self.menuSetting.addAction(self.menuLanguage.menuAction())
-        self.menuLanguage.addAction(self.set_english_action)
-        self.menuLanguage.addAction(self.set_simplified_chinese_action)
-        self.menuLanguage.addAction(self.set_japanese_action)
-        self.menuEdit.addAction(self.undo_action)
-        self.menuEdit.addAction(self.redo_action)
-
-        self.retranslateUi(MainWindow)
-
-        QMetaObject.connectSlotsByName(MainWindow)
-    # setupUi
-
-    def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QMainWindow.tr(u"cvvc reclist generator", None))
-        self.load_action.setText(QMainWindow.tr(u"Load", None))
-#if QT_CONFIG(tooltip)
-        self.load_action.setToolTip(QMainWindow.tr(u"Load", None))
-#endif // QT_CONFIG(tooltip)
-#if QT_CONFIG(shortcut)
-        self.load_action.setShortcut(QMainWindow.tr(u"Ctrl+O", None))
-#endif // QT_CONFIG(shortcut)
-        self.export_action.setText(QMainWindow.tr(u"Export", None))
-#if QT_CONFIG(shortcut)
-        self.export_action.setShortcut(QMainWindow.tr(u"Ctrl+S", None))
-#endif // QT_CONFIG(shortcut)
-        self.export_as_action.setText(QMainWindow.tr(u"Export as ...", None))
-#if QT_CONFIG(shortcut)
-        self.export_as_action.setShortcut(QMainWindow.tr(u"Ctrl+Shift+S", None))
-#endif // QT_CONFIG(shortcut)
-        self.set_english_action.setText(QMainWindow.tr(u"English", None))
-        self.set_simplified_chinese_action.setText(QMainWindow.tr(u"\u7b80\u4f53\u4e2d\u6587", None))
-        self.action.setText(QMainWindow.tr(u"\u7e41\u9ad4\u4e2d\u6587\uff08\u81fa\u7063\uff09", None))
-        self.set_japanese_action.setText(QMainWindow.tr(u"\u65e5\u672c\u8a9e", None))
-        self.undo_action.setText(QMainWindow.tr(u"Undo", None))
-#if QT_CONFIG(shortcut)
-        self.undo_action.setShortcut(QMainWindow.tr(u"Ctrl+Z", None))
-#endif // QT_CONFIG(shortcut)
-        self.redo_action.setText(QMainWindow.tr(u"Redo", None))
-#if QT_CONFIG(shortcut)
-        self.redo_action.setShortcut(QMainWindow.tr(u"Ctrl+Y", None))
-#endif // QT_CONFIG(shortcut)
-        self.dict_file_label.setText(QMainWindow.tr(u"Dict file: ", None))
-        self.dict_file_button.setText(QMainWindow.tr(u"Select", None))
-        self.redirect_config_label.setText(QMainWindow.tr(u"Redirect config: ", None))
-        self.redirect_config_button.setText(QMainWindow.tr(u"Select", None))
-        self.alias_config_label.setText(QMainWindow.tr(u"Alias config: ", None))
-        self.alias_config_button.setText(QMainWindow.tr(u"Select", None))
-        self.reclist_style_label.setText(QMainWindow.tr(u"Reclist style: ", None))
-        self.two_mora_checkBox.setText(QMainWindow.tr(u"2 mora", None))
-        self.haru_style_checkBox.setText(QMainWindow.tr(u"Haru.J style", None))
-        self.mora_x_checkBox.setText(QMainWindow.tr(u"mora x", None))
-        self.reclist_detail_label.setText(QMainWindow.tr(u"Reclist detail: ", None))
-        self.length_label.setText(QMainWindow.tr(u"Length", None))
-        self.cv_head_checkBox.setText(QMainWindow.tr(u"CV head", None))
-        self.full_cv_checkBox.setText(QMainWindow.tr(u"Full CV", None))
-        self.c_head_4_utau_checkBox.setText(QMainWindow.tr(u"C head for UTAU", None))
-        self.labeling_style_label.setText(QMainWindow.tr(u"Labeling style: ", None))
-        self.bpm_label.setText(QMainWindow.tr(u"bpm", None))
-        self.blank_beat_label.setText(QMainWindow.tr(u"blank beat", None))
-        self.save_path_label.setText(QMainWindow.tr(u"Save path: ", None))
-        self.save_path_lineEdit.setText(QMainWindow.tr(u"./result", None))
-        self.save_path_button.setText(QMainWindow.tr(u"Select", None))
-        self.reclist_checkBox.setText(QMainWindow.tr(u"reclist", None))
-        self.oto_checkBox.setText(QMainWindow.tr(u"oto", None))
-        self.presamp_checkBox.setText(QMainWindow.tr(u"presamp", None))
-        self.vsdxmf_checkBox.setText(QMainWindow.tr(u"vsdxmf", None))
-        self.lsd_checkBox.setText(QMainWindow.tr(u"lsd", None))
-        self.preview_button.setText(QMainWindow.tr(u"Preview", None))
-#if QT_CONFIG(shortcut)
-        self.preview_button.setShortcut(QMainWindow.tr(u"Ctrl+P", None))
-#endif // QT_CONFIG(shortcut)
-        self.save_button.setText(QMainWindow.tr(u"Save", None))
-#if QT_CONFIG(shortcut)
-        self.save_button.setShortcut(QMainWindow.tr(u"Return", None))
-#endif // QT_CONFIG(shortcut)
-        self.menuFile.setTitle(QMainWindow.tr(u"File", None))
-        self.menuSetting.setTitle(QMainWindow.tr(u"Setting", None))
-        self.menuLanguage.setTitle(QMainWindow.tr(u"Language", None))
-        self.menuEdit.setTitle(QMainWindow.tr(u"Edit", None))
-    # retranslateUi
-
+import configparser
+from .main_window_ui import Ui_MainWindow
+from .undo_framework import LineEditSetText, LoadParametersCommand
+from .pop_message_box import *
+from .cvvc_reclist_generator_model import Parameters, CvvcReclistGeneratorModel
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QApplication
+from PySide6.QtGui import QUndoStack
+import os
+
+
+def read_parameters_config(config_path: str) -> Parameters:
+    config = configparser.ConfigParser()
+    config.read(config_path, encoding="utf-8")
+    parameters = Parameters(
+        dict_file=config["PARAMETERS"]["dict_file"],
+        alias_config=config["PARAMETERS"]["alias_config"],
+        redirect_config=config["PARAMETERS"]["redirect_config"],
+        save_path=config["PARAMETERS"]["save_path"],
+        is_two_mora=config["PARAMETERS"].getboolean("is_two_mora"),
+        is_haru_style=config["PARAMETERS"].getboolean("is_haru_style"),
+        is_mora_x=config["PARAMETERS"].getboolean("is_mora_x"),
+        length=config["PARAMETERS"].getint("length"),
+        is_full_cv=config["PARAMETERS"].getboolean("is_full_cv"),
+        is_cv_head=config["PARAMETERS"].getboolean("is_cv_head"),
+        is_c_head_4_utau=config["PARAMETERS"].getboolean("is_c_head_4_utau"),
+        bpm=config["PARAMETERS"].getint("bpm"),
+        blank_beat=config["PARAMETERS"].getint("blank_beat"),
+        do_save_reclist=config["PARAMETERS"].getboolean("do_save_reclist"),
+        do_save_oto=config["PARAMETERS"].getboolean("do_save_oto"),
+        do_save_presamp=config["PARAMETERS"].getboolean("do_save_presamp"),
+        do_save_vsdxmf=config["PARAMETERS"].getboolean("do_save_vsdxmf"),
+        do_save_lsd=config["PARAMETERS"].getboolean("do_save_lsd"),
+    )
+    return parameters
+
+
+class MainWindow(QMainWindow, Ui_MainWindow):
+    """main window of the cvvc reclist generator."""
+
+    def __init__(self, parameters: Parameters):
+        super().__init__()
+
+        self.setupUi(self)
+
+        self.parameters = parameters
+        self.parameters_config_path: str = ""
+        self.undo_stack = QUndoStack()
+
+        self.title = self.windowTitle()
+
+        self.dict_file_button.clicked.connect(self.select_dict_file)
+        self.alias_config_button.clicked.connect(self.select_alias_config)
+        self.redirect_config_button.clicked.connect(self.select_redirect_config)
+        self.save_path_button.clicked.connect(self.select_save_path)
+
+        self.two_mora_checkBox.stateChanged.connect(self.disable_mora_x_checkBox)
+        self.mora_x_checkBox.stateChanged.connect(self.disable_two_mora_checkBox)
+
+        self.preview_button.clicked.connect(self.pop_preview_dialog)
+
+        self.export_action.triggered.connect(self.export_parameters_config)
+        self.export_as_action.triggered.connect(self.export_parameters_config)
+        self.load_action.triggered.connect(self.load_parameters_config)
+
+        self.set_english_action.triggered.connect(self.set_language)
+        self.set_simplified_chinese_action.triggered.connect(self.set_language)
+        self.set_japanese_action.triggered.connect(self.set_language)
+
+        self.undo_action.triggered.connect(self.undo_stack.undo)
+        self.redo_action.triggered.connect(self.undo_stack.redo)
+
+        self.save_button.clicked.connect(self.save_files)
+
+    def select_dict_file(self):
+        file_name = QFileDialog.getOpenFileName(
+            self,
+            self.tr("Select a dictionary file"),
+            "./",
+            self.tr("Dict file (*.txt);;Presamp file (*.ini);;LSD file (*.lsd)"),
+        )[0]
+        if file_name:
+            # try to get relative path
+            try:
+                file_name: str = os.path.relpath(file_name)
+            except ValueError:
+                pass
+
+            self.undo_stack.push(LineEditSetText(self.dict_file_lineEdit, file_name))
+            self.dict_file_lineEdit.setText(file_name)
+
+    def select_alias_config(self):
+        file_name = QFileDialog.getOpenFileName(
+            self, self.tr("Select an alias config"), "./", self.tr("Alias file (*.ini)")
+        )[0]
+        if file_name:
+            # try to get relative path
+            try:
+                file_name: str = os.path.relpath(file_name)
+            except ValueError:
+                pass
+
+            self.undo_stack.push(LineEditSetText(self.alias_config_lineEdit, file_name))
+            self.alias_config_lineEdit.setText(file_name)
+
+    def select_redirect_config(self):
+        file_name = QFileDialog.getOpenFileName(
+            self,
+            self.tr("Select a redirect config"),
+            "./",
+            self.tr("Redirect file (*.ini)"),
+        )[0]
+        if file_name:
+            # try to get relative path
+            try:
+                file_name: str = os.path.relpath(file_name)
+            except ValueError:
+                pass
+            self.undo_stack.push(
+                LineEditSetText(self.redirect_config_lineEdit, file_name)
+            )
+            self.redirect_config_lineEdit.setText(file_name)
+
+    def select_save_path(self):
+        path_name = QFileDialog.getExistingDirectory(
+            self, self.tr("Select a save path"), "./"
+        )
+        if path_name:
+            # try to get relative path
+            try:
+                path_name = os.path.relpath(path_name)
+            except ValueError:
+                pass
+            self.undo_stack.push(LineEditSetText(self.save_path_lineEdit, path_name))
+            self.save_path_lineEdit.setText(path_name)
+
+    def disable_mora_x_checkBox(self):
+        if self.two_mora_checkBox.isChecked():
+            self.mora_x_checkBox.setEnabled(False)
+        else:
+            self.mora_x_checkBox.setEnabled(True)
+
+    def disable_two_mora_checkBox(self):
+        if self.mora_x_checkBox.isChecked():
+            self.two_mora_checkBox.setEnabled(False)
+        else:
+            self.two_mora_checkBox.setEnabled(True)
+
+    def pop_preview_dialog(self):
+        if error_message := self.check_essential_parameter():
+            pop_error_message_box(self.tr("Warning"), error_message)
+        else:
+            preview_dialog = PreviewDialog()
+            parameters = self.get_parameters()
+            generator = CvvcReclistGeneratorModel(parameters)
+            preview_dialog.receive_model(generator)
+
+            preview_dialog.reclist_textEdit.setText(generator.get_reclist_str())
+            preview_dialog.reclist_number_label.setText(
+                self.tr(f"total lines: {len(generator.reclist_generator.reclist)}")
+            )
+
+            preview_dialog.oto_textEdit.setText(generator.get_oto_str())
+            preview_dialog.oto_number_label.setText(
+                self.tr(f"total lines: {len(generator.oto_generator.oto_union)}")
+            )
+
+            if parameters.do_save_presamp:
+                preview_dialog.presamp_textEdit.setText(generator.get_presamp_str())
+
+            preview_dialog.vsdxmf_textEdit.setText(generator.get_vsdxmf_str())
+            preview_dialog.vsdxmf_number_label.setText(
+                self.tr(f"total lines: {len(generator.vsdxmf_generator.vsdxmf_union)}")
+            )
+
+            if parameters.do_save_lsd:
+                preview_dialog.lsd_textEdit.setText(generator.get_lsd_str())
+
+            preview_dialog.exec()
+
+    def check_essential_parameter(self) -> str | None:
+        if not self.dict_file_lineEdit.text():
+            return self.tr("Dictionary file is not selected.")
+
+        if not (self.oto_checkBox.isChecked() or self.vsdxmf_checkBox.isChecked()):
+            return self.tr("At least one label type is needed to be selected.")
+
+    def get_parameters(self) -> Parameters:
+        parameters = Parameters(
+            dict_file=self.dict_file_lineEdit.text(),
+            alias_config=self.alias_config_lineEdit.text(),
+            redirect_config=self.redirect_config_lineEdit.text(),
+            save_path=self.save_path_lineEdit.text(),
+            is_two_mora=self.two_mora_checkBox.isChecked(),
+            is_haru_style=self.haru_style_checkBox.isChecked(),
+            is_mora_x=self.mora_x_checkBox.isChecked(),
+            length=self.length_spinBox.value(),
+            is_full_cv=self.full_cv_checkBox.isChecked(),
+            is_cv_head=self.cv_head_checkBox.isChecked(),
+            is_c_head_4_utau=self.c_head_4_utau_checkBox.isChecked(),
+            bpm=self.bpm_spinBox.value(),
+            blank_beat=self.blank_beat_spinBox.value(),
+            do_save_reclist=self.reclist_checkBox.isChecked(),
+            do_save_oto=self.oto_checkBox.isChecked(),
+            do_save_presamp=self.presamp_checkBox.isChecked(),
+            do_save_vsdxmf=self.vsdxmf_checkBox.isChecked(),
+            do_save_lsd=self.lsd_checkBox.isChecked(),
+        )
+        return parameters
+
+    def export_parameters_config(self) -> None:
+        """if current config file exist, overwrite it, otherwise save it."""
+
+        config = configparser.ConfigParser()
+        config["PARAMETERS"] = self.get_parameters().__dict__
+
+        if not self.parameters_config_path:
+            config_path = QFileDialog.getSaveFileName(
+                self,
+                self.tr("Select a save path"),
+                "./config.ini",
+                self.tr("Config file (*.ini)"),
+            )[0]
+        else:
+            config_path = self.parameters_config_path
+
+        config_name = config_path.split("/")[-1]
+        self.setWindowTitle(f"{self.title} - {config_name}")
+
+        if config_path:
+            with open(config_path, mode="w", encoding="utf-8") as f:
+                config.write(f)
+
+    def load_parameters(self, parameters: Parameters) -> None:
+        self.dict_file_lineEdit.setText(parameters.dict_file)
+        self.redirect_config_lineEdit.setText(parameters.redirect_config)
+        self.alias_config_lineEdit.setText(parameters.alias_config)
+        self.save_path_lineEdit.setText(parameters.save_path)
+
+        self.two_mora_checkBox.setChecked(parameters.is_two_mora)
+        self.haru_style_checkBox.setChecked(parameters.is_haru_style)
+        self.mora_x_checkBox.setChecked(parameters.is_mora_x)
+
+        self.length_spinBox.setValue(parameters.length)
+        self.full_cv_checkBox.setChecked(parameters.is_full_cv)
+        self.cv_head_checkBox.setChecked(parameters.is_cv_head)
+        self.c_head_checkBox.setChecked(parameters.is_c_head_4_utau)
+
+        self.bpm_spinBox.setValue(parameters.bpm)
+        self.blank_beat_spinBox.setValue(parameters.blank_beat)
+
+        self.reclist_checkBox.setChecked(parameters.do_save_reclist)
+        self.oto_checkBox.setChecked(parameters.do_save_oto)
+        self.presamp_checkBox.setChecked(parameters.do_save_presamp)
+        self.vsdxmf_checkBox.setChecked(parameters.do_save_vsdxmf)
+        self.lsd_checkBox.setChecked(parameters.do_save_lsd)
+
+    def load_parameters_config(self):
+        """read a parameters config and load it."""
+
+        config_path = QFileDialog.getOpenFileName(
+            self,
+            self.tr("Select a parameters config"),
+            "./",
+            self.tr("Config file (*.ini)"),
+        )[0]
+        self.parameters_config_path = config_path
+
+        config_name = config_path.split("/")[-1]
+        self.setWindowTitle(f"{self.windowTitle()} - {config_name}")
+
+        parameters = self.read_parameters_config(config_path)
+        self.undo_stack.push(LoadParametersCommand(parameters, self))
+        self.load_parameters(parameters)
+
+    def save_files(self):
+        parameters = self.get_parameters()
+        generator = CvvcReclistGeneratorModel(parameters)
+        if parameters.do_save_reclist:
+            generator.save_reclist()
+        if parameters.do_save_oto:
+            generator.save_oto()
+        if parameters.do_save_presamp:
+            generator.save_presamp()
+        if parameters.do_save_vsdxmf:
+            generator.save_vsdxmf()
+        if parameters.do_save_lsd:
+            generator.save_lsd()
+
+        pop_success_message_box(self.tr("(>^ω^<)"), self.tr("Save successfully"))
+
+    def set_language(self):
+        """set language to reclist application"""
+        result = self.translator.load("./translations/cn/zh-CN")
+        print(result)
+        app = QApplication.instance()
+        result = app.installTranslator(self.translator)
+        print(result)
+        self.retranslateUi(self)

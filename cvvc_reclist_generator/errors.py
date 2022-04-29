@@ -24,6 +24,10 @@ class ArgumentTypeError(Exception):
     """the type of given argument is invalid"""
     
 
+class AliasError(Exception):
+   """No such an alias"""
+
+
 class AliasConfigTypeError(Exception):
     """type in alias config is invalid"""
     

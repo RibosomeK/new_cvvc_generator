@@ -1,23 +1,51 @@
 import configparser
 import os
 
-from .main_window import Ui_MainWindow
-from .preview_dialog import Ui_PreviewDialog
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QDialog, QMessageBox
+
+from .main_window_ui import Ui_MainWindow
+from .preview_dialog_ui import Ui_PreviewDialog
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QFileDialog,
+    QDialog,
+    QMessageBox,
+    QApplication,
+)
 from PySide6.QtGui import QUndoStack
+from PySide6.QtCore import QTranslator
 from .undo_framework import LineEditSetText, LoadParametersCommand
 from .cvvc_reclist_generator_model import Parameters, CvvcReclistGeneratorModel
 from .label_highlighter import OtoHighlighter, VsdxmfHighlighter
 
 
-class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
-    def __init__(self):
+def pop_error_message_box(
+    error_type: str, error_message: str, error_icon=QMessageBox.Warning
+) -> None:
+    """pop an error message box."""
+    error_message_box = QMessageBox()
+    error_message_box.setWindowTitle(error_type)
+    error_message_box.setIcon(error_icon)
+    error_message_box.setText(error_message)
+    error_message_box.exec()
+
+
+def pop_success_message_box(success_hint: str, success_message: str) -> None:
+    """pop a success message box"""
+    success_message_box = QMessageBox()
+    success_message_box.setWindowTitle(success_hint)
+    success_message_box.setText(success_message)
+    success_message_box.exec()
+
+
+class MainWindow(QMainWindow, Ui_MainWindow):
+    def __init__(self) -> None:
         super().__init__()
         self.setupUi(self)
 
+        self.parameters = Parameters()
         self.parameters_config_path: str = ""
         self.undo_stack = QUndoStack()
-        
+
         self.title = self.windowTitle()
 
         self.dict_file_button.clicked.connect(self.select_dict_file)
@@ -34,12 +62,14 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         self.export_as_action.triggered.connect(self.export_parameters_as_config)
         self.load_action.triggered.connect(self.load_parameters_config)
 
+        self.set_english_action.triggered.connect(self.set_language)
+        self.set_simplified_chinese_action.triggered.connect(self.set_language)
+        self.set_japanese_action.triggered.connect(self.set_language)
+
         self.undo_action.triggered.connect(self.undo_stack.undo)
         self.redo_action.triggered.connect(self.undo_stack.redo)
 
         self.save_button.clicked.connect(self.save_files)
-
-        self.show()
 
     def select_dict_file(self):
         file_name = QFileDialog.getOpenFileName(
@@ -57,6 +87,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
 
             self.undo_stack.push(LineEditSetText(self.dict_file_lineEdit, file_name))
             self.dict_file_lineEdit.setText(file_name)
+            self.parameters.dict_file = file_name
 
     def select_alias_config(self):
         file_name = QFileDialog.getOpenFileName(
@@ -71,6 +102,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
 
             self.undo_stack.push(LineEditSetText(self.alias_config_lineEdit, file_name))
             self.alias_config_lineEdit.setText(file_name)
+            self.parameters.alias_config = file_name
 
     def select_redirect_config(self):
         file_name = QFileDialog.getOpenFileName(
@@ -89,6 +121,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
                 LineEditSetText(self.redirect_config_lineEdit, file_name)
             )
             self.redirect_config_lineEdit.setText(file_name)
+            self.parameters.redirect_config = file_name
 
     def select_save_path(self):
         path_name = QFileDialog.getExistingDirectory(
@@ -102,6 +135,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
                 pass
             self.undo_stack.push(LineEditSetText(self.save_path_lineEdit, path_name))
             self.save_path_lineEdit.setText(path_name)
+            self.parameters.save_path = path_name
 
     def disable_mora_x_checkBox(self):
         if self.two_mora_checkBox.isChecked():
@@ -117,11 +151,7 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
 
     def pop_preview_dialog(self):
         if error_message := self.check_essential_parameter():
-            warning_message_box = QMessageBox()
-            warning_message_box.setWindowTitle(self.tr("Warning"))
-            warning_message_box.setIcon(QMessageBox.Warning)
-            warning_message_box.setText(error_message)
-            warning_message_box.exec()
+            pop_error_message_box(self.tr("Warning"), error_message)
         else:
             preview_dialog = PreviewDialog()
             parameters = self.get_parameters()
@@ -304,10 +334,16 @@ class CvvcReclistGeneratorGui(QMainWindow, Ui_MainWindow):
         if parameters.do_save_lsd:
             generator.save_lsd()
 
-        finish_message_box = QMessageBox()
-        finish_message_box.setWindowTitle(self.tr("(>^ω^<)"))
-        finish_message_box.setText(self.tr("Save successfully"))
-        finish_message_box.exec()
+        pop_success_message_box(self.tr("(>^ω^<)"), self.tr("Save successfully"))
+
+    def set_language(self):
+        """set language to reclist application"""
+        result = self.translator.load("./translations/cn/zh-CN")
+        print(result)
+        app = QApplication.instance()
+        result = app.installTranslator(self.translator)
+        print(result)
+        self.retranslateUi(self)
 
 
 class PreviewDialog(QDialog, Ui_PreviewDialog):
@@ -315,16 +351,11 @@ class PreviewDialog(QDialog, Ui_PreviewDialog):
         super().__init__()
         self.setupUi(self)
 
-        self.cancel_button.clicked.connect(self.close_dialog)
+        self.cancel_button.clicked.connect(self.close)
         self.save_button.clicked.connect(self.save_files)
 
         oto_highlighter = OtoHighlighter(self.oto_textEdit.document())
         vsdxmf_highlighter = VsdxmfHighlighter(self.vsdxmf_textEdit.document())
-
-        self.show()
-
-    def close_dialog(self):
-        self.close()
 
     def save_files(self):
         if self.generator.parameters.do_save_reclist:
@@ -338,10 +369,17 @@ class PreviewDialog(QDialog, Ui_PreviewDialog):
         if self.generator.parameters.do_save_lsd:
             self.generator.save_lsd()
 
-        finish_message_box = QMessageBox()
-        finish_message_box.setWindowTitle(self.tr("(>^ω^<)"))
-        finish_message_box.setText(self.tr("Save successfully"))
-        finish_message_box.exec()
+        pop_success_message_box(self.tr("(>^ω^<)"), self.tr("Save successfully"))
 
     def receive_model(self, generator: CvvcReclistGeneratorModel):
         self.generator = generator
+
+
+class CvvcReclistGeneratorGui:
+    def __init__(self):
+        self.translator = QTranslator()
+
+        self.main_window = MainWindow()
+        self.preview_dialog = PreviewDialog()
+
+        self.main_window.show()

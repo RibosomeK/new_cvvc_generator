@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pickle import FALSE
 import re
 from cvvc_reclist_generator import (
     CvvWorkshop,
@@ -12,28 +13,28 @@ from cvvc_reclist_generator import (
 
 @dataclass
 class Parameters:
-    dict_file: str
-    alias_config: str
-    redirect_config: str
-    save_path: str
+    dict_file: str = ''
+    alias_config: str = ''
+    redirect_config: str = ''
+    save_path: str = './result'
 
-    is_two_mora: bool
-    is_haru_style: bool
-    is_mora_x: bool
+    is_two_mora: bool = False
+    is_haru_style: bool = False
+    is_mora_x: bool = False
 
-    length: int
-    is_full_cv: bool
-    is_cv_head: bool
-    is_c_head_4_utau: bool
+    length: int = 3
+    is_full_cv: bool = True
+    is_cv_head: bool = True
+    is_c_head_4_utau: bool = False
 
-    bpm: float
-    blank_beat: int
+    bpm: float = 130
+    blank_beat: int = 2
 
-    do_save_oto: bool
-    do_save_reclist: bool
-    do_save_presamp: bool
-    do_save_vsdxmf: bool
-    do_save_lsd: bool
+    do_save_oto: bool = True
+    do_save_reclist: bool = False
+    do_save_presamp: bool = False
+    do_save_vsdxmf: bool = False
+    do_save_lsd: bool = False
 
 
 class CvvcReclistGeneratorModel:

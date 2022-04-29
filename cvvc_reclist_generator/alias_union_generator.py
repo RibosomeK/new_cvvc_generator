@@ -1,8 +1,9 @@
 import configparser
 import re
-from typing import Optional
+import json
+from typing import Iterable, Optional
 from .cvv_dataclasses import AliasType, CvvWorkshop, VcSet, AliasUnion
-from .errors import AliasConfigTypeError, AliasNotExistError, AliasTypeError
+from .errors import AliasConfigTypeError, AliasNotExistError, AliasTypeError, AliasError
 
 
 class AliasUnionGenerator:
@@ -284,3 +285,116 @@ class AliasUnionGenerator:
                         raise AliasNotExistError(f"{alias} do not exist")
                     v_set.add(alias)
         return v_set
+    
+    def _read_alias_config(self, alias_config_path: str) -> tuple[AliasUnion, AliasUnion]:
+        """read an alias json file and return two alias union"""
+        
+        unneeded, needed = AliasUnion(), AliasUnion()
+        
+        unneeded_dict, needed_dict = self._open_and_check(alias_config_path)
+        
+        return unneeded, needed
+    
+    @staticmethod
+    def _read_alias_dict(dict) -> AliasUnion:
+        alias_union = AliasUnion()
+        
+        alias_union.c_head.update(dict["c_head"])
+        alias_union.c_head
+        
+        return alias_union
+    
+    def _open_and_check(self, alias_config_path: str) -> tuple[dict, dict]:
+        """open an alias json file and check it"""
+        
+        with open(alias_config_path, "r") as f:
+            unneeded_dict, needed_dict = json.load(f)["UNNEEDED"], json.load(f)["NEEDED"]
+        
+        if invalid_alias := self._check_config_section(unneeded_dict):
+            print("unneeded alias has following invalid alias:\n",
+                  invalid_alias)
+            raise AliasError()
+        if invalid_alias := self._check_config_section(needed_dict):
+            print("needed alias has following invalid alias:\n",
+                  invalid_alias)
+            raise AliasError()
+        
+        return unneeded_dict, needed_dict
+        
+    def _check_config_section(self, d_2check: dict) -> dict[str, list[str]]:
+        """check wheather the alias in one config section are valid or not.
+
+        Args:
+            d_2check (dict): loaded dictionary.
+
+        Returns:
+            dict[str, list[str]]: return invalid alias.
+        """
+        
+        invalid_alias: dict = {}
+        
+        for name, array in loop_list_in_dict(d_2check):
+            name = name.lower()
+            if name in ("c", "c_head"):
+                if invalids := self._check_c_validation(array):
+                    invalid_alias.setdefault(name, []).extend(invalids)
+            elif name in ("vr", "v"):
+                if invalids := self._check_v_validatin(array):
+                    invalid_alias.setdefault(name, []).extend(invalids)
+            elif name in ("cv", "cv_head"):
+                if invalids := self._check_cv_validation(array):
+                    invalid_alias.setdefault(name, []).extend(invalids)
+            elif name == "vc":
+                for vc in array:
+                    v, c = vc.split(" ")
+                    if invalids := self._check_v_validatin(v):
+                         invalid_alias.setdefault(name, []).extend(invalids)
+                    if invalids := self._check_c_validation(c):
+                        invalid_alias.setdefault(name, []).extend(invalids)
+            elif name == "vcv":
+                for vcv in array:
+                    v, cv = vcv.split(" ")
+                    if invalids := self._check_v_validatin(v):
+                        invalid_alias.setdefault(name, []).extend(invalids)
+                    if invalids := self._check_cv_validation(cv):
+                        invalid_alias.setdefault(name, []).extend(invalids)
+            else:
+                raise AliasTypeError(f"Alias type: {name} is invalid")
+                            
+        return invalid_alias
+    
+    def _check_c_validation(self, *args) -> tuple[str, ...]:
+        """check if the given consonants are valid or not. 
+        in other words, do they exist in given dictionary.
+
+        Returns:
+            tuple[str, ...]: return all invalid consonants.
+        """
+                
+        return tuple({c for c in args if c not in self.cvv_workshop.c_dict})
+    
+    def _check_v_validatin(self, *args) -> tuple[str, ...]:
+        """check if the given vowels are valid or not. 
+        in other words, do they exist in given dictionary.
+
+        Returns:
+            tuple[str, ...]: return all invalid vowels.
+        """
+                
+        return tuple({v for v in args if v not in self.cvv_workshop.v_dict})
+    
+    def _check_cv_validation(self, *args) -> tuple[str, ...]:
+        return tuple({cv for cv in args if cv not in self.cvv_workshop.cv_dict})
+    
+        
+        
+def loop_list_in_dict(d: dict) -> Iterable[tuple[str, list[str]]]:
+    """loop over all the list in a dict"""
+    for k, v in d.items():
+        if isinstance(v, list):
+            yield k, v
+        elif isinstance(v, dict):
+            loop_list_in_dict(v)
+        else:
+            raise TypeError(f"{v} is not a dict or list")
+        
