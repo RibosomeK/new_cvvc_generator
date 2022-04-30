@@ -1,11 +1,8 @@
 from dataclasses import dataclass
-from pickle import FALSE
-import re
 from cvvc_reclist_generator import (
     CvvWorkshop,
     AliasUnionGenerator,
     ReclistGenerator,
-    ReclistChecker,
     OtoGenerator,
     VsdxmfGenerator,
 )
@@ -13,10 +10,10 @@ from cvvc_reclist_generator import (
 
 @dataclass
 class Parameters:
-    dict_file: str = ''
-    alias_config: str = ''
-    redirect_config: str = ''
-    save_path: str = './result'
+    dict_file: str = ""
+    alias_config: str = ""
+    redirect_config: str = ""
+    save_path: str = "./result"
 
     is_two_mora: bool = False
     is_haru_style: bool = False
@@ -35,6 +32,9 @@ class Parameters:
     do_save_presamp: bool = False
     do_save_vsdxmf: bool = False
     do_save_lsd: bool = False
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
 
 
 class CvvcReclistGeneratorModel:
@@ -57,7 +57,7 @@ class CvvcReclistGeneratorModel:
             alias_config = parameters.alias_config
         else:
             alias_config = None
-            
+
         if parameters.is_c_head_4_utau or parameters.do_save_vsdxmf:
             is_c_head = True
         else:
@@ -68,7 +68,7 @@ class CvvcReclistGeneratorModel:
             parameters.is_full_cv,
             alias_config,
         )
-        
+
         alias_union_4_utau = alias_union.copy()
         if not parameters.is_c_head_4_utau:
             alias_union_4_utau.c_head.clear()
@@ -88,15 +88,13 @@ class CvvcReclistGeneratorModel:
             self.oto_generator.gen_oto(
                 self.reclist_generator.reclist,
                 alias_union_4_utau.copy(),
-                parameters.bpm
+                parameters.bpm,
             )
 
         self.vsdxmf_generator = VsdxmfGenerator(self.cvv_workshop)
         if parameters.do_save_vsdxmf:
             self.vsdxmf_generator.gen_vsdxmf(
-                self.reclist_generator.reclist,
-                alias_union.copy(),
-                parameters.bpm
+                self.reclist_generator.reclist, alias_union.copy(), parameters.bpm
             )
 
     def get_reclist_str(self) -> str | None:

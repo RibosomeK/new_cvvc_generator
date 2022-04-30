@@ -47,7 +47,7 @@ class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
 
         Args:
             is_full_cv (Optional[bool], optional): Defaults to False.
-            By default we use simplified cv if there is one, 
+            By default we use simplified cv if there is one,
             or set parameter is_full_cv to True.
 
         Returns:
@@ -216,7 +216,7 @@ class AliasUnion:
     @cv_head.setter
     def cv_head(self, value: set[str]):
         self.__data["cv_head"] = value
-        
+
     @property
     def c(self) -> set[str]:
         return self.__data["c"]
@@ -727,13 +727,13 @@ class CvvWorkshop:
     def save_lsd(self, lsd_dir: str) -> None:
         with open(lsd_dir, mode="w", encoding="utf-8") as f:
             f.write(self.get_lsd_str())
-            
+
     def get_simplified_cv(self) -> list[tuple[str, str]]:
         """return a list that contain (simplified cv, full cv)"""
-        
+
         cv_list = []
         for key, values in self.cv_dict.items():
             for value in values:
                 cv_list.append((key, value.cvv))
-                
+
         return cv_list

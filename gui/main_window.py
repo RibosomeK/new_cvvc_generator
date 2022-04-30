@@ -2,8 +2,16 @@ import configparser
 from .main_window_ui import Ui_MainWindow
 from .undo_framework import LineEditSetText, LoadParametersCommand
 from .pop_message_box import *
+from .preview_dialog import PreviewDialog
 from .cvvc_reclist_generator_model import Parameters, CvvcReclistGeneratorModel
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QApplication
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QFileDialog,
+    QApplication,
+    QLineEdit,
+    QCheckBox,
+    QSpinBox,
+)
 from PySide6.QtGui import QUndoStack
 import os
 
@@ -43,6 +51,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.parameters = parameters
+        self.setup_parameters()
+
         self.parameters_config_path: str = ""
         self.undo_stack = QUndoStack()
 
@@ -71,6 +81,41 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.save_button.clicked.connect(self.save_files)
 
+    def setup_parameters(self):
+        """update parameters when changed"""
+        self.dict_file_lineEdit.textChanged.connect(self._update_parameters)
+        self.redirect_config_lineEdit.textChanged.connect(self._update_parameters)
+        self.alias_config_lineEdit.textChanged.connect(self._update_parameters)
+        self.save_path_lineEdit.textChanged.connect(self._update_parameters)
+
+        self.two_mora_checkBox.stateChanged.connect(self._update_parameters)
+        self.haru_style_checkBox.stateChanged.connect(self._update_parameters)
+        self.mora_x_checkBox.stateChanged.connect(self._update_parameters)
+
+        self.cv_head_checkBox.stateChanged.connect(self._update_parameters)
+        self.full_cv_checkBox.stateChanged.connect(self._update_parameters)
+        self.c_head_4_utau_checkBox.stateChanged.connect(self._update_parameters)
+
+        self.reclist_checkBox.stateChanged.connect(self._update_parameters)
+        self.presamp_checkBox.stateChanged.connect(self._update_parameters)
+        self.oto_checkBox.stateChanged.connect(self._update_parameters)
+        self.vsdxmf_checkBox.stateChanged.connect(self._update_parameters)
+        self.lsd_checkBox.stateChanged.connect(self._update_parameters)
+
+        self.length_spinBox.valueChanged.connect(self._update_parameters)
+        self.bpm_spinBox.valueChanged.connect(self._update_parameters)
+        self.blank_beat_spinBox.valueChanged.connect(self._update_parameters)
+
+    def _update_parameters(self):
+        """update slot"""
+        sender = self.sender()
+        if isinstance(sender, QLineEdit):
+            self.parameters[sender.accessibleName()] = sender.text()
+        elif isinstance(sender, QCheckBox):
+            self.parameters[sender.accessibleName()] = sender.isChecked()
+        elif isinstance(sender, QSpinBox):
+            self.parameters[sender.accessibleName()] = sender.value()
+
     def select_dict_file(self):
         file_name = QFileDialog.getOpenFileName(
             self,
@@ -90,7 +135,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def select_alias_config(self):
         file_name = QFileDialog.getOpenFileName(
-            self, self.tr("Select an alias config"), "./", self.tr("Alias file (*.ini)")
+            self,
+            self.tr("Select an alias config"),
+            "./",
+            self.tr("Alias file (*.json)"),
         )[0]
         if file_name:
             # try to get relative path
@@ -243,7 +291,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.length_spinBox.setValue(parameters.length)
         self.full_cv_checkBox.setChecked(parameters.is_full_cv)
         self.cv_head_checkBox.setChecked(parameters.is_cv_head)
-        self.c_head_checkBox.setChecked(parameters.is_c_head_4_utau)
+        self.c_head_4_utau_checkBox.setChecked(parameters.is_c_head_4_utau)
 
         self.bpm_spinBox.setValue(parameters.bpm)
         self.blank_beat_spinBox.setValue(parameters.blank_beat)
@@ -268,7 +316,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         config_name = config_path.split("/")[-1]
         self.setWindowTitle(f"{self.windowTitle()} - {config_name}")
 
-        parameters = self.read_parameters_config(config_path)
+        parameters = read_parameters_config(config_path)
         self.undo_stack.push(LoadParametersCommand(parameters, self))
         self.load_parameters(parameters)
 

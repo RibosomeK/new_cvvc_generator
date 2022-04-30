@@ -18,4 +18,3 @@ def pop_success_message_box(success_hint: str, success_message: str) -> None:
     success_message_box.setWindowTitle(success_hint)
     success_message_box.setText(success_message)
     success_message_box.exec()
-    

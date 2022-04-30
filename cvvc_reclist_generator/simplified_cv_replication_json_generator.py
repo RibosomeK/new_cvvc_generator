@@ -76,7 +76,7 @@ class CvReplicationJsonGenerator:
                 for pattern in patterns:
                     match_pattern = pattern.replace("{}", rule[0])
                     target_pattern = pattern.replace("{}", rule[1])
-                    
+
                     if match_pattern == rule[0]:
                         continue
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>466</width>
-    <height>306</height>
+    <width>467</width>
+    <height>308</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -38,6 +38,9 @@
       </item>
       <item>
        <widget class="QLineEdit" name="dict_file_lineEdit">
+        <property name="accessibleName">
+         <string>dict_file</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -75,6 +78,9 @@
       </item>
       <item>
        <widget class="QLineEdit" name="redirect_config_lineEdit">
+        <property name="accessibleName">
+         <string>redirect_config</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -115,6 +121,9 @@
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="accessibleName">
+         <string>alias_config</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -152,6 +161,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="two_mora_checkBox">
+        <property name="accessibleName">
+         <string>is_two_mora</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -162,6 +174,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="haru_style_checkBox">
+        <property name="accessibleName">
+         <string>is_haru_style</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -172,6 +187,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="mora_x_checkBox">
+        <property name="accessibleName">
+         <string>is_mora_x</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -196,6 +214,9 @@
       </item>
       <item>
        <widget class="QSpinBox" name="length_spinBox">
+        <property name="accessibleName">
+         <string>length</string>
+        </property>
         <property name="minimum">
          <number>3</number>
         </property>
@@ -213,6 +234,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="cv_head_checkBox">
+        <property name="accessibleName">
+         <string>is_cv_head</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -226,6 +250,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="full_cv_checkBox">
+        <property name="accessibleName">
+         <string>is_full_cv</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -239,6 +266,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="c_head_4_utau_checkBox">
+        <property name="accessibleName">
+         <string>is_c_head_4_utau</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -263,6 +293,9 @@
       </item>
       <item>
        <widget class="QSpinBox" name="bpm_spinBox">
+        <property name="accessibleName">
+         <string>bpm</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -292,6 +325,9 @@
       </item>
       <item>
        <widget class="QSpinBox" name="blank_beat_spinBox">
+        <property name="accessibleName">
+         <string>blank_beat</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -329,6 +365,9 @@
       </item>
       <item>
        <widget class="QLineEdit" name="save_path_lineEdit">
+        <property name="accessibleName">
+         <string>save_path</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -359,6 +398,9 @@
      <layout class="QHBoxLayout" name="save_file_types_layout">
       <item>
        <widget class="QCheckBox" name="reclist_checkBox">
+        <property name="accessibleName">
+         <string>do_save_reclist</string>
+        </property>
         <property name="text">
          <string>reclist</string>
         </property>
@@ -369,6 +411,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="oto_checkBox">
+        <property name="accessibleName">
+         <string>do_save_oto</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -379,6 +424,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="presamp_checkBox">
+        <property name="accessibleName">
+         <string>do_save_presamp</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -389,6 +437,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="vsdxmf_checkBox">
+        <property name="accessibleName">
+         <string>do_save_vsdxmf</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -399,6 +450,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="lsd_checkBox">
+        <property name="accessibleName">
+         <string>do_save_lsd</string>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -452,7 +506,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>466</width>
+     <width>467</width>
      <height>22</height>
     </rect>
    </property>
