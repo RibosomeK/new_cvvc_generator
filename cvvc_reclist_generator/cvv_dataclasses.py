@@ -191,6 +191,7 @@ class AliasUnion:
         self.__data = {
             "c_head": set(),
             "cv_head": set(),
+            "c": set(),
             "cv": set(),
             "vc": VcSet(),
             "vr": set(),
@@ -215,6 +216,14 @@ class AliasUnion:
     @cv_head.setter
     def cv_head(self, value: set[str]):
         self.__data["cv_head"] = value
+        
+    @property
+    def c(self) -> set[str]:
+        return self.__data["c"]
+
+    @c.setter
+    def c(self, value: set[str]):
+        self.__data["c"] = value
 
     @property
     def cv(self) -> set[str]:
