@@ -29,7 +29,7 @@ class LoadParametersCommand(QUndoCommand):
     def __init__(self, new_parameters: Parameters, generator):
         super().__init__()
         self.new_parameters = new_parameters
-        self.old_parameters = generator.get_parameters()
+        self.old_parameters = generator.parameters
         self.generator = generator
 
     def undo(self) -> None:

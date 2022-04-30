@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QSpinBox,
 )
 from PySide6.QtGui import QUndoStack
+from PySide6.QtCore import QTranslator
 import os
 
 
@@ -55,6 +56,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.parameters_config_path: str = ""
         self.undo_stack = QUndoStack()
+        self.translator = QTranslator()
 
         self.title = self.windowTitle()
 
@@ -198,7 +200,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             pop_error_message_box(self.tr("Warning"), error_message)
         else:
             preview_dialog = PreviewDialog()
-            parameters = self.get_parameters()
+            parameters = self.parameters
             generator = CvvcReclistGeneratorModel(parameters)
             preview_dialog.receive_model(generator)
 
@@ -232,34 +234,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not (self.oto_checkBox.isChecked() or self.vsdxmf_checkBox.isChecked()):
             return self.tr("At least one label type is needed to be selected.")
 
-    def get_parameters(self) -> Parameters:
-        parameters = Parameters(
-            dict_file=self.dict_file_lineEdit.text(),
-            alias_config=self.alias_config_lineEdit.text(),
-            redirect_config=self.redirect_config_lineEdit.text(),
-            save_path=self.save_path_lineEdit.text(),
-            is_two_mora=self.two_mora_checkBox.isChecked(),
-            is_haru_style=self.haru_style_checkBox.isChecked(),
-            is_mora_x=self.mora_x_checkBox.isChecked(),
-            length=self.length_spinBox.value(),
-            is_full_cv=self.full_cv_checkBox.isChecked(),
-            is_cv_head=self.cv_head_checkBox.isChecked(),
-            is_c_head_4_utau=self.c_head_4_utau_checkBox.isChecked(),
-            bpm=self.bpm_spinBox.value(),
-            blank_beat=self.blank_beat_spinBox.value(),
-            do_save_reclist=self.reclist_checkBox.isChecked(),
-            do_save_oto=self.oto_checkBox.isChecked(),
-            do_save_presamp=self.presamp_checkBox.isChecked(),
-            do_save_vsdxmf=self.vsdxmf_checkBox.isChecked(),
-            do_save_lsd=self.lsd_checkBox.isChecked(),
-        )
-        return parameters
-
     def export_parameters_config(self) -> None:
         """if current config file exist, overwrite it, otherwise save it."""
 
         config = configparser.ConfigParser()
-        config["PARAMETERS"] = self.get_parameters().__dict__
+        config["PARAMETERS"] = self.parameters.__dict__
 
         if not self.parameters_config_path:
             config_path = QFileDialog.getSaveFileName(
@@ -311,6 +290,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "./",
             self.tr("Config file (*.ini)"),
         )[0]
+        
+        if not config_path:
+            return
+        
         self.parameters_config_path = config_path
 
         config_name = config_path.split("/")[-1]
@@ -321,26 +304,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.load_parameters(parameters)
 
     def save_files(self):
-        parameters = self.get_parameters()
-        generator = CvvcReclistGeneratorModel(parameters)
-        if parameters.do_save_reclist:
+        generator = CvvcReclistGeneratorModel(self.parameters)
+        if self.parameters.do_save_reclist:
             generator.save_reclist()
-        if parameters.do_save_oto:
+        if self.parameters.do_save_oto:
             generator.save_oto()
-        if parameters.do_save_presamp:
+        if self.parameters.do_save_presamp:
             generator.save_presamp()
-        if parameters.do_save_vsdxmf:
+        if self.parameters.do_save_vsdxmf:
             generator.save_vsdxmf()
-        if parameters.do_save_lsd:
+        if self.parameters.do_save_lsd:
             generator.save_lsd()
 
         pop_success_message_box(self.tr("(>^ω^<)"), self.tr("Save successfully"))
 
     def set_language(self):
         """set language to reclist application"""
-        result = self.translator.load("./translations/cn/zh-CN")
-        print(result)
+        self.translator.load("./translations/cn/zh-CN")
         app = QApplication.instance()
-        result = app.installTranslator(self.translator)
-        print(result)
+        app.installTranslator(self.translator)
         self.retranslateUi(self)

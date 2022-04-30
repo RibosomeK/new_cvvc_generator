@@ -257,7 +257,7 @@ class ReclistGenerator:
                     break
                 c_head = c_head_list.pop()
                 for cvv in self.cvv_workshop.cvv_set:
-                    if cvv.get_lsd_c == c_head:
+                    if cvv.get_lsd_c() == c_head:
                         c_head = cvv
                         break
                 else:
