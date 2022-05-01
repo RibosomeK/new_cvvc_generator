@@ -1,7 +1,6 @@
 """generate a alias copy json config for Kira Oto Tool Box in case of simplified cv is used."""
 
 import json, time, os
-from lib2to3.pygram import pattern_symbols
 from typing import Iterable, Optional
 
 
