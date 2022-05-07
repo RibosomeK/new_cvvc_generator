@@ -40,3 +40,6 @@ class AliasNotExistError(Exception):
 
 class PopError(Exception):
     """no qualified vc in set"""
+
+class ConfigError(Exception):
+    """config error"""
