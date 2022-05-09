@@ -1,4 +1,5 @@
-from .cvv_dataclasses import Cvv, RecLine, Reclist, AliasUnion, CvvWorkshop
+from typing import Optional
+from .cvv_dataclasses import AliasType, Cvv, RecLine, Reclist, AliasUnion, CvvWorkshop
 from .errors import CantFindNextCvvError, CantFindCvvError, PopError
 
 
@@ -26,18 +27,17 @@ class ReclistGenerator:
             vcv_list = list(alias_union.vcv)
             vcv_list.sort()
             for vcv in vcv_list:
-                v = Cvv.new()
-                v._replace(v=vcv[0])
+                v = Cvv.new_with((AliasType.V, vcv[0]))
                 cvv = self.cvv_workshop.find_cvv(cvv=vcv[1])
-                self.reclist.append(RecLine((v, cvv)))
+                self.reclist.append(RecLine(v, cvv))
                 alias_union.vc.discard((v.v, cvv.c))
                 alias_union.vr.discard(cvv.v)
         vc_list = list(alias_union.vc)
         vc_list.sort()
         for vc in vc_list:
-            v, c = Cvv.new(), Cvv.new()
-            v._replace(v=vc[0]), c._replace(c=vc[1])
-            self.reclist.append(RecLine((v, c)))
+            v = Cvv.new_with((AliasType.V, vc[0]))
+            c = Cvv.new_with((AliasType.C, vc[1]))
+            self.reclist.append(RecLine(v, c))
 
         if c_head_list := sorted(alias_union.c_head, reverse=True):
             row: list[Cvv] = []
@@ -286,5 +286,12 @@ class ReclistGenerator:
         alias_union.vr.clear()
 
     def save_reclist(self, reclist_dir: str) -> None:
-        with open(reclist_dir, mode="w", encoding="utf-8") as f:
-            f.write(str(self.reclist))
+        with open(reclist_dir, mode="w", encoding="utf-8") as fp:
+            fp.write(str(self.reclist))
+
+    @staticmethod
+    def export_reclist(
+        reclist: Reclist, reclist_path: str = "./result/reclist.txt"
+    ) -> None:
+        with open(reclist_path, mode="w", encoding="utf-8") as fp:
+            fp.write(str(reclist))

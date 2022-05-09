@@ -8,6 +8,14 @@ from typing import Optional, Iterable
 from .errors import *
 
 
+class AliasType(Enum):
+    C = "C"
+    CV = "CV"
+    VC = "VC"
+    VCV = "VCV"
+    V = "VR"
+
+
 class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
     """
     take [gwaang] for example:
@@ -23,6 +31,7 @@ class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
     """
 
     __slot__ = ()
+    STR_ORDER = ("cvv", "cv", "c", "v")
 
     @staticmethod
     def new(components: Optional[Iterable[str]] = None) -> "Cvv":
@@ -42,6 +51,17 @@ class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
             param.extend([None] * (length - len(param)))
             return Cvv(*param)
 
+    @staticmethod
+    def new_with(component: tuple[AliasType, str]) -> "Cvv":
+        atpye, s = component
+        if atpye == AliasType.C:
+            return Cvv(None, s, None, None, None, None, None, None)
+
+        if atpye == AliasType.V:
+            return Cvv(None, None, s, None, None, None, None, None)
+
+        raise AliasTypeError("unsupported alias type in this method.")
+
     def get_cv(self, is_full_cv: Optional[bool] = False) -> str:
         """return full cv or simplified cv
 
@@ -53,6 +73,10 @@ class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
         Returns:
             str: cv
         """
+
+        if not (self.cvv or self.cv):
+            return str(self)
+
         if is_full_cv:
             return self.cvv
         else:
@@ -93,14 +117,6 @@ class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
                 return True
         else:
             return False
-
-
-class AliasType(Enum):
-    C = "C"
-    CV = "CV"
-    VC = "VC"
-    VCV = "VCV"
-    V = "VR"
 
 
 class VcSet(set[tuple[str, str]]):

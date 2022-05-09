@@ -1,5 +1,4 @@
 from .cvv_dataclasses import Cvv, Reclist, AliasType, AliasUnion, Oto, OtoUnion
-from typing import Iterable, Optional
 from .errors import AliasTypeError
 
 
@@ -189,3 +188,8 @@ class OtoGenerator:
         """
         with open(oto_dir, "w", encoding="utf-8") as f:
             f.write(str(self.oto_union))
+
+    @staticmethod
+    def export_oto(oto: OtoUnion, oto_path: str = "./result/oto.ini"):
+        with open(oto_path, mode="w", encoding="shift-jis") as fp:
+            fp.write(str(oto))

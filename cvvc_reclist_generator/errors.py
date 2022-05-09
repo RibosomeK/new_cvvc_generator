@@ -43,3 +43,17 @@ class PopError(Exception):
 
 class ConfigError(Exception):
     """config error"""
+    
+class ConfigNotFindError(Exception):
+    """cant find config"""
+    
+    
+class AliasConfigNotFindError(Exception):
+    """cant find alias config"""
+    
+    
+class RedirectConfigNotFindError(Exception):
+    """cant find redirect config"""
+    
+class UnknownError(Exception):
+    """idk"""
