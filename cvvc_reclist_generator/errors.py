@@ -41,19 +41,26 @@ class AliasNotExistError(Exception):
 class PopError(Exception):
     """no qualified vc in set"""
 
+
 class ConfigError(Exception):
     """config error"""
-    
-class ConfigNotFindError(Exception):
+
+
+class ConfigNotFoundError(Exception):
     """cant find config"""
-    
-    
-class AliasConfigNotFindError(Exception):
+
+
+class AliasConfigNotFoundError(Exception):
     """cant find alias config"""
-    
-    
-class RedirectConfigNotFindError(Exception):
+
+
+class RedirectConfigNotFoundError(Exception):
     """cant find redirect config"""
-    
+
+
+class DictfileNotFoundError(Exception):
+    """cant find dict file"""
+
+
 class UnknownError(Exception):
     """idk"""

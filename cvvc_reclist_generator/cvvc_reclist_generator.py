@@ -13,10 +13,11 @@ from .oto_generator import OtoGenerator
 from .vsdxmf_generator import VsdxmfGenerator
 from .simplified_cv_replication_json_generator import CvReplicationJsonGenerator
 from .errors import (
-    AliasConfigNotFindError,
+    AliasConfigNotFoundError,
     ConfigError,
-    ConfigNotFindError,
-    RedirectConfigNotFindError,
+    ConfigNotFoundError,
+    RedirectConfigNotFoundError,
+    DictfileNotFoundError
 )
 
 PARAMETERS = (
@@ -119,7 +120,7 @@ class Parameters:
         try:
             self.update(config["PARAMETERS"])
         except KeyError:
-            raise ConfigNotFindError
+            raise ConfigNotFoundError
 
     def export_config(self, config_path: str = "./config/config.ini") -> None:
         """export current parameters as an ini config"""
@@ -153,17 +154,20 @@ class CvvcReclistGenerator:
                     if name == "config.ini":
                         return self.parameters.load_config(os.path.join(root, name))
             else:
-                raise FileNotFoundError("Can not find config file.")
+                raise ConfigNotFoundError("Can not find config file.")
 
     def setup_cvv_workshop(self) -> None:
-
-        self.cvv_workshop.read_dict(self.parameters.dict_file)
-
+        
+        try:
+            self.cvv_workshop.read_dict(self.parameters.dict_file)
+        except FileNotFoundError:
+            raise DictfileNotFoundError(f"Can not find dict file: {self.parameters.dict_file}")
+            
         if self.parameters.redirect_config:
             try:
                 self.cvv_workshop.read_redirect_config(self.parameters.redirect_config)
             except FileNotFoundError:
-                raise RedirectConfigNotFindError("Cant find redirect config")
+                raise RedirectConfigNotFoundError("Cant find redirect config")
 
     def get_alias(self) -> None:
 
@@ -177,7 +181,7 @@ class CvvcReclistGenerator:
                 alias_config=self.parameters.alias_config,
             )
         except FileNotFoundError:
-            raise AliasConfigNotFindError("cant find alias config")
+            raise AliasConfigNotFoundError("cant find alias config")
 
     def get_reclist(self) -> None:
         generator = ReclistGenerator(self.cvv_workshop)
