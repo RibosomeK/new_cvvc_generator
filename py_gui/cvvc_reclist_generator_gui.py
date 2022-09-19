@@ -1,4 +1,3 @@
-from PySide6.QtCore import QTranslator
 from .cvvc_reclist_generator_model import Parameters
 from .main_window import MainWindow
 from .preview_dialog import PreviewDialog

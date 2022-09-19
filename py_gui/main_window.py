@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QSpinBox,
 )
 from PySide6.QtGui import QUndoStack
-from PySide6.QtCore import QTranslator, QEvent
+from PySide6.QtCore import QTranslator
 import os
 
 
@@ -61,13 +61,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.title = self.windowTitle()
 
-        self.dict_file_button.clicked.connect(self.select_dict_file)
-        self.alias_config_button.clicked.connect(self.select_alias_config)
-        self.redirect_config_button.clicked.connect(self.select_redirect_config)
-        self.save_path_button.clicked.connect(self.select_save_path)
+        self.dict_file_button.clicked.connect(self.select_dict_file)  # type: ignore
+        self.alias_config_button.clicked.connect(self.select_alias_config)  # type: ignore
+        self.redirect_config_button.clicked.connect(self.select_redirect_config)  # type: ignore
+        self.save_path_button.clicked.connect(self.select_save_path)  # type: ignore
 
-        self.two_mora_checkBox.stateChanged.connect(self.disable_mora_x_checkBox)
-        self.mora_x_checkBox.stateChanged.connect(self.disable_two_mora_checkBox)
+        self.two_mora_checkBox.stateChanged.connect(self.disable_mora_x_checkBox)  # type: ignore
+        self.mora_x_checkBox.stateChanged.connect(self.disable_two_mora_checkBox)  # type: ignore
 
         self.preview_button.clicked.connect(self.pop_preview_dialog)
 
@@ -77,7 +77,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.set_english_action.triggered.connect(self.to_en)
         self.set_simplified_chinese_action.triggered.connect(self.to_cn)
-        self.set_japanese_action.triggered.connect(self.set_language)
+        # self.set_japanese_action.triggered.connect()
 
         self.undo_action.triggered.connect(self.undo_stack.undo)
         self.redo_action.triggered.connect(self.undo_stack.redo)
@@ -284,7 +284,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cv_head_checkBox.setChecked(parameters.is_cv_head)
         self.c_head_4_utau_checkBox.setChecked(parameters.is_c_head_4_utau)
 
-        self.bpm_spinBox.setValue(parameters.bpm)
+        self.bpm_spinBox.setValue(int(parameters.bpm))
         self.blank_beat_spinBox.setValue(parameters.blank_beat)
 
         self.reclist_checkBox.setChecked(parameters.do_save_reclist)
@@ -300,7 +300,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self,
             self.tr("Select a parameters config"),
             "./",
-            self.tr("Config file (*.ini)"),
+            self.tr("Config file (*.ini)"),  # type: ignore
         )[0]
         
         if not config_path:
@@ -317,6 +317,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def save_files(self):
         generator = CvvcReclistGeneratorModel(self.parameters)
+        
+        if not os.path.exists(self.parameters.save_path):
+            os.mkdir(self.parameters.save_path)
+            
         if self.parameters.do_save_reclist:
             generator.save_reclist()
         if self.parameters.do_save_oto:
@@ -329,9 +333,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             generator.save_lsd()
 
         pop_success_message_box(self.tr("(>^ω^<)"), self.tr("Save successfully"))
-
-    def set_language(self):
-        """set language to reclist application"""
-        self.trans.load("./scr_gui/translations/cn/zh-CN")
-        QApplication.instance().installTranslator(self.trans)
-        self.retranslateUi(self)

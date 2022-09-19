@@ -27,8 +27,8 @@ class Parameters:
     bpm: float = 130
     blank_beat: int = 2
 
-    do_save_oto: bool = True
-    do_save_reclist: bool = False
+    do_save_oto: bool = False
+    do_save_reclist: bool = True
     do_save_presamp: bool = False
     do_save_vsdxmf: bool = False
     do_save_lsd: bool = False
