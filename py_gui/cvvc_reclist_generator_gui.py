@@ -6,10 +6,9 @@ from .preview_dialog import PreviewDialog
 
 class CvvcReclistGeneratorGui:
     def __init__(self):
-        self.translator = QTranslator()
         
         self.parameters = Parameters()
-        self.main_window = MainWindow(self.parameters, self.translator)
+        self.main_window = MainWindow(self.parameters)
         self.preview_dialog = PreviewDialog()
 
         self.main_window.show()

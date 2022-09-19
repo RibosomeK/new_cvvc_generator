@@ -1,5 +1,8 @@
 from typing import Optional
-from .cvv_dataclasses import Cvv, Reclist, AliasUnion
+
+from cvvc_reclist_generator.vc_set import VcSet
+from .cvv_dataclasses import Cvv, Reclist
+from .alias_union import AliasUnion
 
 
 class ReclistChecker:
@@ -61,7 +64,7 @@ class ReclistChecker:
         cv_log = ", ".join(cv_set) if cv_set else "None"
         return cv_log
 
-    def check_vc_integrity(self, vc_set: set[tuple[str, str]]) -> str:
+    def check_vc_integrity(self, vc_set: VcSet) -> str:
         for row in self.reclist:
             for idx, cvv in enumerate(row):
                 if idx == 0:
@@ -70,7 +73,7 @@ class ReclistChecker:
         vc_log = ", ".join(str(vc) for vc in vc_set) if vc_set else "None"
         return vc_log
 
-    def check_vcv_integrity(self, vcv_set: set[tuple[str, str]]) -> str:
+    def check_vcv_integrity(self, vcv_set: VcSet) -> str:
         for row in self.reclist:
             for idx, cvv in enumerate(row):
                 if idx == 0:

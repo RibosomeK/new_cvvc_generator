@@ -58,7 +58,7 @@ class RedirectConfigNotFoundError(Exception):
     """cant find redirect config"""
 
 
-class DictfileNotFoundError(Exception):
+class DictFileNotFoundError(Exception):
     """cant find dict file"""
 
 

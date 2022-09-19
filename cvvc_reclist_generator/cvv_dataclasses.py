@@ -1,11 +1,13 @@
-from collections import namedtuple, UserList, Counter
+from collections import namedtuple, UserList
 import configparser
 from dataclasses import dataclass, field
 from enum import Enum
 from random import choice
 import re
-from typing import Optional, Iterable
+from typing import Optional, Iterable, Iterator
 from .errors import *
+
+
 
 
 class AliasType(Enum):
@@ -119,230 +121,62 @@ class Cvv(namedtuple("Cvv", "cvv c v act_c fol_v cv mid_v end_v")):
             return False
 
 
-class VcSet(set[tuple[str, str]]):
-    _v_counter: Counter
-    _c_counter: Counter
-    __max_v: tuple[str, int] = ("", 0)
-    __max_c: tuple[str, int] = ("", 0)
-
-    def __init__(self, __iterable: Iterable[tuple[str, str]] = ...) -> None:
-        if __iterable == ...:
-            __iterable = set()
-        super().__init__(__iterable)
-        self.__post_init__()
-
-    def __post_init__(self) -> None:
-        self._v_counter = Counter()
-        self._c_counter = Counter()
-        for vc in self:
-            self.__update_dict(vc, True)
-
-    @property
-    def max_v(self):
-        self.__max_v = self._v_counter.most_common(1)[0]
-        return self.__max_v
-
-    @property
-    def max_c(self):
-        self.__max_c = self._c_counter.most_common(1)[0]
-        return self.__max_c
-
-    def __update_dict(self, vc: tuple[str, str], is_add: bool) -> None:
-        update_idx = 1 if is_add else -1
-        v, c = vc
-        self._v_counter[v] += update_idx
-        self._c_counter[c] += update_idx
-
-    def add(self, vc: tuple[str, str]) -> None:
-        self.__update_dict(vc, True)
-        return super().add(vc)
-
-    def update(self, __iterable: Iterable[tuple[str, str]]) -> None:
-        for value in __iterable:
-            self.add(value)
-
-    def discard(self, vc: tuple[str, str]) -> None:
-        if vc not in self:
-            return
-        self.__update_dict(vc, False)
-        return super().discard(vc)
-
-    def pop(self, c: Optional[str] = None, v: Optional[str] = None) -> tuple[str, str]:
-        if not (c or v):
-            vc = super().pop()
-            self.__update_dict(vc, False)
-            return vc
-        aimed_vc = None
-        for vc in self:
-            if c and c == vc[1]:
-                aimed_vc = vc
-            elif v and v == vc[0]:
-                aimed_vc = vc
-            if aimed_vc:
-                break
-        if aimed_vc:
-            self.discard(aimed_vc)
-            return aimed_vc
-        else:
-            raise PopError
-
-    def __sub__(self, __iterable: Iterable[tuple[str, str]]) -> "VcSet":
-        for value in __iterable:
-            self.discard(value)
-        return self
-
-    def __or__(self, __iterable: Iterable[tuple[str, str]]) -> "VcSet":
-        for value in __iterable:
-            self.add(value)
-        return self
-
-    def copy(self) -> "VcSet":
-        new_vc_set = VcSet()
-        new_vc_set.update(self)
-        return new_vc_set
-
-
-class AliasUnion:
-    def __init__(self) -> None:
-        self.__data = {
-            "c_head": set(),
-            "cv_head": set(),
-            "c": set(),
-            "cv": set(),
-            "vc": VcSet(),
-            "vr": set(),
-            "vcv": VcSet(),
-            "cv_mid": set(),
-        }
-
-        self.is_full_cv: bool = True
-
-    @property
-    def c_head(self) -> set[str]:
-        return self.__data["c_head"]
-
-    @c_head.setter
-    def c_head(self, value: set[str]):
-        self.__data["c_head"] = value
-
-    @property
-    def cv_head(self) -> set[str]:
-        return self.__data["cv_head"]
-
-    @cv_head.setter
-    def cv_head(self, value: set[str]):
-        self.__data["cv_head"] = value
-
-    @property
-    def c(self) -> set[str]:
-        return self.__data["c"]
-
-    @c.setter
-    def c(self, value: set[str]):
-        self.__data["c"] = value
-
-    @property
-    def cv(self) -> set[str]:
-        return self.__data["cv"]
-
-    @cv.setter
-    def cv(self, value: set[str]):
-        self.__data["cv"] = value
-
-    @property
-    def vc(self) -> VcSet:
-        return self.__data["vc"]
-
-    @vc.setter
-    def vc(self, value: VcSet):
-        self.__data["vc"] = value
-
-    @property
-    def vr(self) -> set[str]:
-        return self.__data["vr"]
-
-    @vr.setter
-    def vr(self, value: set):
-        self.__data["vr"] = value
-
-    @property
-    def vcv(self) -> VcSet:
-        return self.__data["vcv"]
-
-    @vcv.setter
-    def vcv(self, value: VcSet):
-        self.__data["vcv"] = value
-
-    @property
-    def cv_mid(self) -> set[str]:
-        return self.__data["cv_mid"]
-
-    @cv_mid.setter
-    def cv_mid(self, value: set[str]):
-        self.__data["cv_mid"] = value
-
+class Recline:
+    def __init__(self, cvv: Iterable[Cvv]) -> None:
+        self._data: tuple[Cvv, ...] = tuple(cvv)
+        self.NONE_UNDERLINE = ("[\u30a0-\u30ff\u3040-\u309f]+", "[\u4e00-\u9fa5]+")
+        
     def __len__(self) -> int:
-        return len(self.__data)
+        return len(self._data)
+    
+    def __getitem__(self, idx: int) -> Cvv:
+        return self._data[idx]
+    
+    def __iter__(self) -> Iterator[Cvv]:
+        return iter(self._data)
 
-    def __getitem__(self, key: str) -> set:
-        return self.__data[key]
+    def __str__(self) -> str:
+        temp_str = []
+        is_pre_word_latin = True
+        is_curr_word_latin = True
+        is_upper_case = False
+        for cvv in self._data:
+            cvv_str = str(cvv)
 
-    def __iter__(self):
-        for value in self.__data.values():
-            yield value
+            if is_pre_word_latin:
+                temp_str.append("_")
 
-    def __bool__(self) -> bool:
-        for value in self:
-            if value:
-                return True
-        else:
-            return False
-
-    def copy(self) -> "AliasUnion":
-        new_copy = AliasUnion()
-
-        new_copy.update(self)
-        new_copy.is_full_cv = self.is_full_cv
-
-        return new_copy
-
-    def update(self, other: "AliasUnion") -> None:
-        for key, value in other.__data.items():
-            self.__data[key].update(value)
-
-    def difference_update(self, other: "AliasUnion") -> None:
-        for key, value in other.__data.items():
-            self.__data[key].difference_update(value)
-
-    def __repr__(self) -> str:
-        return ", ".join(f"{key}={value}" for key, value in self.__dict__.items())
-
-
-class RecLine(tuple[Cvv, ...]):
-    def __new__(cls, *args):
-        recline = (x for x in args)
-        return super().__new__(cls, recline)
-
-    def __str__(self, split_symbol: str = "_") -> str:
-        if isinstance(self[0], Cvv):
-            if re.match("[\u30a0-\u30ff\u3040-\u309f]+", self[0].get_cv()):
-                line: str = split_symbol + "".join(str(e) for e in self)
+            for pattern in self.NONE_UNDERLINE:
+                if re.match(pattern, cvv_str) is not None:
+                    is_curr_word_latin = False
+                    break
             else:
-                line: str = split_symbol + split_symbol.join(str(e) for e in self)
-        else:
-            line: str = split_symbol.join(str(e) for e in self)
+                is_curr_word_latin = True
+            
+            if not is_pre_word_latin and is_curr_word_latin:
+                temp_str.append("_")
+                    
+            is_pre_word_latin = is_curr_word_latin
 
-        # replace R and japanease characters
-        sub_str = f"{split_symbol}R{split_symbol}"
-        sub_line = re.sub("[\u30a0-\u30ff\u3040-\u309f]", "", line)
-        sub_line = re.sub(f"{sub_str}", "", sub_line)
+            if cvv_str == "R":
+                temp_str.append(cvv_str)
+                continue
+            
+            temp_str.append(cvv_str)
 
-        if not sub_line.islower():
-            return f"{line}_UpperCase"
-        return line
+            if is_pre_word_latin and not cvv_str.islower():
+                is_upper_case = True
+
+        if temp_str[-1] == "R":
+            temp_str = temp_str[:-2]
+
+        if is_upper_case:
+            temp_str.append("_UpperCase")
+
+        return "".join(temp_str)
 
 
-class Reclist(UserList[RecLine]):
+class Reclist(UserList[Recline]):
     """a list of recline"""
 
     def __str__(self) -> str:
@@ -492,7 +326,7 @@ class CvvWorkshop:
             SyntaxError: more than 8 elements are given
 
         [Todo]:
-            comment support, both multipul lines and single
+            comment support, both multiple lines and single
         """
         with open(dict_dir, mode="r", encoding="utf-8") as dict_file:
             dict_content = dict_file.read()
@@ -543,7 +377,7 @@ class CvvWorkshop:
         for cv, component in cv_dict.items():
             if len(component) > 2:
                 raise MultiCvInPresampError(
-                    f"{cv} seems to appeared in [VOWEL] section or [CONSONANT] section multipul times."
+                    f"{cv} seems to appeared in [VOWEL] section or [CONSONANT] section multiple times."
                 )
             elif len(component) == 1:
                 v = c = component[0]

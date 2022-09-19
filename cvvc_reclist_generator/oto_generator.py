@@ -1,4 +1,5 @@
-from .cvv_dataclasses import Cvv, Reclist, AliasType, AliasUnion, Oto, OtoUnion
+from .cvv_dataclasses import Cvv, Reclist, AliasType, Oto, OtoUnion
+from .alias_union import AliasUnion
 from .errors import AliasTypeError
 
 

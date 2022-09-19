@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QSpinBox,
 )
 from PySide6.QtGui import QUndoStack
-from PySide6.QtCore import QTranslator
+from PySide6.QtCore import QTranslator, QEvent
 import os
 
 
@@ -46,7 +46,7 @@ def read_parameters_config(config_path: str) -> Parameters:
 class MainWindow(QMainWindow, Ui_MainWindow):
     """main window of the cvvc reclist generator."""
 
-    def __init__(self, parameters: Parameters, translator: QTranslator):
+    def __init__(self, parameters: Parameters):
         super().__init__()
 
         self.setupUi(self)
@@ -56,7 +56,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.parameters_config_path: str = ""
         self.undo_stack = QUndoStack()
-        self.translator = translator
+
+        self.trans = QTranslator(self)
 
         self.title = self.windowTitle()
 
@@ -74,14 +75,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.export_as_action.triggered.connect(self.export_parameters_config)
         self.load_action.triggered.connect(self.load_parameters_config)
 
-        self.set_english_action.triggered.connect(self.set_language)
-        self.set_simplified_chinese_action.triggered.connect(self.set_language)
+        self.set_english_action.triggered.connect(self.to_en)
+        self.set_simplified_chinese_action.triggered.connect(self.to_cn)
         self.set_japanese_action.triggered.connect(self.set_language)
 
         self.undo_action.triggered.connect(self.undo_stack.undo)
         self.redo_action.triggered.connect(self.undo_stack.redo)
 
         self.save_button.clicked.connect(self.save_files)
+        
+    def to_cn(self):
+        """change language to cn"""
+        print(self.trans.load("./scr_gui/translations/cn/zh-CN"))
+        print(QApplication.instance().installTranslator(self.trans))
+        self.retranslateUi(self)
+
+    def to_en(self):
+        """change language to en"""
+        self.trans.load("")
+        self.retranslateUi(self)
 
     def setup_parameters(self):
         """update parameters when changed"""
@@ -320,7 +332,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def set_language(self):
         """set language to reclist application"""
-        self.translator.load("./scr_gui/translations/cn/zh-CN")
-        app = QApplication.instance()
-        app.installTranslator(self.translator)
+        self.trans.load("./scr_gui/translations/cn/zh-CN")
+        QApplication.instance().installTranslator(self.trans)
         self.retranslateUi(self)

@@ -3,7 +3,7 @@ from .errors import (
     ConfigNotFoundError,
     AliasConfigNotFoundError,
     RedirectConfigNotFoundError,
-    DictfileNotFoundError,
+    DictFileNotFoundError,
 )
 
 
@@ -24,7 +24,7 @@ class GeneratorErrorManager:
             print_solution()
             return True
 
-        if exc_type == DictfileNotFoundError:
+        if exc_type == DictFileNotFoundError:
             print(
                 f"Can not find dict file in given directory: \n{self.generator.parameters.dict_file}"
             )

@@ -2,11 +2,11 @@ from cvvc_reclist_generator.errors import AliasTypeError
 from .cvv_dataclasses import (
     Reclist,
     AliasType,
-    AliasUnion,
     Vsdxmf,
     VsdxmfUnion,
     CvvWorkshop,
 )
+from .alias_union import AliasUnion
 
 
 class VsdxmfGenerator:

@@ -1,11 +1,9 @@
-from dataclasses import dataclass
 import os
-from sqlite3 import paramstyle
 from typing import Any, Optional
 from configparser import ConfigParser
-from unicodedata import name
 
-from .cvv_dataclasses import AliasUnion, CvvWorkshop, OtoUnion, Reclist, VsdxmfUnion
+from .cvv_dataclasses import CvvWorkshop, OtoUnion, Reclist, VsdxmfUnion
+from .alias_union import AliasUnion
 from .alias_union_generator import AliasUnionGenerator
 from .reclist_generator import ReclistGenerator
 from .reclist_checker import ReclistChecker
@@ -17,7 +15,7 @@ from .errors import (
     ConfigError,
     ConfigNotFoundError,
     RedirectConfigNotFoundError,
-    DictfileNotFoundError
+    DictFileNotFoundError,
 )
 
 PARAMETERS = (
@@ -41,7 +39,7 @@ PARAMETERS = (
     "do_save_lsd",
 )
 TRUE_VALUE = ("true", "yes", "1", "y", "t", "yeah", "yup")
-NONE_VALUE = ("none", "null", "no", "false", "0", "n")
+NONE_VALUE = ("none", "null", "no", "false", "0", "n", "nope")
 
 
 class Parameters:
@@ -157,12 +155,14 @@ class CvvcReclistGenerator:
                 raise ConfigNotFoundError("Can not find config file.")
 
     def setup_cvv_workshop(self) -> None:
-        
+
         try:
             self.cvv_workshop.read_dict(self.parameters.dict_file)
         except FileNotFoundError:
-            raise DictfileNotFoundError(f"Can not find dict file: {self.parameters.dict_file}")
-            
+            raise DictFileNotFoundError(
+                f"Can not find dict file: {self.parameters.dict_file}"
+            )
+
         if self.parameters.redirect_config:
             try:
                 self.cvv_workshop.read_redirect_config(self.parameters.redirect_config)

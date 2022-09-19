@@ -1,7 +1,8 @@
-from email.policy import strict
 import json
 from typing import Iterable, Optional
-from .cvv_dataclasses import CvvWorkshop, VcSet, AliasUnion
+from .cvv_dataclasses import CvvWorkshop
+from .alias_union import AliasUnion
+from .vc_set import VcSet
 from .errors import AliasTypeError, AliasError
 
 
