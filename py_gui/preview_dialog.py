@@ -4,7 +4,7 @@ from .label_highlighter import OtoHighlighter, VsdxmfHighlighter
 from .pop_message_box import *
 from .cvvc_reclist_generator_model import CvvcReclistGeneratorModel
 
-
+import os
 class PreviewDialog(QDialog, Ui_PreviewDialog):
     def __init__(self):
         super().__init__()
@@ -17,6 +17,10 @@ class PreviewDialog(QDialog, Ui_PreviewDialog):
         vsdxmf_highlighter = VsdxmfHighlighter(self.vsdxmf_textEdit.document())
 
     def save_files(self):
+        
+        if not os.path.exists(self.generator.parameters.save_path):
+            os.mkdir(self.generator.parameters.save_path)
+            
         if self.generator.parameters.do_save_reclist:
             self.generator.save_reclist()
         if self.generator.parameters.do_save_oto:
