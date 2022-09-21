@@ -17,7 +17,7 @@ class OtoGenerator:
             reclist (Reclist): a reclist
             alias_union (AliasUnion): needed alias
             bpm (float): bpm of the recording BGM
-            is_full_cv (bool, optional): wheather use full cv in oto. Defaults to True.
+            is_full_cv (bool, optional): whether use full cv in oto. Defaults to True.
         """
         for row in reclist:
             wav = f"{row}.wav"
@@ -177,7 +177,7 @@ class OtoGenerator:
             raise AliasTypeError("Given type of alias is invalid.")
 
         oto = Oto(
-            wav, None, alias, None, offset, consonant, cutoff, preutterance, overlap
+            wav, "", str(alias), "", offset, consonant, cutoff, preutterance, overlap
         )
         return oto
 
@@ -194,3 +194,7 @@ class OtoGenerator:
     def export_oto(oto: OtoUnion, oto_path: str = "./result/oto.ini"):
         with open(oto_path, mode="w", encoding="shift-jis") as fp:
             fp.write(str(oto))
+
+
+def shift_oto(oto: Oto, shifts: int):
+    """to shift the oto left or right for whole"""

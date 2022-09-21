@@ -22,8 +22,8 @@ class AliasUnionGenerator:
         """Get needed alias.
 
         Args:
-            c_head (bool, optional): Begining consonant for vocalsharp. Defaults to False.
-            cv_head (bool, optional): Begining cv head. Defaults to True.
+            c_head (bool, optional): Beginning consonant for vocalsharp. Defaults to False.
+            cv_head (bool, optional): Beginning cv head. Defaults to True.
             is_full_cv (bool, optional): For cv and cv head.
                 If your dict included extra cv part and you WANT TO use them in non vcv part,
                 you must set to False. Defaults to True.
@@ -189,7 +189,7 @@ class AliasUnionGenerator:
         return unneeded_dict, needed_dict
 
     def _check_config_section(self, d_2check: dict) -> dict[str, list[str]]:
-        """check wheather the alias in one config section are valid or not.
+        """check whether the alias in one config section are valid or not.
 
         Args:
             d_2check (dict): loaded dictionary.
@@ -211,7 +211,7 @@ class AliasUnionGenerator:
                 if invalids := self._check_c_validation(array):
                     invalid_alias.setdefault(name, []).extend(invalids)
             elif name in ("vr", "v"):
-                if invalids := self._check_v_validatin(array):
+                if invalids := self._check_v_validation(array):
                     invalid_alias.setdefault(name, []).extend(invalids)
             elif name in ("cv", "cv_head"):
                 if invalids := self._check_cv_validation(array):
@@ -219,19 +219,19 @@ class AliasUnionGenerator:
             elif name == "vc":
                 for vc in array:
                     v, c = vc.split(" ")
-                    if invalids := self._check_v_validatin(v):
+                    if invalids := self._check_v_validation(v):
                         invalid_alias.setdefault(name, []).extend(invalids)
                     if invalids := self._check_c_validation(c):
                         invalid_alias.setdefault(name, []).extend(invalids)
             elif name == "vcv":
                 for vcv in array:
                     v, cv = vcv.split(" ")
-                    if invalids := self._check_v_validatin(v):
+                    if invalids := self._check_v_validation(v):
                         invalid_alias.setdefault(name, []).extend(invalids)
                     if invalids := self._check_cv_validation(cv):
                         invalid_alias.setdefault(name, []).extend(invalids)
             elif name in ("v", "vr"):
-                if invalids := self._check_v_validatin(array):
+                if invalids := self._check_v_validation(array):
                     invalid_alias.setdefault(name, []).extend(invalids)
             else:
                 raise AliasTypeError(f"Alias type: {name} is invalid")
@@ -248,7 +248,7 @@ class AliasUnionGenerator:
 
         return tuple({c for c in consonants if c not in self.cvv_workshop.c_dict})
 
-    def _check_v_validatin(self, vowels: Iterable) -> tuple[str, ...]:
+    def _check_v_validation(self, vowels: Iterable) -> tuple[str, ...]:
         """check if the given vowels are valid or not.
         in other words, do they exist in given dictionary.
 

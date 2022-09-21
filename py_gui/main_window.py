@@ -69,25 +69,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.two_mora_checkBox.stateChanged.connect(self.disable_mora_x_checkBox)  # type: ignore
         self.mora_x_checkBox.stateChanged.connect(self.disable_two_mora_checkBox)  # type: ignore
 
-        self.preview_button.clicked.connect(self.pop_preview_dialog)
+        self.preview_button.clicked.connect(self.pop_preview_dialog)  # type: ignore
 
-        self.export_action.triggered.connect(self.export_parameters_config)
-        self.export_as_action.triggered.connect(self.export_parameters_config)
-        self.load_action.triggered.connect(self.load_parameters_config)
+        self.export_action.triggered.connect(self.export_parameters_config)  # type: ignore
+        self.export_as_action.triggered.connect(self.export_parameters_config)  # type: ignore
+        self.load_action.triggered.connect(self.load_parameters_config)  # type: ignore
 
-        self.set_english_action.triggered.connect(self.to_en)
-        self.set_simplified_chinese_action.triggered.connect(self.to_cn)
+        self.set_english_action.triggered.connect(self.to_en)  # type: ignore  # type: ignore
+        self.set_simplified_chinese_action.triggered.connect(self.to_cn)  # type: ignore
         # self.set_japanese_action.triggered.connect()
 
-        self.undo_action.triggered.connect(self.undo_stack.undo)
-        self.redo_action.triggered.connect(self.undo_stack.redo)
+        self.undo_action.triggered.connect(self.undo_stack.undo)  # type: ignore
+        self.redo_action.triggered.connect(self.undo_stack.redo)  # type: ignore
 
-        self.save_button.clicked.connect(self.save_files)
+        self.save_button.clicked.connect(self.save_files)  # type: ignore
         
     def to_cn(self):
         """change language to cn"""
         print(self.trans.load("./scr_gui/translations/cn/zh-CN"))
-        print(QApplication.instance().installTranslator(self.trans))
+        if inst := QApplication.instance():
+            inst.installTranslator(self.trans)
         self.retranslateUi(self)
 
     def to_en(self):
@@ -97,28 +98,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def setup_parameters(self):
         """update parameters when changed"""
-        self.dict_file_lineEdit.textChanged.connect(self._update_parameters)
-        self.redirect_config_lineEdit.textChanged.connect(self._update_parameters)
-        self.alias_config_lineEdit.textChanged.connect(self._update_parameters)
-        self.save_path_lineEdit.textChanged.connect(self._update_parameters)
+        self.dict_file_lineEdit.textChanged.connect(self._update_parameters)  # type: ignore
+        self.redirect_config_lineEdit.textChanged.connect(self._update_parameters)  # type: ignore
+        self.alias_config_lineEdit.textChanged.connect(self._update_parameters)  # type: ignore
+        self.save_path_lineEdit.textChanged.connect(self._update_parameters)  # type: ignore
 
-        self.two_mora_checkBox.stateChanged.connect(self._update_parameters)
-        self.haru_style_checkBox.stateChanged.connect(self._update_parameters)
-        self.mora_x_checkBox.stateChanged.connect(self._update_parameters)
+        self.two_mora_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
+        self.haru_style_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
+        self.mora_x_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
 
-        self.cv_head_checkBox.stateChanged.connect(self._update_parameters)
-        self.full_cv_checkBox.stateChanged.connect(self._update_parameters)
-        self.c_head_4_utau_checkBox.stateChanged.connect(self._update_parameters)
+        self.cv_head_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
+        self.full_cv_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore  # type: ignore
+        self.c_head_4_utau_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
 
-        self.reclist_checkBox.stateChanged.connect(self._update_parameters)
-        self.presamp_checkBox.stateChanged.connect(self._update_parameters)
-        self.oto_checkBox.stateChanged.connect(self._update_parameters)
-        self.vsdxmf_checkBox.stateChanged.connect(self._update_parameters)
-        self.lsd_checkBox.stateChanged.connect(self._update_parameters)
+        self.reclist_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
+        self.presamp_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
+        self.oto_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
+        self.vsdxmf_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
+        self.lsd_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
 
-        self.length_spinBox.valueChanged.connect(self._update_parameters)
-        self.bpm_spinBox.valueChanged.connect(self._update_parameters)
-        self.blank_beat_spinBox.valueChanged.connect(self._update_parameters)
+        self.length_spinBox.valueChanged.connect(self._update_parameters)  # type: ignore
+        self.bpm_spinBox.valueChanged.connect(self._update_parameters)  # type: ignore
+        self.blank_beat_spinBox.valueChanged.connect(self._update_parameters)  # type: ignore
 
     def _update_parameters(self):
         """update slot"""
@@ -133,9 +134,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def select_dict_file(self):
         file_name = QFileDialog.getOpenFileName(
             self,
-            self.tr("Select a dictionary file"),
+            self.tr("Select a dictionary file"),  # type: ignore
             "./",
-            self.tr("Dict file (*.txt);;Presamp file (*.ini);;LSD file (*.lsd)"),
+            self.tr("Dict file (*.txt);;Presamp file (*.ini);;LSD file (*.lsd)"),  # type: ignore
         )[0]
         if file_name:
             # try to get relative path
@@ -150,9 +151,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def select_alias_config(self):
         file_name = QFileDialog.getOpenFileName(
             self,
-            self.tr("Select an alias config"),
+            self.tr("Select an alias config"),  # type: ignore
             "./",
-            self.tr("Alias file (*.json)"),
+            self.tr("Alias file (*.json)"),  # type: ignore
         )[0]
         if file_name:
             # try to get relative path
@@ -167,9 +168,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def select_redirect_config(self):
         file_name = QFileDialog.getOpenFileName(
             self,
-            self.tr("Select a redirect config"),
+            self.tr("Select a redirect config"),  # type: ignore
             "./",
-            self.tr("Redirect file (*.ini)"),
+            self.tr("Redirect file (*.ini)"),  # type: ignore
         )[0]
         if file_name:
             # try to get relative path
@@ -184,7 +185,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def select_save_path(self):
         path_name = QFileDialog.getExistingDirectory(
-            self, self.tr("Select a save path"), "./"
+            self, self.tr("Select a save path"), "./"  # type: ignore
         )
         if path_name:
             # try to get relative path
@@ -209,7 +210,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def pop_preview_dialog(self):
         if error_message := self.check_essential_parameter():
-            pop_error_message_box(self.tr("Warning"), error_message)
+            pop_error_message_box(self.tr("Warning"), error_message)  # type: ignore
         else:
             preview_dialog = PreviewDialog()
             parameters = self.parameters
@@ -218,12 +219,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             preview_dialog.reclist_textEdit.setText(generator.get_reclist_str())
             preview_dialog.reclist_number_label.setText(
-                self.tr(f"total lines: {len(generator.reclist_generator.reclist)}")
+                self.tr(f"total lines: {len(generator.reclist_generator.reclist)}")  # type: ignore
             )
 
             preview_dialog.oto_textEdit.setText(generator.get_oto_str())
             preview_dialog.oto_number_label.setText(
-                self.tr(f"total lines: {len(generator.oto_generator.oto_union)}")
+                self.tr(f"total lines: {len(generator.oto_generator.oto_union)}")  # type: ignore
             )
 
             if parameters.do_save_presamp:
@@ -231,7 +232,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             preview_dialog.vsdxmf_textEdit.setText(generator.get_vsdxmf_str())
             preview_dialog.vsdxmf_number_label.setText(
-                self.tr(f"total lines: {len(generator.vsdxmf_generator.vsdxmf_union)}")
+                self.tr(f"total lines: {len(generator.vsdxmf_generator.vsdxmf_union)}")  # type: ignore
             )
 
             if parameters.do_save_lsd:
@@ -241,10 +242,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def check_essential_parameter(self) -> str | None:
         if not self.dict_file_lineEdit.text():
-            return self.tr("Dictionary file is not selected.")
+            return self.tr("Dictionary file is not selected.")  # type: ignore
 
         if not (self.oto_checkBox.isChecked() or self.vsdxmf_checkBox.isChecked()):
-            return self.tr("At least one label type is needed to be selected.")
+            return self.tr("At least one label type is needed to be selected.")  # type: ignore
 
     def export_parameters_config(self) -> None:
         """if current config file exist, overwrite it, otherwise save it."""
@@ -255,9 +256,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not self.parameters_config_path:
             config_path = QFileDialog.getSaveFileName(
                 self,
-                self.tr("Select a save path"),
+                self.tr("Select a save path"),  # type: ignore
                 "./config.ini",
-                self.tr("Config file (*.ini)"),
+                self.tr("Config file (*.ini)"),  # type: ignore
             )[0]
         else:
             config_path = self.parameters_config_path
@@ -298,7 +299,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         config_path = QFileDialog.getOpenFileName(
             self,
-            self.tr("Select a parameters config"),
+            self.tr("Select a parameters config"),  # type: ignore
             "./",
             self.tr("Config file (*.ini)"),  # type: ignore
         )[0]
@@ -332,4 +333,4 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.parameters.do_save_lsd:
             generator.save_lsd()
 
-        pop_success_message_box(self.tr("(>^ω^<)"), self.tr("Save successfully"))
+        pop_success_message_box(self.tr("(>^ω^<)"), self.tr("Save successfully"))  # type: ignore

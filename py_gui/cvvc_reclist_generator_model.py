@@ -97,20 +97,20 @@ class CvvcReclistGeneratorModel:
                 self.reclist_generator.reclist, alias_union.copy(), parameters.bpm
             )
 
-    def get_reclist_str(self) -> str | None:
-        return str(self.reclist_generator.reclist) or None
+    def get_reclist_str(self) -> str:
+        return str(self.reclist_generator.reclist)
 
-    def get_oto_str(self) -> str | None:
-        return str(self.oto_generator.oto_union) or None
+    def get_oto_str(self) -> str:
+        return str(self.oto_generator.oto_union)
 
-    def get_presamp_str(self) -> str | None:
-        return str(self.cvv_workshop.get_presamp_str()) or None
+    def get_presamp_str(self) -> str:
+        return str(self.cvv_workshop.get_presamp_str())
 
-    def get_vsdxmf_str(self) -> str | None:
-        return str(self.vsdxmf_generator.vsdxmf_union) or None
+    def get_vsdxmf_str(self) -> str:
+        return str(self.vsdxmf_generator.vsdxmf_union)
 
-    def get_lsd_str(self) -> str | None:
-        return str(self.cvv_workshop.get_lsd_str()) or None
+    def get_lsd_str(self) -> str:
+        return str(self.cvv_workshop.get_lsd_str())
 
     def save_reclist(self) -> None:
         self.reclist_generator.save_reclist(self.parameters.save_path + "/reclist.txt")

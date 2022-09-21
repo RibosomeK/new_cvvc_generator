@@ -10,8 +10,8 @@ class PreviewDialog(QDialog, Ui_PreviewDialog):
         super().__init__()
         self.setupUi(self)
 
-        self.cancel_button.clicked.connect(self.close)
-        self.save_button.clicked.connect(self.save_files)
+        self.cancel_button.clicked.connect(self.close)  # type: ignore
+        self.save_button.clicked.connect(self.save_files)  # type: ignore
 
         oto_highlighter = OtoHighlighter(self.oto_textEdit.document())
         vsdxmf_highlighter = VsdxmfHighlighter(self.vsdxmf_textEdit.document())
@@ -32,7 +32,7 @@ class PreviewDialog(QDialog, Ui_PreviewDialog):
         if self.generator.parameters.do_save_lsd:
             self.generator.save_lsd()
 
-        pop_success_message_box(self.tr("(>^ω^<)"), self.tr("Save successfully"))
+        pop_success_message_box(self.tr("(>^ω^<)"), self.tr("Save successfully"))  # type: ignore
 
     def receive_model(self, generator: CvvcReclistGeneratorModel):
         self.generator = generator

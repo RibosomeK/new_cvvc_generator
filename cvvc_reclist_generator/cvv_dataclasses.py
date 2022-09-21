@@ -6,6 +6,7 @@ from random import choice
 import re
 from typing import Optional, Iterable, Iterator
 from .errors import *
+from .labels import Oto, Vsdxmf
 
 
 
@@ -185,9 +186,9 @@ class Reclist(UserList[Recline]):
             line_str.append(str(line))
         return "\n".join(line_str)
 
-
+"""
 class Oto(namedtuple("OTO", "wav prefix alias suffix l con r pre ovl")):
-    """single line of oto"""
+    
 
     __slot__ = ()
 
@@ -201,7 +202,7 @@ class Oto(namedtuple("OTO", "wav prefix alias suffix l con r pre ovl")):
             self.wav, alias, *self[-5:]
         )
 
-
+"""
 class OtoUnion(dict[AliasType, list[Oto]]):
     """a set of otos"""
 
@@ -241,7 +242,7 @@ class OtoUnion(dict[AliasType, list[Oto]]):
             length += len(section)
         return length
 
-
+"""
 class Vsdxmf(namedtuple("VS_OTO", "phoneme wav l pre con r ovl")):
     __slot__ = ()
 
@@ -254,7 +255,7 @@ class Vsdxmf(namedtuple("VS_OTO", "phoneme wav l pre con r ovl")):
     @staticmethod
     def get_redirect(phoneme: str, redirect_phoneme: str) -> "Vsdxmf":
         return Vsdxmf(phoneme, f"#{redirect_phoneme}", 0, 0, 0, 0, 0)
-
+"""
 
 class VsdxmfUnion(dict[AliasType, list[Vsdxmf]]):
     """a set of vsdxmfs"""

@@ -41,7 +41,7 @@ class VsdxmfGenerator:
                     cv_vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv_alias, 1, bpm)
                     cv_L_vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv_alias, 2, bpm)
                     for L_vsdxmf in cv_L_vsdxmf:
-                        L_vsdxmf = L_vsdxmf._replace(phoneme=f"{L_vsdxmf.phoneme}_L")
+                        L_vsdxmf.phoneme = f"{L_vsdxmf.phoneme}_L"
                         self.vsdxmf_union[AliasType.CV].append(L_vsdxmf)
                     self.vsdxmf_union[AliasType.CV].extend(cv_vsdxmf)
                     alias_union.cv.discard(cv)
