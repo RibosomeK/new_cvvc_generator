@@ -6,7 +6,7 @@ from random import choice
 import re
 from typing import Optional, Iterable, Iterator
 from .errors import *
-from .labels import Oto, Vsdxmf
+from .labels import Label, Oto, Vsdxmf
 
 
 
@@ -203,7 +203,11 @@ class Oto(namedtuple("OTO", "wav prefix alias suffix l con r pre ovl")):
         )
 
 """
-class OtoUnion(dict[AliasType, list[Oto]]):
+
+class LabelUnion(dict[AliasType, list[Label]]):
+    """label union"""
+
+class OtoUnion(LabelUnion):
     """a set of otos"""
 
     __is_frozen = False
@@ -257,7 +261,7 @@ class Vsdxmf(namedtuple("VS_OTO", "phoneme wav l pre con r ovl")):
         return Vsdxmf(phoneme, f"#{redirect_phoneme}", 0, 0, 0, 0, 0)
 """
 
-class VsdxmfUnion(dict[AliasType, list[Vsdxmf]]):
+class VsdxmfUnion(LabelUnion):
     """a set of vsdxmfs"""
 
     __is_frozen: bool = False

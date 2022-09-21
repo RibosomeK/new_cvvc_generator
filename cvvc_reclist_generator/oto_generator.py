@@ -1,4 +1,5 @@
-from .cvv_dataclasses import Cvv, Reclist, AliasType, Oto, OtoUnion
+from .cvv_dataclasses import Cvv, Reclist, AliasType, OtoUnion
+from .labels import Oto, UDigits
 from .alias_union import AliasUnion
 from .errors import AliasTypeError
 
@@ -194,7 +195,3 @@ class OtoGenerator:
     def export_oto(oto: OtoUnion, oto_path: str = "./result/oto.ini"):
         with open(oto_path, mode="w", encoding="shift-jis") as fp:
             fp.write(str(oto))
-
-
-def shift_oto(oto: Oto, shifts: int):
-    """to shift the oto left or right for whole"""

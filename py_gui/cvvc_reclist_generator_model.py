@@ -6,6 +6,8 @@ from cvvc_reclist_generator import (
     OtoGenerator,
     VsdxmfGenerator,
 )
+from cvvc_reclist_generator.cvv_dataclasses import AliasType
+from cvvc_reclist_generator.labels import Label, shift_label
 
 
 @dataclass
@@ -90,12 +92,22 @@ class CvvcReclistGeneratorModel:
                 alias_union_4_utau.copy(),
                 parameters.bpm,
             )
+            if parameters.blank_beat != 2:
+                self.shift_labels(self.oto_generator.oto_union)
 
         self.vsdxmf_generator = VsdxmfGenerator(self.cvv_workshop)
         if parameters.do_save_vsdxmf:
             self.vsdxmf_generator.gen_vsdxmf(
                 self.reclist_generator.reclist, alias_union.copy(), parameters.bpm
             )
+            if parameters.blank_beat != 2:
+                self.shift_labels(self.vsdxmf_generator.vsdxmf_union)
+
+    def shift_labels(self, label_union: dict[AliasType, list[Label]]):
+        shift = (self.parameters.blank_beat - 2) * 4.2 * self.parameters.bpm
+        for labels in label_union.values():
+            for label in labels:
+                label = shift_label(label, round(shift))
 
     def get_reclist_str(self) -> str:
         return str(self.reclist_generator.reclist)

@@ -1,8 +1,10 @@
 import os
-from typing import Any, Optional
+from typing import Any, List, Optional
 from configparser import ConfigParser
 
-from .cvv_dataclasses import CvvWorkshop, OtoUnion, Reclist, VsdxmfUnion
+from cvvc_reclist_generator.labels import Label, shift_label
+
+from .cvv_dataclasses import AliasType, CvvWorkshop, OtoUnion, Reclist, VsdxmfUnion
 from .alias_union import AliasUnion
 from .alias_union_generator import AliasUnionGenerator
 from .reclist_generator import ReclistGenerator
@@ -220,6 +222,13 @@ class CvvcReclistGenerator:
         generator.gen_vsdxmf(self.reclist, alias_union, self.parameters.bpm)
         self.vsdxmf = generator.vsdxmf_union
 
+    def shift_labels(self, label_union: dict[AliasType, List[Label]]):
+        
+        shift = (self.parameters.blank_beat - 2) * 4.2 * self.parameters.bpm
+        for labels in label_union.values():
+            for label in labels:
+                label = shift_label(label, round(shift))
+
     def save_reclist(self, reclist_path: Optional[str] = "./result/reclist.txt"):
         if reclist_path is None:
             reclist_path = f"{self.parameters.save_path}/reclist.txt"
@@ -246,6 +255,8 @@ class CvvcReclistGenerator:
         print("reclist generate success...")
         self.get_oto()
         print("oto generate success...")
+        if self.parameters.blank_beat != 2:
+            self.shift_labels(self.oto)
         self.save_reclist()
         print("reclist exported...")
         self.save_oto()

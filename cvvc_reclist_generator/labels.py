@@ -149,7 +149,8 @@ class Vsdxmf(Label):
     def ovl(self) -> float:
         return self.digits.ovl
 
-
-if __name__ == "__main__":
-    vd2 = Digits(0, 0, 0, 0, 0)
-    print(vd2)
+def shift_label(label: Label, shifts: int) -> Label:
+    """to shift the label left or right for whole. left is negative."""
+    new_digits = UDigits(*[digit + shifts for digit in label.digits])
+    label.digits = new_digits
+    return label
