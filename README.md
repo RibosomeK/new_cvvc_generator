@@ -93,7 +93,7 @@ Hr.J style and be used with other reclist style. But 2 mora and mora x is confli
 
 ### Labeling Style:
 - bpm: the bpm of recording bgm. Default is 130, step is 10
-- blank beat: how many beat before voicing. Default is 2, used by OneJazzNote bgm series
+- blank beat: how many beat before voicing. Default is 2, used by One Note Jazz bgm series
 
 ### Save Path:
 A save path for generated outcomes. Default is "./result"
@@ -224,7 +224,7 @@ Haru.J 式可以与其他两个样式一起使用。
 
 ### 窝头详情：
 - 录音曲速：录音用 BGM 的曲速，默认为 130
-- 空白拍数：在出声念咒之前有多少拍，默认为 OneJazzNote 系列用的 2 拍
+- 空白拍数：在出声念咒之前有多少拍，默认为 One Note Jazz 系列用的 2 拍
 
 ### 保存目录：
 生成文件的保存目录，默认是同目录下的名叫 result 的文件夹里，"./result"

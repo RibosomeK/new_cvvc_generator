@@ -138,7 +138,7 @@ class OtoGenerator:
         Returns:
             a single line of oto
         """
-        bpm_param = float(120 / bpm)
+        bpm_param = float(bpm / 120)
         beat = bpm_param * (1250 + position * 500)
         OVL, CONSONANT_VEL, VOWEL_VEL = 80, 100, 200
 
@@ -151,7 +151,7 @@ class OtoGenerator:
         elif alias_type == AliasType.CV:
             offset = beat - CONSONANT_VEL
             consonant = 0.25 * 500 * bpm_param + CONSONANT_VEL
-            cutoff = -(beat + 0.75 * 500 * bpm_param)
+            cutoff = -(0.75 * 500 * bpm_param)
             preutterance = CONSONANT_VEL
             overlap = CONSONANT_VEL / 2
         elif alias_type == AliasType.V:
