@@ -246,7 +246,7 @@ class CvvcReclistGenerator:
         self.cvv_workshop.save_presamp(presamp_path)
 
     def generate(self, config_path: Optional[str] = None) -> None:
-        """generate reclist and add-ons accroding to config"""
+        """generate reclist and add-ons according to config"""
 
         self.load_config(config_path)
         self.setup_cvv_workshop()
