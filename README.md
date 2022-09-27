@@ -42,7 +42,7 @@ separation symbol can be a half-width space, comma or semi-comma, a tab, full-wi
 The C_alias and V_alias will not be used in redirecting in this stage, only in VocalSharp dict file *.lsd.
 
 ### Redirect Config:
-A ini style config specific for VocalSharp, do not competitive with the official redirect file. It has two sections: [VOWEL] and [CONSONANT] and the following syntax
+A ini style config specific for VocalSharp, do not competitive with the official redirect file. Multiple redirect files selected at once is also supported. It has two sections: [VOWEL] and [CONSONANT] and the following syntax
 
 > REDIRECT=ALIAS1,ALIAS2...
 
@@ -113,7 +113,7 @@ Different folder for different reclist outcomes is recommended.
 
 ## Todo (might):
 1. complete translation
-2. add multi-redirect-file function
+2. ~~add multi-redirect-file function~~
 3. you name it (Will anyone actually use it?)
 
 ## Contact:
@@ -168,7 +168,7 @@ CV 可以用来合并某些整音的 cv 部，如 [biA] 可以用来代替 [biao
 C_别名 和 V_别名 目前不会在 VocalSharp 窝头的重定向中使用，只会用于生成该引擎的字典
 
 ### 重定向文件：
-用于 VocalSharp 窝头的重定向，使用 ini 格式，与官方的重定向配置不兼容。配置中含有两个部分：[VOWEL] and [CONSONANT]，语法格式如下：
+用于 VocalSharp 窝头的重定向，使用 ini 格式，与官方的重定向配置不兼容。现在支持选择多个文件。配置中含有两个部分：[VOWEL] and [CONSONANT]，语法格式如下：
 
 > 重定向至=别名1,别名2...
 

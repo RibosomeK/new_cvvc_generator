@@ -18,7 +18,6 @@ class OtoGenerator:
             reclist (Reclist): a reclist
             alias_union (AliasUnion): needed alias
             bpm (float): bpm of the recording BGM
-            is_full_cv (bool, optional): whether use full cv in oto. Defaults to True.
         """
         for row in reclist:
             wav = f"{row}.wav"

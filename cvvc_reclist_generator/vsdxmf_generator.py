@@ -24,7 +24,6 @@ class VsdxmfGenerator:
             bpm (float): [description]
             is_full_cv (bool, optional): [description]. Defaults to False.
             cv_mid (Set[str], optional): [description]. Defaults to None.
-            redirect_config_dir (Optional[str], optional): [description]. Defaults to None.
         """
 
         for row in reclist:

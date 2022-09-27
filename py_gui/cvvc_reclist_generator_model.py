@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from cvvc_reclist_generator import (
     CvvWorkshop,
     AliasUnionGenerator,
@@ -14,7 +14,7 @@ from cvvc_reclist_generator.labels import Label, shift_label
 class Parameters:
     dict_file: str = ""
     alias_config: str = ""
-    redirect_config: str = ""
+    redirect_config: list[str] = field(default_factory=list)
     save_path: str = "./result"
 
     is_two_mora: bool = False
@@ -51,8 +51,9 @@ class CvvcReclistGeneratorModel:
         elif parameters.dict_file.endswith("lsd"):
             self.cvv_workshop.read_lsd(parameters.dict_file)
 
-        if parameters.redirect_config:
-            self.cvv_workshop.read_redirect_config(parameters.redirect_config)
+        if redirect_configs := parameters.redirect_config:
+            for config in redirect_configs:
+                self.cvv_workshop.read_redirect_config(config)
 
         self.alias_union_generator = AliasUnionGenerator(self.cvv_workshop)
         if parameters.alias_config:

@@ -9,8 +9,6 @@ from .errors import *
 from .labels import Label, Oto, Vsdxmf
 
 
-
-
 class AliasType(Enum):
     C = "C"
     CV = "CV"
@@ -126,13 +124,13 @@ class Recline:
     def __init__(self, cvv: Iterable[Cvv]) -> None:
         self._data: tuple[Cvv, ...] = tuple(cvv)
         self.NONE_UNDERLINE = ("[\u30a0-\u30ff\u3040-\u309f]+", "[\u4e00-\u9fa5]+")
-        
+
     def __len__(self) -> int:
         return len(self._data)
-    
+
     def __getitem__(self, idx: int) -> Cvv:
         return self._data[idx]
-    
+
     def __iter__(self) -> Iterator[Cvv]:
         return iter(self._data)
 
@@ -153,16 +151,16 @@ class Recline:
                     break
             else:
                 is_curr_word_latin = True
-            
+
             if not is_pre_word_latin and is_curr_word_latin:
                 temp_str.append("_")
-                    
+
             is_pre_word_latin = is_curr_word_latin
 
             if cvv_str == "R":
                 temp_str.append(cvv_str)
                 continue
-            
+
             temp_str.append(cvv_str)
 
             if is_pre_word_latin and not cvv_str.islower():
@@ -186,26 +184,62 @@ class Reclist(UserList[Recline]):
             line_str.append(str(line))
         return "\n".join(line_str)
 
-"""
-class Oto(namedtuple("OTO", "wav prefix alias suffix l con r pre ovl")):
-    
 
-    __slot__ = ()
+@dataclass(slots=True)
+class Alias:
+    def __init__(
+        self, alias: str | tuple[str, str], alias_type: Optional[AliasType] = None
+    ) -> None:
+        if isinstance(alias, tuple):
+            self.alias = alias
+        
+        elif len(splitted := alias.split(" ")) == 2:
+            self.alias = (splitted[0], splitted[1])
+            
+        else:
+            self.alias = alias
+
+        if alias_type is None:
+            self.type = self._guess_type()
+        else:
+            self.type = alias_type
 
     def __str__(self) -> str:
-        alias = self.alias
-        if self.prefix:
-            alias = self.prefix + self.alias
-        if self.suffix:
-            alias += self.suffix
-        return "{}={},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}".format(
-            self.wav, alias, *self[-5:]
-        )
+        if isinstance(self.alias, str):
+            return self.alias
 
-"""
+        return f"{self.alias[0]} {self.alias[1]}"
+
+    def _guess_type(self) -> AliasType:
+        if len(self.alias) < 1:
+            raise ValueError(f"can't determine {self.alias} type.")
+
+        VOWEL = ("a", "i", "u", "e", "o")
+
+        if isinstance(self.alias, str):
+            if self.alias[0].lower() in VOWEL:
+                return AliasType.V
+
+            if self.alias[-1].lower() in VOWEL:
+                return AliasType.CV
+
+            if len(self.alias) > 2:
+                return AliasType.CV
+
+            return AliasType.C
+
+        if self.alias[-1][-1].lower() in VOWEL:
+            return AliasType.VCV
+
+        if len(self.alias[-1]) > 2:
+            return AliasType.VCV
+
+        return AliasType.VC
+
 
 class LabelUnion(dict[AliasType, list[Label]]):
     """label union"""
+
 
 class OtoUnion(LabelUnion):
     """a set of otos"""
@@ -246,20 +280,6 @@ class OtoUnion(LabelUnion):
             length += len(section)
         return length
 
-"""
-class Vsdxmf(namedtuple("VS_OTO", "phoneme wav l pre con r ovl")):
-    __slot__ = ()
-
-    def __str__(self) -> str:
-        if self.l == self.pre == self.con == self.r == self.ovl == 0:
-            return ",".join(str(ele) for ele in self)
-        else:
-            return "{},{},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}".format(*self)
-
-    @staticmethod
-    def get_redirect(phoneme: str, redirect_phoneme: str) -> "Vsdxmf":
-        return Vsdxmf(phoneme, f"#{redirect_phoneme}", 0, 0, 0, 0, 0)
-"""
 
 class VsdxmfUnion(LabelUnion):
     """a set of vsdxmfs"""
@@ -495,13 +515,16 @@ class CvvWorkshop:
     def read_redirect_config(self, redirect_config_dir) -> None:
         redirect_config = configparser.ConfigParser(allow_no_value=True)
         redirect_config.read(redirect_config_dir, encoding="utf-8")
-        self.redirect_vowel_dict = {
-            key: values.split(",") for key, values in redirect_config["VOWEL"].items()
-        }
-        self.redirect_consonant_dict = {
-            key: values.split(",")
-            for key, values in redirect_config["CONSONANT"].items()
-        }
+        try:
+            for key, values in redirect_config["VOWEL"].items():
+                self.redirect_vowel_dict.setdefault(key, []).extend(values.split(","))
+        except KeyError:
+            pass
+        try:
+            for key, values in redirect_config["CONSONANT"].items():
+                self.redirect_consonant_dict.setdefault(key, []).extend(values.split(","))
+        except KeyError:
+            pass
 
     def get_redirect_phoneme(
         self, phoneme: str | tuple[str, str], alias_type: AliasType

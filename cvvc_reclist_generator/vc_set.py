@@ -61,6 +61,7 @@ class VcSet:
         return VcSet(self._data)
 
     def difference_update(self, other: "VcSet") -> None:
+        other = other.copy()
         while other:
             self.discard(other.pop())
             

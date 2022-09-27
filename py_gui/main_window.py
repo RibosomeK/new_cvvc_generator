@@ -1,4 +1,5 @@
 import configparser
+
 from .main_window_ui import Ui_MainWindow
 from .undo_framework import LineEditSetText, LoadParametersCommand
 from .pop_message_box import *
@@ -20,10 +21,13 @@ import os
 def read_parameters_config(config_path: str) -> Parameters:
     config = configparser.ConfigParser()
     config.read(config_path, encoding="utf-8")
+    
+    redirect_configs = config["PARAMETERS"]["redirect_config"].split(",")
+    
     parameters = Parameters(
         dict_file=config["PARAMETERS"]["dict_file"],
         alias_config=config["PARAMETERS"]["alias_config"],
-        redirect_config=config["PARAMETERS"]["redirect_config"],
+        redirect_config=redirect_configs,
         save_path=config["PARAMETERS"]["save_path"],
         is_two_mora=config["PARAMETERS"].getboolean("is_two_mora"),
         is_haru_style=config["PARAMETERS"].getboolean("is_haru_style"),
@@ -83,7 +87,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.redo_action.triggered.connect(self.undo_stack.redo)  # type: ignore
 
         self.save_button.clicked.connect(self.save_files)  # type: ignore
-        
+
     def to_cn(self):
         """change language to cn"""
         print(self.trans.load("./scr_gui/translations/cn/zh-CN"))
@@ -124,9 +128,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def _update_parameters(self):
         """update slot"""
         sender = self.sender()
-        if isinstance(sender, QLineEdit):
-            self.parameters[sender.accessibleName()] = sender.text()
-        elif isinstance(sender, QCheckBox):
+        if isinstance(sender, QCheckBox):
             self.parameters[sender.accessibleName()] = sender.isChecked()
         elif isinstance(sender, QSpinBox):
             self.parameters[sender.accessibleName()] = sender.value()
@@ -145,6 +147,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             except ValueError:
                 pass
 
+            self.parameters.dict_file = file_name
             self.undo_stack.push(LineEditSetText(self.dict_file_lineEdit, file_name))
             self.dict_file_lineEdit.setText(file_name)
 
@@ -161,27 +164,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 file_name: str = os.path.relpath(file_name)
             except ValueError:
                 pass
-
+            
+            self.parameters.alias_config = file_name
             self.undo_stack.push(LineEditSetText(self.alias_config_lineEdit, file_name))
             self.alias_config_lineEdit.setText(file_name)
 
     def select_redirect_config(self):
-        file_name = QFileDialog.getOpenFileName(
+        file_names: list[str] = QFileDialog.getOpenFileNames(
             self,
-            self.tr("Select a redirect config"),  # type: ignore
+            self.tr("Select one or more redirect configs"),  # type: ignore
             "./",
-            self.tr("Redirect file (*.ini)"),  # type: ignore
+            self.tr("Redirect files (*.ini)"),  # type: ignore
         )[0]
-        if file_name:
-            # try to get relative path
-            try:
-                file_name: str = os.path.relpath(file_name)
-            except ValueError:
-                pass
+
+        if file_names:
+            for idx, file_name in enumerate(file_names):
+                try:
+                    file_name = os.path.realpath(file_name)
+                    file_names[idx] = file_name
+                except ValueError:
+                    pass
+                
+            self.parameters.redirect_config = file_names
             self.undo_stack.push(
-                LineEditSetText(self.redirect_config_lineEdit, file_name)
+                LineEditSetText(self.redirect_config_lineEdit, ", ".join(file_names))
             )
-            self.redirect_config_lineEdit.setText(file_name)
+            self.redirect_config_lineEdit.setText(", ".join(file_names))
 
     def select_save_path(self):
         path_name = QFileDialog.getExistingDirectory(
@@ -193,6 +201,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 path_name = os.path.relpath(path_name)
             except ValueError:
                 pass
+            
+            self.parameters.save_path = path_name
             self.undo_stack.push(LineEditSetText(self.save_path_lineEdit, path_name))
             self.save_path_lineEdit.setText(path_name)
 
@@ -270,9 +280,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             with open(config_path, mode="w", encoding="utf-8") as f:
                 config.write(f)
 
-    def load_parameters(self, parameters: Parameters) -> None:
+    def load_parameters_ui(self, parameters: Parameters) -> None:
         self.dict_file_lineEdit.setText(parameters.dict_file)
-        self.redirect_config_lineEdit.setText(parameters.redirect_config)
+        self.redirect_config_lineEdit.setText(", ".join(parameters.redirect_config))
         self.alias_config_lineEdit.setText(parameters.alias_config)
         self.save_path_lineEdit.setText(parameters.save_path)
 
@@ -303,25 +313,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "./",
             self.tr("Config file (*.ini)"),  # type: ignore
         )[0]
-        
+
         if not config_path:
             return
-        
+
         self.parameters_config_path = config_path
 
         config_name = config_path.split("/")[-1]
         self.setWindowTitle(f"{self.windowTitle()} - {config_name}")
 
-        parameters = read_parameters_config(config_path)
-        self.undo_stack.push(LoadParametersCommand(parameters, self))
-        self.load_parameters(parameters)
+        self.parameters = read_parameters_config(config_path)
+        self.load_parameters_ui(self.parameters)
 
     def save_files(self):
         generator = CvvcReclistGeneratorModel(self.parameters)
-        
+
         if not os.path.exists(self.parameters.save_path):
             os.mkdir(self.parameters.save_path)
-            
+
         if self.parameters.do_save_reclist:
             generator.save_reclist()
         if self.parameters.do_save_oto:
