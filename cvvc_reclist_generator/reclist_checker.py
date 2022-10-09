@@ -1,8 +1,5 @@
-from typing import Optional
 
-from cvvc_reclist_generator.vc_set import VcSet
-from .cvv_dataclasses import Cvv, Reclist
-from .alias_union import AliasUnion
+from cvvc_reclist_generator.data_struct import Cvv, Reclist, AliasUnion, VcSet
 
 
 class ReclistChecker:

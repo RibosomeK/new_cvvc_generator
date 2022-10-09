@@ -1,13 +1,11 @@
 from dataclasses import dataclass, field
 from cvvc_reclist_generator import (
-    CvvWorkshop,
     AliasUnionGenerator,
     ReclistGenerator,
     OtoGenerator,
     VsdxmfGenerator,
 )
-from cvvc_reclist_generator.cvv_dataclasses import AliasType
-from cvvc_reclist_generator.labels import Label, shift_label
+from cvvc_reclist_generator.data_struct import CvvWorkshop, LabelUnion
 
 
 @dataclass
@@ -104,11 +102,10 @@ class CvvcReclistGeneratorModel:
             if parameters.blank_beat != 2:
                 self.shift_labels(self.vsdxmf_generator.vsdxmf_union)
 
-    def shift_labels(self, label_union: dict[AliasType, list[Label]]):
+    def shift_labels(self, label_union: LabelUnion):
         shift = (self.parameters.blank_beat - 2) * 4.2 * self.parameters.bpm
-        for labels in label_union.values():
-            for label in labels:
-                label = shift_label(label, round(shift))
+        for label in label_union:
+            label.shift(round(shift))
 
     def get_reclist_str(self) -> str:
         return str(self.reclist_generator.reclist)

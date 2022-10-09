@@ -1,17 +1,13 @@
 import os
-from typing import Any, List, Optional
+from typing import Any, Optional
 from configparser import ConfigParser
 
-from cvvc_reclist_generator.labels import Label, shift_label
 
-from .cvv_dataclasses import AliasType, CvvWorkshop, OtoUnion, Reclist, VsdxmfUnion
-from .alias_union import AliasUnion
+from .data_struct import AliasUnion, CvvWorkshop, LabelUnion, OtoUnion, Reclist, VsdxmfUnion
 from .alias_union_generator import AliasUnionGenerator
 from .reclist_generator import ReclistGenerator
-from .reclist_checker import ReclistChecker
 from .oto_generator import OtoGenerator
 from .vsdxmf_generator import VsdxmfGenerator
-from .simplified_cv_replication_json_generator import CvReplicationJsonGenerator
 from .errors import (
     AliasConfigNotFoundError,
     ConfigError,
@@ -222,12 +218,11 @@ class CvvcReclistGenerator:
         generator.gen_vsdxmf(self.reclist, alias_union, self.parameters.bpm)
         self.vsdxmf = generator.vsdxmf_union
 
-    def shift_labels(self, label_union: dict[AliasType, List[Label]]):
+    def shift_labels(self, label_union: LabelUnion):
         
         shift = (self.parameters.blank_beat - 2) * 4.2 * self.parameters.bpm
-        for labels in label_union.values():
-            for label in labels:
-                label = shift_label(label, round(shift))
+        for label in label_union:
+            label.shift(round(shift))
 
     def save_reclist(self, reclist_path: Optional[str] = "./result/reclist.txt"):
         if reclist_path is None:

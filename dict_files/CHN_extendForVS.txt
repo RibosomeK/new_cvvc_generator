@@ -177,9 +177,9 @@ xie	xy	e0
 yue	v	e0		
 nue	n	e0		
 lue	l	e0		
-jue	j	e0	jy	e0
-que	q	e0	qy	e0
-xue	xw	e0	xw	e0
+jue	j	e0		
+que	q	e0		
+xue	xw	e0		
 ei	ei	ei		
 bei	b	ei		
 pei	p	ei		
@@ -250,8 +250,8 @@ jian	j	en0
 qian	q	en0		
 xian	xy	en0		
 yuan	v	en0		
-juan	j	en0	jy	en0
-quan	q	en0	qy	en0
+juan	jy	en0		
+quan	qy	en0		
 xuan	xw	en0		
 beng	b	eng		
 peng	p	eng		
@@ -394,10 +394,10 @@ wu	w	u
 yu	v	v		
 nv	n	v		
 lv	l	v		
-ju	j	v		
-qu	q	v		
+ju	jy	v		
+qu	qy	v		
 xu	xw	v		
 yun	v	vn		
-jun	j	vn		
-qun	q	vn		
+jun	jy	vn		
+qun	qy	vn		
 xun	xw	vn		

@@ -1,7 +1,7 @@
 import configparser
 
 from .main_window_ui import Ui_MainWindow
-from .undo_framework import LineEditSetText, LoadParametersCommand
+from .undo_framework import LineEditSetText
 from .pop_message_box import *
 from .preview_dialog import PreviewDialog
 from .cvvc_reclist_generator_model import Parameters, CvvcReclistGeneratorModel
@@ -9,20 +9,19 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QFileDialog,
     QApplication,
-    QLineEdit,
     QCheckBox,
     QSpinBox,
 )
 from PySide6.QtGui import QUndoStack
 from PySide6.QtCore import QTranslator
-import os
+import os, re
 
 
 def read_parameters_config(config_path: str) -> Parameters:
     config = configparser.ConfigParser()
     config.read(config_path, encoding="utf-8")
     
-    redirect_configs = config["PARAMETERS"]["redirect_config"].split(",")
+    redirect_configs = re.split(r"[, ]", config["PARAMETERS"]["redirect_config"])
     
     parameters = Parameters(
         dict_file=config["PARAMETERS"]["dict_file"],
@@ -262,6 +261,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         config = configparser.ConfigParser()
         config["PARAMETERS"] = self.parameters.__dict__
+        config["PARAMETERS"]["redirect_config"] = ", ".join(self.parameters.redirect_config)
 
         if not self.parameters_config_path:
             config_path = QFileDialog.getSaveFileName(

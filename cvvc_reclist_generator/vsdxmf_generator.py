@@ -1,12 +1,15 @@
+from re import L
 from cvvc_reclist_generator.errors import AliasTypeError
-from .cvv_dataclasses import (
+from .data_struct import (
+    Cvv,
     Reclist,
     AliasType,
+    Alias,
+    AliasUnion,
     Vsdxmf,
     VsdxmfUnion,
     CvvWorkshop,
 )
-from .alias_union import AliasUnion
 
 
 class VsdxmfGenerator:
@@ -15,88 +18,170 @@ class VsdxmfGenerator:
     def __init__(self, cvv_workshop: CvvWorkshop) -> None:
         self.vsdxmf_union = VsdxmfUnion()
         self.cvv_workshop = cvv_workshop
+        self.EMPTY = Cvv.new()
 
     def gen_vsdxmf(self, reclist: Reclist, alias_union: AliasUnion, bpm: float) -> None:
-        """Generate vsdxmf for vocalsharp.
-
-        Args:
-            alias_union (AliasUnion): [description]
-            bpm (float): [description]
-            is_full_cv (bool, optional): [description]. Defaults to False.
-            cv_mid (Set[str], optional): [description]. Defaults to None.
-        """
-
         for row in reclist:
             wav = f"{row}.wav"
             if len(row) == 3 and row[0] == row[1] == row[2]:
-                if (c := row[0].get_lsd_c()) in alias_union.c_head:
-                    c_vsdxmf = self._get_vs_oto(AliasType.C, wav, c, 0, bpm)
-                    self.vsdxmf_union[AliasType.C].extend(c_vsdxmf)
+                if (
+                    c := Alias(row[0].get_lsd_c(), AliasType.C_HEAD)
+                ) in alias_union.c_head:
+                    c_vsdxmf = self.get_vsdxmf(
+                        ("", c.alias[0], AliasType.C_HEAD), wav, 0, bpm
+                    )
+                    self.vsdxmf_union.C.extend(c_vsdxmf)
                     alias_union.c_head.discard(c)
                 if (
-                    cv := row[1].get_cv(alias_union.is_full_cv)
+                    cv := Alias(row[1].get_cv(alias_union.is_full_cv), AliasType.CV)
                 ) in alias_union.cv and row[0].c != row[0].v:
-                    cv_alias = row[1].get_cv(alias_union.is_full_cv)
-                    cv_vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv_alias, 1, bpm)
-                    cv_L_vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv_alias, 2, bpm)
-                    for L_vsdxmf in cv_L_vsdxmf:
-                        L_vsdxmf.phoneme = f"{L_vsdxmf.phoneme}_L"
-                        self.vsdxmf_union[AliasType.CV].append(L_vsdxmf)
-                    self.vsdxmf_union[AliasType.CV].extend(cv_vsdxmf)
+                    cv_alias = row[1].get_lsd_c(), row[-1].get_lsd_v()
+                    cv_vsdxmf = self.get_vsdxmf((*cv_alias, AliasType.CV), wav, 1, bpm)
+                    cv_L_vsdxmf = self.get_vsdxmf(
+                        (*cv_alias, AliasType.CV_LONG), wav, 2, bpm
+                    )
+                    self.vsdxmf_union.CV.extend(cv_L_vsdxmf)
+                    self.vsdxmf_union.CV.extend(cv_vsdxmf)
                     alias_union.cv.discard(cv)
-                if (vc := (row[0].v, row[1].c)) in alias_union.vc:
-                    vc_vsdxmf = self._get_vs_oto(AliasType.VC, wav, vc, 1, bpm)
-                    self.vsdxmf_union[AliasType.VC].extend(vc_vsdxmf)
+                if (vc := Alias((row[0].v, row[1].c), AliasType.VC)) in alias_union.vc:
+                    vc_vsdxmf = self.get_vsdxmf((*vc.alias, AliasType.VC), wav, 1, bpm)
+                    self.vsdxmf_union.VC.extend(vc_vsdxmf)
                     alias_union.vc.discard(vc)
                 """if (vcv := (row[0].v, row[1].get_cv())) in alias.vcv:
                     vcv_vsdxmf = self.get_vs_oto(Alias_Type.VCV, wav, vcv, 1, bpm)
                     vcv_vsdxmf_list.append(vcv_vsdxmf)
                     alias.vcv.discard(vcv)"""
-                if (vr := row[2].v) in alias_union.vr:
-                    vr_vsdxmf = self._get_vs_oto(AliasType.V, wav, vr, 2, bpm)
-                    self.vsdxmf_union[AliasType.V].extend(vr_vsdxmf)
-                    alias_union.vr.discard(vr)
+                if (vr := Alias(row[2].v, AliasType.V)) in alias_union.v:
+                    vr_vsdxmf = self.get_vsdxmf(
+                        (vr.alias[0], "", AliasType.V), wav, 2, bpm
+                    )
+                    self.vsdxmf_union.V.extend(vr_vsdxmf)
+                    alias_union.v.discard(vr)
             else:
                 for idx, cvv in enumerate(row):
-                    if idx == 0:
-                        if (c := cvv.get_lsd_c()) in alias_union.c_head:
-                            vsdxmf = self._get_vs_oto(AliasType.C, wav, c, idx, bpm)
-                            self.vsdxmf_union[AliasType.C].extend(vsdxmf)
-                            alias_union.c_head.discard(c)
-                        cv = cvv.get_cv(alias_union.is_full_cv)
-                        if (
-                            cv in alias_union.cv
-                            and cv not in alias_union.cv_mid
-                            and cvv.c != cvv.v
-                        ):
-                            vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv, idx, bpm)
-                            self.vsdxmf_union[AliasType.CV].extend(vsdxmf)
-                            alias_union.cv_head.discard(cv)
-                    elif idx <= len(row) - 1:
-                        if (
-                            cv := cvv.get_cv(alias_union.is_full_cv)
-                        ) in alias_union.cv and cvv.c != cvv.v:
-                            vsdxmf = self._get_vs_oto(AliasType.CV, wav, cv, idx, bpm)
-                            self.vsdxmf_union[AliasType.CV].extend(vsdxmf)
-                            alias_union.cv_head.discard(cv)
-                        if (vc := (row[idx - 1].v, cvv.c)) in alias_union.vc:
-                            vsdxmf = self._get_vs_oto(AliasType.VC, wav, vc, idx, bpm)
-                            self.vsdxmf_union[AliasType.VC].extend(vsdxmf)
-                            alias_union.vc.discard(vc)
-                        """if (vcv := (row[idx-1].v, cvv.get_cv())) in alias.vcv:
-                            vsdxmf = self.get_vs_oto(Alias_Type.VCV, wav, vcv, idx, bpm)
-                            vcv_vsdxmf_list.append(vsdxmf)
-                            alias.vcv.discard(vcv)"""
-                    if idx == len(row) - 1 and (vr := row[idx].v) in alias_union.vr:
-                        vsdxmf = self._get_vs_oto(AliasType.V, wav, vr, idx, bpm)
-                        self.vsdxmf_union[AliasType.V].extend(vsdxmf)
-                        alias_union.vr.discard(vr)
 
-    def _get_vs_oto(
+                    if idx == 0:
+                        # c_head
+                        if cvv.c != cvv.v and cvv.c not in self.cvv_workshop.v_dict:
+                            c_head = Alias(cvv.get_lsd_c(), AliasType.C_HEAD)
+                            if c_head in alias_union.c_head:
+                                c_head_vsdxmf = self.get_vsdxmf(
+                                    ("", cvv.get_lsd_c(), AliasType.C_HEAD),
+                                    wav,
+                                    idx,
+                                    bpm,
+                                )
+                                self.vsdxmf_union.C.extend(c_head_vsdxmf)
+                                alias_union.c_head.discard(c_head)
+                        # v_head
+                        elif cvv.c == cvv.v:
+                            v_head = Alias(
+                                cvv.get_cv(alias_union.is_full_cv), AliasType.CV_HEAD
+                            )
+                            if v_head in alias_union.cv_head:
+                                v_head_vsdxmf = self.get_vsdxmf(
+                                    ("", cvv.get_lsd_c(), AliasType.C_HEAD),
+                                    wav,
+                                    idx,
+                                    bpm,
+                                )
+                                self.vsdxmf_union.C.extend(v_head_vsdxmf)
+                                alias_union.cv_head.discard(v_head)
+                    else:
+                        if cvv == self.EMPTY:
+                            # v
+                            vr = Alias(row[idx - 1].v, AliasType.V)
+                            if vr in alias_union.v:
+                                vr_vsdxmf = self.get_vsdxmf(
+                                    (row[idx - 1].v, "", AliasType.V),
+                                    wav,
+                                    idx - 1,
+                                    bpm,
+                                )
+                                self.vsdxmf_union.V.extend(vr_vsdxmf)
+                                alias_union.v.discard(vr)
+                            continue
+                        if row[idx - 1] == self.EMPTY:
+                            # c_head
+                            if cvv.c != cvv.v and cvv.c not in self.cvv_workshop.v_dict:
+                                c_head = Alias(cvv.get_lsd_c(), AliasType.C_HEAD)
+                                if c_head in alias_union.c_head:
+                                    c_head_vsdxmf = self.get_vsdxmf(
+                                        ("", cvv.get_lsd_c(), AliasType.C_HEAD),
+                                        wav,
+                                        idx,
+                                        bpm,
+                                    )
+                                    self.vsdxmf_union.C.extend(c_head_vsdxmf)
+                                    alias_union.c_head.discard(c_head)
+                            # v_head
+                            elif cvv.c == cvv.v:
+                                v_head = Alias(
+                                    cvv.get_cv(alias_union.is_full_cv),
+                                    AliasType.CV_HEAD,
+                                )
+                                if v_head in alias_union.cv_head:
+                                    v_head_vsdxmf = self.get_vsdxmf(
+                                        ("", cvv.get_lsd_c(), AliasType.C_HEAD),
+                                        wav,
+                                        idx,
+                                        bpm,
+                                    )
+                                    self.vsdxmf_union.C.extend(v_head_vsdxmf)
+                                    alias_union.cv_head.discard(v_head)
+                        else:
+                            # cv
+                            # vc
+                            vc = Alias((row[idx - 1].v, cvv.c), AliasType.VC)
+                            if vc in alias_union.vc:
+                                vc_vsdxmf = self.get_vsdxmf(
+                                    (
+                                        row[idx - 1].v,
+                                        cvv.c,
+                                        AliasType.VC,
+                                    ),
+                                    wav,
+                                    idx,
+                                    bpm,
+                                )
+                                self.vsdxmf_union.VC.extend(vc_vsdxmf)
+                                alias_union.vc.discard(vc)
+                            if cvv.c != cvv.v:
+                                cv = Alias(
+                                    cvv.get_cv(alias_union.is_full_cv), AliasType.CV
+                                )
+                                if cv in alias_union.cv:
+                                    cv_vsdxmf = self.get_vsdxmf(
+                                        (
+                                            cvv.get_lsd_c(),
+                                            cvv.get_lsd_v(),
+                                            AliasType.CV,
+                                        ),
+                                        wav,
+                                        idx,
+                                        bpm,
+                                    )
+                                    self.vsdxmf_union.CV.extend(cv_vsdxmf)
+                                    alias_union.cv.discard(cv)
+                    if idx == len(row) - 1:
+                        # v
+                        with open("debug.txt", mode="a") as fp:
+                            fp.write(f"{wav}\n")
+                        vr = Alias(cvv.v, AliasType.V)
+                        if vr in alias_union.v:
+                            vr_vsdxmf = self.get_vsdxmf(
+                                (cvv.v, "", AliasType.V),
+                                wav,
+                                idx,
+                                bpm,
+                            )
+                            self.vsdxmf_union.V.extend(vr_vsdxmf)
+                            alias_union.v.discard(vr)
+
+    def get_vsdxmf(
         self,
-        alias_type: AliasType,
+        phoneme: tuple[str, str, AliasType],
         wav: str,
-        alias: str | tuple[str, str],
         position: int,
         bpm: float,
     ) -> list[Vsdxmf]:
@@ -105,30 +190,26 @@ class VsdxmfGenerator:
         OVL, CONSONANT_VEL, VOWEL_VEL = 80, 100, 200
         vsdxmf_list: list[Vsdxmf] = []
 
-        if alias_type == AliasType.C:
-            phoneme = f" {alias}"
+        alias_type = phoneme[-1]
+        if alias_type == AliasType.C_HEAD:
             offset = beat - 20 - CONSONANT_VEL
             preutterance = offset + 20
             consonant = preutterance + 0.25 * CONSONANT_VEL
             cutoff = consonant + CONSONANT_VEL
             overlap = offset + 5
-        elif alias_type == AliasType.CV:
-            cvv = self.cvv_workshop.find_cvv(cvv=str(alias))
-            phoneme = f"{cvv.get_lsd_c()} {cvv.get_lsd_v()}"
+        elif alias_type in (AliasType.CV, AliasType.CV_LONG):
             offset = beat - CONSONANT_VEL
             preutterance = beat
             consonant = 0.25 * 500 * bpm_param + preutterance
             cutoff = consonant + 0.75 * 500 * bpm_param
             overlap = offset + CONSONANT_VEL / 2
         elif alias_type == AliasType.V:
-            phoneme = f"{alias} "
             offset = beat + 500 * bpm_param - OVL - VOWEL_VEL
             preutterance = offset + OVL + VOWEL_VEL
             consonant = preutterance + 100
             cutoff = consonant + 100
             overlap = offset + OVL
         elif alias_type == AliasType.VC:
-            phoneme = "{} {}".format(*alias)
             offset = beat - OVL - VOWEL_VEL - CONSONANT_VEL
             preutterance = beat - CONSONANT_VEL
             consonant = preutterance + 0.33 * CONSONANT_VEL
@@ -145,14 +226,17 @@ class VsdxmfGenerator:
             """
         else:
             raise AliasTypeError
-        vsdxmf = Vsdxmf(phoneme, wav, offset, preutterance, consonant, cutoff, overlap)
+
+        vsdxmf = Vsdxmf(
+            phoneme, wav, (offset, preutterance, consonant, cutoff, overlap)
+        )
         vsdxmf_list.append(vsdxmf)
 
-        redirect_phoneme_list = self.cvv_workshop.get_redirect_phoneme(
-            alias, alias_type
-        )
+        redirect_phoneme_list = self.cvv_workshop.get_redirect_phoneme(phoneme)
         for redirect_phoneme in redirect_phoneme_list:
-            vsdxmf_list.append(Vsdxmf.get_redirect(redirect_phoneme, vsdxmf.phoneme))
+            vsdxmf_list.append(
+                Vsdxmf.get_redirect(redirect_phoneme, str(vsdxmf).split(",")[0])
+            )
 
         return vsdxmf_list
 

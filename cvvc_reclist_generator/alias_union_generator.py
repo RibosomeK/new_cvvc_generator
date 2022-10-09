@@ -1,8 +1,6 @@
 import json
 from typing import Iterable, Optional
-from .cvv_dataclasses import CvvWorkshop
-from .alias_union import AliasUnion
-from .vc_set import VcSet
+from .data_struct import Alias, AliasType, VcSet, AliasUnion, CvvWorkshop
 from .errors import AliasTypeError, AliasError
 
 
@@ -37,16 +35,24 @@ class AliasUnionGenerator:
 
         if is_c_head:
             alias_union.c_head = {
-                x.get_lsd_c() for x in self.cvv_workshop.cvv_set if x.v != x.get_lsd_c()
+                Alias(x.get_lsd_c(), AliasType.C_HEAD)
+                for x in self.cvv_workshop.cvv_set
+                if x.v != x.get_lsd_c()
             }
-        alias_union.cv = {cv.get_cv(is_full_cv) for cv in self.cvv_workshop.cvv_set}
+        alias_union.cv = {
+            Alias(cv.get_cv(is_full_cv), AliasType.CV)
+            for cv in self.cvv_workshop.cvv_set
+        }
         if is_cv_head:
-            alias_union.cv_head = alias_union.cv.copy()
-        alias_union.vc = VcSet()
+            for alias in alias_union.cv:
+                head_alias = Alias(alias.alias, AliasType.CV_HEAD)
+                alias_union.cv_head.add(head_alias)
         alias_union.vc.update(
-            (v, c) for v in self.cvv_workshop.v_dict for c in self.cvv_workshop.c_dict
+            Alias((v, c), AliasType.VC)
+            for v in self.cvv_workshop.v_dict
+            for c in self.cvv_workshop.c_dict
         )
-        alias_union.vr = {v for v in self.cvv_workshop.v_dict}
+        alias_union.v = {Alias(v, AliasType.V) for v in self.cvv_workshop.v_dict}
         if alias_config:
             unneeded, needed = self.read_alias_config(alias_config, is_full_cv)
             alias_union.update(needed)
@@ -69,33 +75,49 @@ class AliasUnionGenerator:
         alias_union = AliasUnion()
 
         if isinstance(alias_dict["C_HEAD"], str):
-            alias_union.c_head.update(self.cvv_workshop.c_dict.keys())
+            alias_union.c_head.update(
+                [
+                    Alias(c_head, AliasType.C_HEAD)
+                    for c_head in self.cvv_workshop.c_dict.keys()
+                ]
+            )
         else:
             alias_union.c_head.update(alias_dict["C_HEAD"])
 
         if isinstance(alias_dict["C"], str):
-            alias_union.c.update(self.cvv_workshop.c_dict.keys())
+            alias_union.c.update(
+                [Alias(c, AliasType.C) for c in self.cvv_workshop.c_dict.keys()]
+            )
         else:
-            alias_union.c.update(alias_dict["C"])
+            alias_union.c.update([Alias(c, AliasType.C) for c in alias_dict["C"]])
 
-        alias_union.vr.update(alias_dict["VR"])
+        alias_union.v.update(Alias(v, AliasType.V) for v in alias_dict["VR"])
 
         # cv part func
-        def update_cv(cv_type, cv_alias_dict, update_alias_union):
+        def update_cv(
+            cv_type: str,
+            cv_alias_dict: dict[str, list[str]],
+            update_alias_union: AliasUnion,
+        ):
             for alias_type, alias in loop_in_dict(cv_alias_dict):
                 if alias_type == "c":
                     for consonant in alias:
                         if cv_type == "cv":
                             update_alias_union.cv.update(
                                 (
-                                    cvv.get_cv(is_full_cv=is_full_cv)
+                                    Alias(
+                                        cvv.get_cv(is_full_cv=is_full_cv), AliasType.CV
+                                    )
                                     for cvv in self.cvv_workshop.c_dict[consonant]
                                 )
                             )
                         else:
                             update_alias_union.cv_head.update(
                                 (
-                                    cvv.get_cv(is_full_cv=is_full_cv)
+                                    Alias(
+                                        cvv.get_cv(is_full_cv=is_full_cv),
+                                        AliasType.CV_HEAD,
+                                    )
                                     for cvv in self.cvv_workshop.c_dict[consonant]
                                 )
                             )
@@ -103,18 +125,33 @@ class AliasUnionGenerator:
                     for vowel in alias:
                         if cv_type == "cv":
                             update_alias_union.cv.update(
-                                (cvv.v for cvv in self.cvv_workshop.v_dict[vowel])
+                                (
+                                    Alias(
+                                        cvv.get_cv(is_full_cv=is_full_cv), AliasType.CV
+                                    )
+                                    for cvv in self.cvv_workshop.v_dict[vowel]
+                                )
                             )
                         else:
                             update_alias_union.cv_head.update(
-                                (cvv.v for cvv in self.cvv_workshop.v_dict[vowel])
+                                (
+                                    Alias(
+                                        cvv.get_cv(is_full_cv=is_full_cv),
+                                        AliasType.CV_HEAD,
+                                    )
+                                    for cvv in self.cvv_workshop.v_dict[vowel]
+                                )
                             )
 
                 elif alias_type == "cv":
                     if cv_type == "cv":
-                        update_alias_union.cv.update(alias)
+                        update_alias_union.cv.update(
+                            Alias(cv, AliasType.CV) for cv in alias
+                        )
                     else:
-                        update_alias_union.cv_head.update(alias)
+                        update_alias_union.cv_head.update(
+                            Alias(cv, AliasType.CV_HEAD) for cv in alias
+                        )
 
         update_cv("cv", alias_dict["CV"], alias_union)
         update_cv("cv_head", alias_dict["CV_HEAD"], alias_union)
@@ -124,17 +161,23 @@ class AliasUnionGenerator:
             if alias_type == "c":
                 for consonant in alias:
                     alias_union.vc.update(
-                        ((v, consonant) for v in self.cvv_workshop.v_dict)
+                        (
+                            Alias((v, consonant), AliasType.VC)
+                            for v in self.cvv_workshop.v_dict
+                        )
                     )
             elif alias_type == "v":
                 for vowel in alias:
                     alias_union.vc.update(
-                        ((vowel, c) for c in self.cvv_workshop.c_dict)
+                        (
+                            Alias((vowel, c), AliasType.VC)
+                            for c in self.cvv_workshop.c_dict
+                        )
                     )
             elif alias_type == "vc":
                 for vc in alias:
                     v, c = vc.split(" ")
-                    alias_union.vc.add((v, c))
+                    alias_union.vc.add(Alias((v, c), AliasType.VC))
 
         # vcv part
         for alias_type, alias in loop_in_dict(alias_dict["VCV"]):
@@ -142,7 +185,7 @@ class AliasUnionGenerator:
                 for consonant in alias:
                     alias_union.vcv.update(
                         (
-                            (v, cvv.get_cv(is_full_cv))
+                            Alias((v, cvv.get_cv(is_full_cv)), AliasType.VCV)
                             for v in self.cvv_workshop.v_dict
                             for cvv in self.cvv_workshop.c_dict[consonant]
                         )
@@ -151,24 +194,26 @@ class AliasUnionGenerator:
                 for vowel in alias:
                     alias_union.vcv.update(
                         (
-                            (vowel, cvv.get_cv(is_full_cv))
+                            Alias((vowel, cvv.get_cv(is_full_cv)), AliasType.VCV)
                             for cvv in self.cvv_workshop.cvv_set
                         )
                     )
             elif alias_type == "cv":
                 for cv in alias:
-                    alias_union.vcv.update((v, cv) for v in self.cvv_workshop.v_dict)
+                    alias_union.vcv.update(
+                        Alias((v, cv), AliasType.VCV) for v in self.cvv_workshop.v_dict
+                    )
             elif alias_type == "vcv":
                 if isinstance(alias, str):
                     alias_union.vcv.update(
-                        (v, cvv.get_cv(is_full_cv))
+                        Alias((v, cvv.get_cv(is_full_cv)), AliasType.VCV)
                         for v in self.cvv_workshop.v_dict
                         for cvv in self.cvv_workshop.cvv_set
                     )
                     continue
                 for vcv in alias:
                     v, cv = vcv.split(" ")
-                    alias_union.vcv.add((v, cv))
+                    alias_union.vcv.add(Alias((v, cv), AliasType.VCV))
 
         return alias_union
 
