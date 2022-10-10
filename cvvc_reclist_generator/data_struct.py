@@ -1,6 +1,7 @@
 from ast import alias
 from collections import UserList
 import configparser
+from email.errors import MissingHeaderBodySeparatorDefect
 from enum import Enum
 from dataclasses import dataclass, field, fields
 from typing import Counter, Iterator, Optional, Iterable
@@ -321,7 +322,7 @@ class Vsdxmf(Label):
 @dataclass(slots=True)
 class Recline:
     _data: tuple[Cvv, ...]
-    NONE_UNDERLINE = ("[\u30a0-\u30ff\u3040-\u309f]+", "[\u4e00-\u9fa5]+")
+    NONE_UNDERLINE = ("[\u30a0-\u30ff\u3040-\u309f]+", "[\u4e00-\u9fa5]+", "[0-9]")
 
     def __init__(self, cvv: Iterable[Cvv]) -> None:
         self._data = tuple(cvv)
@@ -617,7 +618,12 @@ class CvvWorkshop:
             presamp_dir (str): presamp.ini file path
         """
         presamp_config = configparser.ConfigParser(allow_no_value=True)
-        presamp_config.read(presamp_dir, encoding="utf-8")
+        presamp_config.optionxform = str # type: ignore
+        try:
+            presamp_config.read(presamp_dir, encoding="utf-8")
+        except configparser.MissingSectionHeaderError as e:
+            raise EncodingWarning(f"Following error appear: \n{e}\n"
+                                  f"It might be encoding error, please use utf-8 encoding.")
 
         cv_dict: dict[str, list[str]] = {}
 
