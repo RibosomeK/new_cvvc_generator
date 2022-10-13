@@ -98,7 +98,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def to_cn(self):
         """change language to cn"""
-        self.trans.load("./scr_gui/translations/cn/CN")
+        self.trans.load("./scr_gui/translations/cn/zh-CN")
         if inst := QApplication.instance():
             inst.installTranslator(self.trans)
         self.retranslateUi(self)
