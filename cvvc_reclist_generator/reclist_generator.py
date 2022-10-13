@@ -1,3 +1,5 @@
+from operator import attrgetter, itemgetter
+from typing import Optional
 from .data_struct import (
     Cvv,
     AliasType,
@@ -11,19 +13,30 @@ from .data_struct import (
 from .errors import CantFindNextCvvError, CantFindCvvError, PopError
 
 
+ORDER = {0: "cvv", 1: "v"}
+
+
 class ReclistGenerator:
     """a reclist generator"""
 
-    def __init__(self, cvv_workshop: CvvWorkshop) -> None:
+    def __init__(self, cvv_workshop: CvvWorkshop, order_by: int = 0) -> None:
         self.cvv_workshop = cvv_workshop
+        if order_by not in ORDER:
+            order_by = 0
+        self.order_by: int = order_by
         self.reclist = Reclist()
         self.EMPTY_CVV = Cvv.new()
 
     def gen_2mora(self, alias_union: AliasUnion) -> None:
-        cv_list = list(alias_union.cv | alias_union.cv_head)
-        cv_list.sort(key=lambda alias: alias[0])
-        for cv in cv_list:
-            cvv = self.cvv_workshop.find_cvv(cvv=str(cv))
+        all_cv = alias_union.cv
+        for cv_head in alias_union.cv_head.copy():
+            cv = Alias(cv_head.alias, AliasType.CV)
+            all_cv.add(cv)
+        all_cvv = sorted(
+            [self.cvv_workshop.find_cvv(cv.alias[0]) for cv in all_cv],
+            key=attrgetter(ORDER[self.order_by], ORDER[0]),
+        )
+        for cvv in all_cvv:
             if cvv:
                 line = Recline((cvv, cvv))
                 self.reclist.append(line)
@@ -34,7 +47,9 @@ class ReclistGenerator:
 
         if alias_union.vcv:
             vcv_list = list(alias_union.vcv)
-            vcv_list.sort(key=lambda alias: alias[1])
+            vcv_list.sort(
+                key=lambda alias: alias[int(not bool(self.order_by))] + alias[0]
+            )
             for vcv in vcv_list:
                 v = Cvv.new_with((AliasType.V, vcv[0]))
                 cvv = self.cvv_workshop.find_cvv(cvv=vcv[1])
@@ -43,7 +58,7 @@ class ReclistGenerator:
                 alias_union.vc.discard(Alias((v.v, cvv.c), AliasType.VC))
                 alias_union.v.discard(Alias(cvv.v, AliasType.V))
         vc_list = list(alias_union.vc)
-        vc_list.sort(key=lambda alias: alias[1])
+        vc_list.sort(key=lambda alias: alias[int(not bool(self.order_by))] + alias[0])
         for vc in vc_list:
             v = Cvv.new_with((AliasType.V, vc[0]))
             c = Cvv.new_with((AliasType.C, vc[1]))
@@ -51,7 +66,7 @@ class ReclistGenerator:
             self.reclist.append(line)
 
         if c_head_list := sorted(
-            alias_union.c_head, key=lambda alias: alias[1], reverse=True
+            alias_union.c_head, key=lambda alias: alias[0], reverse=True
         ):
             row: list[Cvv] = []
             while c_head_list:
@@ -79,25 +94,28 @@ class ReclistGenerator:
                 self.reclist.append(Recline(row))
 
     def gen_plan_b(self, alias_union: AliasUnion) -> AliasUnion:
-        all_cv = list(alias_union.cv | alias_union.cv_head)
-        all_cv.sort(key=lambda alias: alias[0])
+        all_cv = alias_union.cv.copy()
+        for cv_head in alias_union.cv_head.copy():
+            cv = Alias(cv_head.alias, AliasType.CV)
+            all_cv.add(cv)
+        all_cv = sorted(
+            [self.cvv_workshop.find_cvv(cv.alias[0]) for cv in all_cv],
+            key=attrgetter(ORDER[self.order_by], ORDER[0]),
+        )
         for cv in all_cv:
-            if cv := self.cvv_workshop.find_cvv(cv.alias[0]):
-                line = Recline((cv, cv, cv))
-                self.reclist.append(line)
-                alias_union.c_head.discard(Alias(cv.get_lsd_c(), AliasType.C_HEAD))
-                alias_union.vc.discard(Alias((cv.v, cv.c), AliasType.VC))
-                alias_union.v.discard(Alias(cv.v, AliasType.V))
-                alias_union.vcv.discard(Alias((cv.v, cv.get_cv()), AliasType.VCV))
+            line = Recline((cv, cv, cv))
+            self.reclist.append(line)
+            alias_union.c_head.discard(Alias(cv.get_lsd_c(), AliasType.C_HEAD))
+            alias_union.vc.discard(Alias((cv.v, cv.c), AliasType.VC))
+            alias_union.v.discard(Alias(cv.v, AliasType.V))
+            alias_union.vcv.discard(Alias((cv.v, cv.get_cv()), AliasType.VCV))
 
         alias_union.cv.clear()
         alias_union.cv_head.clear()
         return alias_union
 
     def gen_mora_x(
-        self,
-        alias_union: AliasUnion,
-        length: int,
+        self, alias_union: AliasUnion, length: int, order_length: Optional[int] = None
     ) -> None:
         """Generate given x length long pre row of reclist.
 
@@ -106,29 +124,37 @@ class ReclistGenerator:
             length (int): length pre row
         Returns: None
         """
+        if order_length is None:
+            order_length = length
 
-        cv_list = sorted(alias_union.cv, key=lambda alias: alias[0], reverse=True)
+        cvv_list = sorted(
+            [self.cvv_workshop.find_cvv(cv.alias[0]) for cv in alias_union.cv],
+            key=attrgetter(ORDER[self.order_by], ORDER[0]),
+            reverse=True,
+        )
         row: list[Cvv] = []
-        while cv_list:
-
-            cv = cv_list.pop()
-            cvv = self.cvv_workshop.find_cvv(cvv=str(cv))
+        while cvv_list:
+            cvv = cvv_list.pop()
             if len(row) == 0:
                 row.append(cvv)
                 alias_union.cv_head.discard(
                     Alias(cvv.get_cv(alias_union.is_full_cv), AliasType.CV_HEAD)
                 )
                 alias_union.c_head.discard(Alias(cvv.get_lsd_c(), AliasType.C_HEAD))
-            elif len(row) < length:
+            elif len(row) < order_length:
                 pre_cvv = row[-1]
                 row.append(cvv)
                 alias_union.cv.discard(
                     Alias(cvv.get_cv(alias_union.is_full_cv), AliasType.CV)
                 )
                 alias_union.vc.discard(Alias((pre_cvv.v, cvv.c), AliasType.VC))
-                alias_union.vcv.discard(Alias((pre_cvv.v, cvv.get_cv(alias_union.is_full_cv)), AliasType.VCV))
+                alias_union.vcv.discard(
+                    Alias(
+                        (pre_cvv.v, cvv.get_cv(alias_union.is_full_cv)), AliasType.VCV
+                    )
+                )
 
-            if len(row) == length:
+            if len(row) == order_length:
                 self.reclist.append(Recline(row))
                 alias_union.v.discard(Alias(cvv.v, AliasType.V))
                 row.clear()
@@ -258,21 +284,27 @@ class ReclistGenerator:
             )
 
         # complete cv part
-        cv_list = sorted(alias_union.cv, key=lambda alias: alias[0], reverse=True)
+        cvv_list = sorted(
+            [self.cvv_workshop.find_cvv(cv.alias[0]) for cv in alias_union.cv],
+            key=attrgetter(ORDER[self.order_by], ORDER[0]),
+            reverse=True,
+        )
         ALPHA = sorted(self.cvv_workshop.cvv_set, key=lambda cvv: cvv.get_cv())[0]
         row: list[Cvv] = []
-        while cv_list:
+        while cvv_list:
             if len(row) == 0:
                 if alias_union.cv_head:
                     row.append(
                         self.cvv_workshop.find_cvv(cvv=str(alias_union.cv_head.pop()))
                     )
-                    alias_union.c_head.discard(Alias(row[0].get_lsd_c(), AliasType.C_HEAD))
+                    alias_union.c_head.discard(
+                        Alias(row[0].get_lsd_c(), AliasType.C_HEAD)
+                    )
                 else:
                     row.append(ALPHA)
-            elif len(row) < length:
-                cv = cv_list.pop()
-                row.append(self.cvv_workshop.find_cvv(cvv=str(cv)))
+            elif len(row) < order_length:
+                cvv = cvv_list.pop()
+                row.append(cvv)
             else:
                 self.reclist.append(Recline(row))
                 vr = Alias(row[-1].v, AliasType.V)
@@ -284,15 +316,17 @@ class ReclistGenerator:
             alias_union.v.discard(vr)
 
         # complete cv head part
-        cv_head_list = sorted(
-            alias_union.cv_head, key=lambda alias: alias[0], reverse=True
+        cvv_head_list = sorted(
+            [self.cvv_workshop.find_cvv(cv.alias[0]) for cv in alias_union.cv_head],
+            key=attrgetter(ORDER[self.order_by], ORDER[0]),
+            reverse=True,
         )
         row: list[Cvv] = []
-        while cv_head_list:
-            for i in range(length // 2 + length % 2):
-                if not cv_head_list:
+        while cvv_head_list:
+            for i in range(order_length // 2 + order_length % 2):
+                if not cvv_head_list:
                     break
-                row.append(self.cvv_workshop.find_cvv(cvv=str(cv_head_list.pop())))
+                row.append(cvv_head_list.pop())
                 alias_union.v.discard(Alias(row[-1].v, AliasType.V))
                 alias_union.c_head.discard(Alias(row[-1].get_lsd_c(), AliasType.C_HEAD))
                 row.append(self.EMPTY_CVV)
@@ -308,7 +342,7 @@ class ReclistGenerator:
         )
         row: list[Cvv] = []
         while c_head_list:
-            for i in range(length // 2 + length % 2):
+            for i in range(order_length // 2 + order_length % 2):
                 if not c_head_list:
                     break
                 c_head = c_head_list.pop()
@@ -330,7 +364,7 @@ class ReclistGenerator:
         vr_list = sorted(alias_union.v, key=lambda alias: alias[0], reverse=True)
         row: list[Cvv] = []
         while vr_list:
-            for i in range(length // 2 + length % 2):
+            for i in range(order_length // 2 + order_length % 2):
                 if not vr_list:
                     break
                 row.append(self.cvv_workshop.find_cvv(v=str(vr_list.pop())))

@@ -78,6 +78,14 @@ Other is the same.
 
 The priority in "UNNEEDED" is higher. Which means alias in both "NEEDED" and "UNNEEDED" will be eliminated. Generated reclist will not include such an alias.
 
+
+---
+**All file encoding are utf-8, please try to not use other encoding**
+---
+
+---
+
+
 ### Reclist Style:
 2 mora means two words in a line, mora x is more than 2, specific length can be selected in Reclist Detail.
 
@@ -90,6 +98,9 @@ Hr.J style and be used with other reclist style. But 2 mora and mora x is confli
 - CV head: include beginning cv or not. Default is true
 - Full cv: use whole cv instead of unified cv in cv, cv head or vcv. Default is true
 - C head for UTAU: include c head for utau. Default is false
+- order by: arrange by consonant or vowel for plan b or other order recline
+- order length switch: turn on to specify the length of order recline
+- order length: the length of order reline, only available when order length switch is on
 
 ### Labeling Style:
 - bpm: the bpm of recording bgm. Default is 130, step is 10
@@ -209,6 +220,13 @@ json 格式的配置文件，可以在方括号内增减额外的音素，音素
 
 "UNNEEDED" 的优先级会更高，也就是说只要你在这部分里包括了相对应的音素，就不会被生成
 
+
+---
+**以上所有的文件编码均为 utf-8，请尽量不要使用其他文件编码**
+---
+
+---
+
 ### 录音表样式：
 两字和多字不能同时使用，两字会按顺序生成所需要的音素，而多字在生成时则是随机的。多字的长度可以在下面的字长选择
 
@@ -221,6 +239,9 @@ Haru.J 式可以与其他两个样式一起使用。
 - 开头音：是否包含开头音，默认为包含
 - 全整音：是否使用全整音而不是类似 [biA] 这种合并的在 cv 或者 vcv 中，默认使用全整音
 - 开头辅音：是否在 UTAU oto 包含开头辅音，默认不包含
+- 以...排序：根据辅音或者元音对 Haru.J 式或者其他有序行进行排序
+- 可指定有序行字长：可以对有序行指定字数 
+- 有序行字长：指定有序行的字长，打开指定有序行字长开关后才可以用
 
 ### 窝头详情：
 - 录音曲速：录音用 BGM 的曲速，默认为 130

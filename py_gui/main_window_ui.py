@@ -19,12 +19,15 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QCheckBox,
+    QComboBox,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QMenu,
     QMenuBar,
     QPushButton,
+    QRadioButton,
     QSizePolicy,
     QSpinBox,
     QVBoxLayout,
@@ -36,7 +39,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(467, 308)
+        MainWindow.resize(503, 393)
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -186,6 +189,13 @@ class Ui_MainWindow(object):
 
         self.overall_layout.addLayout(self.reclist_style_layout)
 
+        self.line = QFrame(self.centralwidget)
+        self.line.setObjectName("line")
+        self.line.setFrameShape(QFrame.HLine)
+        self.line.setFrameShadow(QFrame.Sunken)
+
+        self.overall_layout.addWidget(self.line)
+
         self.reclist_detail_layout = QHBoxLayout()
         self.reclist_detail_layout.setObjectName("reclist_detail_layout")
         self.reclist_detail_label = QLabel(self.centralwidget)
@@ -196,31 +206,37 @@ class Ui_MainWindow(object):
 
         self.reclist_detail_layout.addWidget(self.reclist_detail_label)
 
+        self.reclist_detail_options_layout = QVBoxLayout()
+        self.reclist_detail_options_layout.setObjectName(
+            "reclist_detail_options_layout"
+        )
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
         self.length_spinBox = QSpinBox(self.centralwidget)
         self.length_spinBox.setObjectName("length_spinBox")
         self.length_spinBox.setMinimum(3)
         self.length_spinBox.setMaximum(100)
 
-        self.reclist_detail_layout.addWidget(self.length_spinBox)
+        self.horizontalLayout_6.addWidget(self.length_spinBox)
 
         self.length_label = QLabel(self.centralwidget)
         self.length_label.setObjectName("length_label")
 
-        self.reclist_detail_layout.addWidget(self.length_label)
+        self.horizontalLayout_6.addWidget(self.length_label)
 
         self.cv_head_checkBox = QCheckBox(self.centralwidget)
         self.cv_head_checkBox.setObjectName("cv_head_checkBox")
         self.cv_head_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
         self.cv_head_checkBox.setChecked(True)
 
-        self.reclist_detail_layout.addWidget(self.cv_head_checkBox)
+        self.horizontalLayout_6.addWidget(self.cv_head_checkBox)
 
         self.full_cv_checkBox = QCheckBox(self.centralwidget)
         self.full_cv_checkBox.setObjectName("full_cv_checkBox")
         self.full_cv_checkBox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
         self.full_cv_checkBox.setChecked(True)
 
-        self.reclist_detail_layout.addWidget(self.full_cv_checkBox)
+        self.horizontalLayout_6.addWidget(self.full_cv_checkBox)
 
         self.c_head_4_utau_checkBox = QCheckBox(self.centralwidget)
         self.c_head_4_utau_checkBox.setObjectName("c_head_4_utau_checkBox")
@@ -228,9 +244,58 @@ class Ui_MainWindow(object):
             QLocale(QLocale.English, QLocale.UnitedStates)
         )
 
-        self.reclist_detail_layout.addWidget(self.c_head_4_utau_checkBox)
+        self.horizontalLayout_6.addWidget(self.c_head_4_utau_checkBox)
+
+        self.reclist_detail_options_layout.addLayout(self.horizontalLayout_6)
+
+        self.horizontalLayout_7 = QHBoxLayout()
+        self.horizontalLayout_7.setObjectName("horizontalLayout_7")
+        self.order_by_comboBox = QComboBox(self.centralwidget)
+        self.order_by_comboBox.addItem("")
+        self.order_by_comboBox.addItem("")
+        self.order_by_comboBox.setObjectName("order_by_comboBox")
+        self.order_by_comboBox.setMaxVisibleItems(2)
+
+        self.horizontalLayout_7.addWidget(self.order_by_comboBox)
+
+        self.order_by_label = QLabel(self.centralwidget)
+        self.order_by_label.setObjectName("order_by_label")
+
+        self.horizontalLayout_7.addWidget(self.order_by_label)
+
+        self.order_length_switch_radioButton = QRadioButton(self.centralwidget)
+        self.order_length_switch_radioButton.setObjectName(
+            "order_length_switch_radioButton"
+        )
+
+        self.horizontalLayout_7.addWidget(self.order_length_switch_radioButton)
+
+        self.order_length_spinBox = QSpinBox(self.centralwidget)
+        self.order_length_spinBox.setObjectName("order_length_spinBox")
+        self.order_length_spinBox.setEnabled(False)
+        self.order_length_spinBox.setMinimum(3)
+        self.order_length_spinBox.setMaximum(100)
+
+        self.horizontalLayout_7.addWidget(self.order_length_spinBox)
+
+        self.order_length_label = QLabel(self.centralwidget)
+        self.order_length_label.setObjectName("order_length_label")
+        self.order_length_label.setEnabled(False)
+
+        self.horizontalLayout_7.addWidget(self.order_length_label)
+
+        self.reclist_detail_options_layout.addLayout(self.horizontalLayout_7)
+
+        self.reclist_detail_layout.addLayout(self.reclist_detail_options_layout)
 
         self.overall_layout.addLayout(self.reclist_detail_layout)
+
+        self.line_2 = QFrame(self.centralwidget)
+        self.line_2.setObjectName("line_2")
+        self.line_2.setFrameShape(QFrame.HLine)
+        self.line_2.setFrameShadow(QFrame.Sunken)
+
+        self.overall_layout.addWidget(self.line_2)
 
         self.labeling_style_layout = QHBoxLayout()
         self.labeling_style_layout.setObjectName("labeling_style_layout")
@@ -357,7 +422,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menuBar = QMenuBar(MainWindow)
         self.menuBar.setObjectName("menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 467, 22))
+        self.menuBar.setGeometry(QRect(0, 0, 503, 23))
         self.menuFile = QMenu(self.menuBar)
         self.menuFile.setObjectName("menuFile")
         self.menuSetting = QMenu(self.menuBar)
@@ -538,6 +603,40 @@ class Ui_MainWindow(object):
         # endif // QT_CONFIG(accessibility)
         self.c_head_4_utau_checkBox.setText(
             QCoreApplication.translate("MainWindow", "C head for UTAU", None)
+        )
+        self.order_by_comboBox.setItemText(
+            0, QCoreApplication.translate("MainWindow", "by consonant", None)
+        )
+        self.order_by_comboBox.setItemText(
+            1, QCoreApplication.translate("MainWindow", "by vowel", None)
+        )
+
+        # if QT_CONFIG(accessibility)
+        self.order_by_comboBox.setAccessibleName(
+            QCoreApplication.translate("MainWindow", "order_by", None)
+        )
+        # endif // QT_CONFIG(accessibility)
+        self.order_by_comboBox.setCurrentText(
+            QCoreApplication.translate("MainWindow", "by consonant", None)
+        )
+        self.order_by_label.setText(
+            QCoreApplication.translate("MainWindow", "order by", None)
+        )
+        # if QT_CONFIG(accessibility)
+        self.order_length_switch_radioButton.setAccessibleName(
+            QCoreApplication.translate("MainWindow", "is_order_length_switch", None)
+        )
+        # endif // QT_CONFIG(accessibility)
+        self.order_length_switch_radioButton.setText(
+            QCoreApplication.translate("MainWindow", "order length switch", None)
+        )
+        # if QT_CONFIG(accessibility)
+        self.order_length_spinBox.setAccessibleName(
+            QCoreApplication.translate("MainWindow", "order_length", None)
+        )
+        # endif // QT_CONFIG(accessibility)
+        self.order_length_label.setText(
+            QCoreApplication.translate("MainWindow", "length", None)
         )
         self.labeling_style_label.setText(
             QCoreApplication.translate("MainWindow", "Labeling style: ", None)

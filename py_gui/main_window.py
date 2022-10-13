@@ -11,6 +11,8 @@ from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
     QSpinBox,
+    QComboBox,
+    QRadioButton,
 )
 from PySide6.QtGui import QUndoStack
 from PySide6.QtCore import QTranslator
@@ -20,9 +22,9 @@ import os, re
 def read_parameters_config(config_path: str) -> Parameters:
     config = configparser.ConfigParser()
     config.read(config_path, encoding="utf-8")
-    
+
     redirect_configs = re.split(r"[, ]", config["PARAMETERS"]["redirect_config"])
-    
+
     parameters = Parameters(
         dict_file=config["PARAMETERS"]["dict_file"],
         alias_config=config["PARAMETERS"]["alias_config"],
@@ -35,6 +37,11 @@ def read_parameters_config(config_path: str) -> Parameters:
         is_full_cv=config["PARAMETERS"].getboolean("is_full_cv"),
         is_cv_head=config["PARAMETERS"].getboolean("is_cv_head"),
         is_c_head_4_utau=config["PARAMETERS"].getboolean("is_c_head_4_utau"),
+        order_by=config["PARAMETERS"].getint("order_by"),
+        is_order_length_switch=config["PARAMETERS"].getboolean(
+            "is_order_length_switch"
+        ),
+        order_length=config["PARAMETERS"].getint("order_length"),
         bpm=config["PARAMETERS"].getint("bpm"),
         blank_beat=config["PARAMETERS"].getint("blank_beat"),
         do_save_reclist=config["PARAMETERS"].getboolean("do_save_reclist"),
@@ -72,6 +79,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.two_mora_checkBox.stateChanged.connect(self.disable_mora_x_checkBox)  # type: ignore
         self.mora_x_checkBox.stateChanged.connect(self.disable_two_mora_checkBox)  # type: ignore
 
+        self.order_length_switch_radioButton.clicked.connect(self.disable_order_length_switch_spinBox)  # type: ignore
+
         self.preview_button.clicked.connect(self.pop_preview_dialog)  # type: ignore
 
         self.export_action.triggered.connect(self.export_parameters_config)  # type: ignore
@@ -89,7 +98,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def to_cn(self):
         """change language to cn"""
-        print(self.trans.load("./scr_gui/translations/cn/zh-CN"))
+        self.trans.load("./scr_gui/translations/cn/CN")
         if inst := QApplication.instance():
             inst.installTranslator(self.trans)
         self.retranslateUi(self)
@@ -114,6 +123,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.full_cv_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore  # type: ignore
         self.c_head_4_utau_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
 
+        self.order_by_comboBox.currentIndexChanged.connect(self._update_parameters)  # type: ignore
+        self.order_length_switch_radioButton.toggled.connect(self._update_parameters)  # type: ignore
+        self.order_length_spinBox.valueChanged.connect(self._update_parameters)  # type: ignore
+
         self.reclist_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
         self.presamp_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
         self.oto_checkBox.stateChanged.connect(self._update_parameters)  # type: ignore
@@ -127,10 +140,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def _update_parameters(self):
         """update slot"""
         sender = self.sender()
-        if isinstance(sender, QCheckBox):
+        if isinstance(sender, QCheckBox | QRadioButton):
             self.parameters[sender.accessibleName()] = sender.isChecked()
         elif isinstance(sender, QSpinBox):
             self.parameters[sender.accessibleName()] = sender.value()
+        elif isinstance(sender, QComboBox):
+            self.parameters[sender.accessibleName()] = sender.currentIndex()
 
     def select_dict_file(self):
         file_name = QFileDialog.getOpenFileName(
@@ -163,7 +178,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 file_name: str = os.path.relpath(file_name)
             except ValueError:
                 pass
-            
+
             self.parameters.alias_config = file_name
             self.undo_stack.push(LineEditSetText(self.alias_config_lineEdit, file_name))
             self.alias_config_lineEdit.setText(file_name)
@@ -183,7 +198,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     file_names[idx] = file_name
                 except ValueError:
                     pass
-                
+
             self.parameters.redirect_config = file_names
             self.undo_stack.push(
                 LineEditSetText(self.redirect_config_lineEdit, ", ".join(file_names))
@@ -200,7 +215,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 path_name = os.path.relpath(path_name)
             except ValueError:
                 pass
-            
+
             self.parameters.save_path = path_name
             self.undo_stack.push(LineEditSetText(self.save_path_lineEdit, path_name))
             self.save_path_lineEdit.setText(path_name)
@@ -217,13 +232,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.two_mora_checkBox.setEnabled(True)
 
+    def disable_order_length_switch_spinBox(self):
+        if self.order_length_switch_radioButton.isChecked():
+            stage = True
+        else:
+            stage = False
+        self.order_length_spinBox.setEnabled(stage)
+        self.order_length_label.setEnabled(stage)
+
     def pop_preview_dialog(self):
         if error_message := self.check_essential_parameter():
             pop_error_message_box(self.tr("Warning"), error_message)  # type: ignore
         else:
             preview_dialog = PreviewDialog()
-            parameters = self.parameters
-            generator = CvvcReclistGeneratorModel(parameters)
+            generator = CvvcReclistGeneratorModel(self.parameters)
             preview_dialog.receive_model(generator)
 
             preview_dialog.reclist_textEdit.setText(generator.get_reclist_str())
@@ -236,7 +258,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.tr(f"total lines: {len(generator.oto_generator.oto_union)}")  # type: ignore
             )
 
-            if parameters.do_save_presamp:
+            if self.parameters.do_save_presamp:
                 preview_dialog.presamp_textEdit.setText(generator.get_presamp_str())
 
             preview_dialog.vsdxmf_textEdit.setText(generator.get_vsdxmf_str())
@@ -244,7 +266,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.tr(f"total lines: {len(generator.vsdxmf_generator.vsdxmf_union)}")  # type: ignore
             )
 
-            if parameters.do_save_lsd:
+            if self.parameters.do_save_lsd:
                 preview_dialog.lsd_textEdit.setText(generator.get_lsd_str())
 
             preview_dialog.exec()
@@ -261,9 +283,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         config = configparser.ConfigParser()
         config["PARAMETERS"] = self.parameters.__dict__
-        config["PARAMETERS"]["redirect_config"] = ", ".join(self.parameters.redirect_config)
+        config["PARAMETERS"]["redirect_config"] = ", ".join(
+            self.parameters.redirect_config
+        )
 
-        if not self.parameters_config_path:
+        if (
+            not self.parameters_config_path
+            or self.sender().objectName() == "export_as_action"
+        ):
             config_path = QFileDialog.getSaveFileName(
                 self,
                 self.tr("Select a save path"),  # type: ignore
@@ -294,6 +321,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.full_cv_checkBox.setChecked(parameters.is_full_cv)
         self.cv_head_checkBox.setChecked(parameters.is_cv_head)
         self.c_head_4_utau_checkBox.setChecked(parameters.is_c_head_4_utau)
+
+        self.order_by_comboBox.setCurrentIndex(parameters.order_by)
+        self.order_length_switch_radioButton.setChecked(
+            parameters.is_order_length_switch
+        )
+        self.order_length_spinBox.setValue(parameters.order_length)
 
         self.bpm_spinBox.setValue(int(parameters.bpm))
         self.blank_beat_spinBox.setValue(parameters.blank_beat)

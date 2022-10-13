@@ -169,7 +169,7 @@ class Cvv:
                 return str(value)
         else:
             return "R"
-        
+
     def __eq__(self, cvv: "Cvv") -> bool:
         for attr in self._ITER_ORDER.split(" "):
             if getattr(self, attr) != getattr(cvv, attr):
@@ -180,6 +180,9 @@ class Cvv:
     def __iter__(self) -> Iterator[str]:
         for name in self._ITER_ORDER.split(" "):
             yield getattr(self, name)
+
+    def __getitem__(self, idx: int) -> str:
+        return getattr(self, self._ITER_ORDER.split(" ")[idx])
 
     def __bool__(self) -> bool:
         return any(self)
@@ -618,12 +621,14 @@ class CvvWorkshop:
             presamp_dir (str): presamp.ini file path
         """
         presamp_config = configparser.ConfigParser(allow_no_value=True)
-        presamp_config.optionxform = str # type: ignore
+        presamp_config.optionxform = str  # type: ignore
         try:
             presamp_config.read(presamp_dir, encoding="utf-8")
         except configparser.MissingSectionHeaderError as e:
-            raise EncodingWarning(f"Following error appear: \n{e}\n"
-                                  f"It might be encoding error, please use utf-8 encoding.")
+            raise EncodingWarning(
+                f"Following error appear: \n{e}\n"
+                f"It might be encoding error, please use utf-8 encoding."
+            )
 
         cv_dict: dict[str, list[str]] = {}
 

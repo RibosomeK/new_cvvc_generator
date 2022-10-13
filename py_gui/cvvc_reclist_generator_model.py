@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
+from re import L
 from cvvc_reclist_generator import (
     AliasUnionGenerator,
     ReclistGenerator,
@@ -24,6 +25,10 @@ class Parameters:
     is_cv_head: bool = True
     is_c_head_4_utau: bool = False
 
+    order_by: int = 0
+    is_order_length_switch: bool = False
+    order_length: int = 3
+
     bpm: float = 130
     blank_beat: int = 2
 
@@ -34,7 +39,10 @@ class Parameters:
     do_save_lsd: bool = False
 
     def __setitem__(self, key, value):
-        self.__dict__[key] = value
+        setattr(self, key, value)
+
+    def __getitem__(self, key: str):
+        return getattr(self, key)
 
 
 class CvvcReclistGeneratorModel:
@@ -74,7 +82,9 @@ class CvvcReclistGeneratorModel:
         if not parameters.is_c_head_4_utau:
             alias_union_4_utau.c_head.clear()
 
-        self.reclist_generator = ReclistGenerator(self.cvv_workshop)
+        self.reclist_generator = ReclistGenerator(
+            self.cvv_workshop, parameters.order_by
+        )
         if parameters.is_haru_style:
             rest_alias = self.reclist_generator.gen_plan_b(alias_union.copy())
         else:
@@ -82,7 +92,14 @@ class CvvcReclistGeneratorModel:
         if parameters.is_two_mora:
             self.reclist_generator.gen_2mora(rest_alias)
         elif parameters.is_mora_x or parameters.length:
-            self.reclist_generator.gen_mora_x(rest_alias, parameters.length)
+            if parameters.is_order_length_switch:
+                self.reclist_generator.gen_mora_x(
+                    rest_alias, parameters.length, parameters.order_length
+                )
+            else:
+                self.reclist_generator.gen_mora_x(
+                    rest_alias, parameters.length, parameters.length
+                )
 
         self.oto_generator = OtoGenerator()
         if parameters.do_save_oto:
