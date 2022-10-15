@@ -8,6 +8,5 @@ class CvvcReclistGeneratorGui:
         
         self.parameters = Parameters()
         self.main_window = MainWindow(self.parameters)
-        self.preview_dialog = PreviewDialog()
 
         self.main_window.show()
