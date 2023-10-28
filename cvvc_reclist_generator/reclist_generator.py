@@ -1,4 +1,4 @@
-from operator import attrgetter, itemgetter
+from operator import attrgetter
 from typing import Optional
 from .data_struct import (
     Cvv,

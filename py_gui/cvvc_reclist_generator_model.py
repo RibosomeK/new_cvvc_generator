@@ -1,5 +1,4 @@
-from dataclasses import dataclass, field, fields
-from re import L
+from dataclasses import dataclass, field
 from cvvc_reclist_generator import (
     AliasUnionGenerator,
     ReclistGenerator,

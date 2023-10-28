@@ -3,7 +3,6 @@ from cvvc_reclist_generator.error_context_manager import GeneratorErrorManager
 
 
 def main():
-
     while True:
         generator = CvvcReclistGenerator()
         with GeneratorErrorManager(generator) as gen:

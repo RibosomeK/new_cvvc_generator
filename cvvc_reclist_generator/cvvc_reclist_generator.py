@@ -3,7 +3,14 @@ from typing import Any, Optional
 from configparser import ConfigParser
 
 
-from .data_struct import AliasUnion, CvvWorkshop, LabelUnion, OtoUnion, Reclist, VsdxmfUnion
+from .data_struct import (
+    AliasUnion,
+    CvvWorkshop,
+    LabelUnion,
+    OtoUnion,
+    Reclist,
+    VsdxmfUnion,
+)
 from .alias_union_generator import AliasUnionGenerator
 from .reclist_generator import ReclistGenerator
 from .oto_generator import OtoGenerator
@@ -79,7 +86,6 @@ class Parameters:
             return
 
         if isinstance(value, type(self[key])):
-
             if isinstance(self[key], str) and value.lower() in NONE_VALUE:
                 self.__dict__[key] = None
             else:
@@ -153,7 +159,6 @@ class CvvcReclistGenerator:
                 raise ConfigNotFoundError("Can not find config file.")
 
     def setup_cvv_workshop(self) -> None:
-
         try:
             self.cvv_workshop.read_dict(self.parameters.dict_file)
         except FileNotFoundError:
@@ -168,7 +173,6 @@ class CvvcReclistGenerator:
                 raise RedirectConfigNotFoundError("Cant find redirect config")
 
     def get_alias(self) -> None:
-
         alias_union_generator = AliasUnionGenerator(self.cvv_workshop)
 
         try:
@@ -219,7 +223,6 @@ class CvvcReclistGenerator:
         self.vsdxmf = generator.vsdxmf_union
 
     def shift_labels(self, label_union: LabelUnion):
-        
         shift = (self.parameters.blank_beat - 2) * 4.2 * self.parameters.bpm
         for label in label_union:
             label.shift(round(shift))

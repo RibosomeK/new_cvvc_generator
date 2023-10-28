@@ -1,4 +1,3 @@
-from re import L
 from cvvc_reclist_generator.errors import AliasTypeError
 from .data_struct import (
     Cvv,
@@ -59,7 +58,6 @@ class VsdxmfGenerator:
                     alias_union.v.discard(vr)
             else:
                 for idx, cvv in enumerate(row):
-
                     if idx == 0:
                         # c_head
                         if cvv.c != cvv.v and cvv.c not in self.cvv_workshop.v_dict:

@@ -43,7 +43,9 @@ def main():
 
     simplified_cv_list = cvv_workshop.get_simplified_cv()
     json_generator = CvReplicationJsonGenerator(
-        CvReplicationJsonGenerator.get_json_rules(simplified_cv_list, patterns=['- {}', '{}_L'])
+        CvReplicationJsonGenerator.get_json_rules(
+            simplified_cv_list, patterns=["- {}", "{}_L"]
+        )
     )
 
     if simplified_cv_list:

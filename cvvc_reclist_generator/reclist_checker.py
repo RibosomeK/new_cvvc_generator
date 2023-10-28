@@ -1,4 +1,3 @@
-
 from cvvc_reclist_generator.data_struct import Cvv, Reclist, AliasUnion, VcSet
 
 

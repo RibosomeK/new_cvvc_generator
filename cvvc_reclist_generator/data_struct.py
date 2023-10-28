@@ -1,12 +1,11 @@
-from ast import alias
 from collections import UserList
 import configparser
-from email.errors import MissingHeaderBodySeparatorDefect
 from enum import Enum
 from dataclasses import dataclass, field, fields
 from typing import Counter, Iterator, Optional, Iterable
 from abc import ABC, abstractmethod
-import re, random
+import re
+import random
 
 from .errors import (
     AliasTypeError,
@@ -34,14 +33,12 @@ class AliasType(Enum):
 
 @dataclass(slots=True)
 class Alias:
-
     _alias: tuple[str, ...]
     _type: AliasType
 
     def __init__(
         self, alias: str | tuple[str, ...], alias_type: AliasType | str
     ) -> None:
-
         if isinstance(alias, tuple):
             self._alias = alias
 
@@ -196,8 +193,8 @@ class Digits:
         return ",".join(f"{digit:.1f}" for digit in self)
 
     def __iter__(self) -> Iterator[float]:
-        for field in fields(self):
-            yield getattr(self, field.name)
+        for fd in fields(self):
+            yield getattr(self, fd.name)
 
 
 @dataclass
@@ -244,7 +241,6 @@ class Oto(Label):
         prefix: str = "",
         suffix: str = "",
     ) -> None:
-
         self.wav: str = wav
         self.alias: Alias
         self.digits: UDigits = UDigits(*digits)
@@ -285,7 +281,6 @@ class Vsdxmf(Label):
         wav: str,
         digits: Iterable[float] | VDigits,
     ) -> None:
-
         self.phoneme: tuple[str, str, AliasType]
         self.wav: str = wav
         self.digits: VDigits = VDigits(*digits)
@@ -386,7 +381,6 @@ class Reclist(UserList[Recline]):
 
 
 class LabelUnion(ABC):
-
     _is_froze: bool = True
 
     @property
@@ -400,22 +394,22 @@ class LabelUnion(ABC):
     def __str__(self) -> str:
         return "\n".join(
             [
-                "\n".join(str(label) for label in getattr(self, field.name))
-                for field in fields(self)
-                if getattr(self, field.name)
+                "\n".join(str(label) for label in getattr(self, fd.name))
+                for fd in fields(self)
+                if getattr(self, fd.name)
             ]
         )
 
     def __iter__(self) -> Iterator[Label]:
-        for field in fields(self):
-            labels = getattr(self, field.name)
+        for fd in fields(self):
+            labels = getattr(self, fd.name)
             for label in labels:
                 yield label
 
     def __len__(self) -> int:
         length = 0
-        for field in fields(self):
-            otos = getattr(self, field.name)
+        for fd in fields(self):
+            otos = getattr(self, fd.name)
             length += len(otos)
         return length
 
@@ -590,7 +584,6 @@ class AliasUnion:
 
 @dataclass
 class CvvWorkshop:
-
     cvv_set: set[Cvv] = field(default_factory=set)
     cvv_dict: dict[str, Cvv] = field(default_factory=dict)
     cv_dict: dict[str, list[Cvv]] = field(default_factory=dict)
@@ -600,7 +593,6 @@ class CvvWorkshop:
     redirect_vowel_dict: dict[str, list[str]] = field(default_factory=dict)
 
     def read_dict(self, dict_dir: str) -> None:
-
         with open(dict_dir, mode="r", encoding="utf-8") as fp:
             for line in fp.read().splitlines():
                 if line := line.strip():
@@ -702,7 +694,6 @@ class CvvWorkshop:
         v: Optional[str] = None,
         exception: Optional[set[str]] = None,
     ) -> Cvv:
-
         if cvv:
             if cv := self.cvv_dict.get(cvv):
                 return cv

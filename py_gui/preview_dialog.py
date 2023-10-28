@@ -6,6 +6,8 @@ from .pop_message_box import *
 from .cvvc_reclist_generator_model import CvvcReclistGeneratorModel
 
 import os
+
+
 class PreviewDialog(QDialog, Ui_PreviewDialog):
     def __init__(self):
         super().__init__()
@@ -17,10 +19,14 @@ class PreviewDialog(QDialog, Ui_PreviewDialog):
 
         oto_highlighter = OtoHighlighter(self.oto_textEdit.document())
         vsdxmf_highlighter = VsdxmfHighlighter(self.vsdxmf_textEdit.document())
-        
+
     def set_font(self):
-        id_i_r = QFontDatabase.addApplicationFont("./scr_gui/fonts/Inconsolata-Regular.ttf")
-        id_i_b = QFontDatabase.addApplicationFont("./scr_gui/fonts/Inconsolata-Bold.ttf")
+        id_i_r = QFontDatabase.addApplicationFont(
+            "./scr_gui/fonts/Inconsolata-Regular.ttf"
+        )
+        id_i_b = QFontDatabase.addApplicationFont(
+            "./scr_gui/fonts/Inconsolata-Bold.ttf"
+        )
         families = QFontDatabase.applicationFontFamilies(id_i_r)
         font = QFont(families[0], 12)
         self.reclist_textEdit.setFont(font)
@@ -30,10 +36,9 @@ class PreviewDialog(QDialog, Ui_PreviewDialog):
         self.lsd_textEdit.setFont(font)
 
     def save_files(self):
-        
         if not os.path.exists(self.generator.parameters.save_path):
             os.mkdir(self.generator.parameters.save_path)
-            
+
         if self.generator.parameters.do_save_reclist:
             self.generator.save_reclist()
         if self.generator.parameters.do_save_oto:

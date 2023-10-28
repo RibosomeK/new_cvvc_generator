@@ -1,6 +1,6 @@
 import json
 from typing import Iterable, Optional
-from .data_struct import Alias, AliasType, VcSet, AliasUnion, CvvWorkshop
+from .data_struct import Alias, AliasType, AliasUnion, CvvWorkshop
 from .errors import AliasTypeError, AliasError
 
 

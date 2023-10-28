@@ -1,4 +1,3 @@
-from ast import alias
 from .data_struct import Alias, Cvv, Reclist, AliasType, AliasUnion, Oto, OtoUnion
 from .errors import AliasTypeError
 
@@ -76,10 +75,13 @@ class OtoGenerator:
                             oto = self.get_oto(wav, cv_head, idx, bpm)
                             self.oto_union.CV.append(oto)
                             alias_union.cv_head.discard(cv_head)
-                        if len(row) == 1 and (vr := Alias(cvv.v, AliasType.V)) in alias_union.v:
+                        if (
+                            len(row) == 1
+                            and (vr := Alias(cvv.v, AliasType.V)) in alias_union.v
+                        ):
                             oto = self.get_oto(wav, vr, idx, bpm)
                             self.oto_union.V.append(oto)
-                            alias_union.v.discard(vr)                            
+                            alias_union.v.discard(vr)
                     else:
                         island: list[bool] = [False, False]
                         if idx < len(row) - 1 and row[idx + 1] == self.EMPTY_CVV:
