@@ -20,7 +20,7 @@ ya	y	a
 lia	ly	a			
 jia	j	a			
 qia	q	a			
-xia	xy	a			
+xia	x	a			
 wa	w	a			
 gua	g	a			
 kua	k	a			
@@ -109,7 +109,7 @@ yang	y	ang
 liang	ly	ang			
 jiang	j	ang			
 qiang	q	ang			
-xiang	xy	ang			
+xiang	x	ang			
 wang	w	ang			
 guang	g	ang			
 kuang	k	ang			
@@ -146,7 +146,7 @@ niao	ny	ao
 liao	ly	ao			lia
 jiao	j	ao			jia
 qiao	q	ao			qia
-xiao	xy	ao			xia
+xiao	x	ao			xia
 e	e	e			
 me	m	e			
 de	d	e			
@@ -173,12 +173,12 @@ nie	ny	e0
 lie	ly	e0			
 jie	j	e0			
 qie	q	e0			
-xie	xy	e0			
+xie	x	e0			
 yue	v	e0			
 nue	n	e0			
 lue	l	e0			
-jue	j	e0			
-que	q	e0			
+jue	jy	e0			
+que	qy	e0			
 xue	xw	e0			
 ei	ei	ei			
 bei	b	ei			
@@ -248,10 +248,10 @@ nian	ny	en0
 lian	ly	en0			
 jian	j	en0			
 qian	q	en0			
-xian	xy	en0			
+xian	x	en0			
 yuan	v	en0			
-juan	j	en0			
-quan	q	en0			
+juan	jy	en0			
+quan	qy	en0			
 xuan	xw	en0			
 beng	b	eng			
 peng	p	eng			
@@ -282,7 +282,7 @@ ni	ny	i
 li	ly	i			
 ji	j	i			
 qi	q	i			
-xi	xy	i			
+xi	x	i			
 yi	y	i			
 yin	y	in			
 bin	b	in			
@@ -292,7 +292,7 @@ nin	ny	in
 lin	ly	in			
 jin	j	in			
 qin	q	in			
-xin	xy	in			
+xin	x	in			
 ying	y	ing			
 bing	b	ing			
 ping	p	ing			
@@ -303,7 +303,7 @@ ning	ny	ing
 ling	ly	ing			
 jing	j	ing			
 qing	q	ing			
-xing	xy	ing			
+xing	x	ing			
 zi	z	i0			
 ci	c	i0			
 si	s	i0			
@@ -346,7 +346,7 @@ song	s	ong
 yong	y	ong			
 jiong	j	ong			
 qiong	q	ong			
-xiong	xy	ong			
+xiong	x	ong			
 ou	ou	ou			
 pou	p	ou			
 mou	m	ou			
@@ -371,7 +371,7 @@ niu	ny	ou
 liu	ly	ou			
 jiu	j	ou			
 qiu	q	ou			
-xiu	xy	ou			
+xiu	x	ou			
 bu	b	u			
 pu	p	u			
 mu	m	u			
@@ -394,10 +394,10 @@ wu	w	u
 yu	v	v			
 nv	n	v			
 lv	l	v			
-ju	j	v			
-qu	q	v			
+ju	jy	v			
+qu	qy	v			
 xu	xw	v			
 yun	v	vn			
-jun	j	vn			
-qun	q	vn			
+jun	jy	vn			
+qun	qy	vn			
 xun	xw	vn			

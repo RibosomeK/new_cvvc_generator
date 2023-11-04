@@ -177,8 +177,8 @@ xie	xy	e0
 yue	v	e0		
 nue	n	e0		
 lue	l	e0		
-jue	j	e0		
-que	q	e0		
+jue	jy	e0		
+que	qy	e0		
 xue	xw	e0		
 ei	ei	ei		
 bei	b	ei		
