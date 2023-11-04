@@ -232,7 +232,7 @@ class ReclistGenerator:
                 row.append(current_cv)
                 try:
                     next_cv = self.cvv_workshop.find_next(
-                        current_vc.alias, alias_union.vc.max_v[0]
+                        current_vc.alias, alias_union.vc.max_v[0]  # type: ignore
                     )
                 except CantFindNextCvvError:
                     next_cv = self.cvv_workshop.find_cvv(c=current_vc[1])
@@ -244,7 +244,7 @@ class ReclistGenerator:
                     try:
                         row.append(
                             self.cvv_workshop.find_next(
-                                vc.alias, alias_union.vc.max_v[0]
+                                vc.alias, alias_union.vc.max_v[0]  # type: ignore
                             )
                         )
                     except CantFindNextCvvError:

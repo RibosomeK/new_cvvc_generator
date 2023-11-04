@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from cvvc_reclist_generator import (
     AliasUnionGenerator,
     ReclistGenerator,
@@ -37,7 +37,37 @@ class Parameters:
     do_save_vsdxmf: bool = False
     do_save_lsd: bool = False
 
+    def __post_init__(self):
+        for key, fd in self.__dataclass_fields__.items():
+            value = getattr(self, key)
+            is_miss_type = False
+            try:
+                if not isinstance(value, fd.type):
+                    is_miss_type = True
+            except TypeError:
+                if not isinstance(value, fd.type.__origin__):
+                    is_miss_type = True
+
+            if is_miss_type:
+                setattr(self, key, fd.default)
+                print(f"Invalid value: {value} for key: {key}")
+                print(f"Fallback to default: {fd.default}")
+
     def __setitem__(self, key, value):
+        is_miss_type = False
+        fd = self.__dataclass_fields__[key]
+        try:
+            if not isinstance(value, fd.type):
+                is_miss_type = True
+        except TypeError:
+            if not isinstance(value, fd.type.__origin__):
+                is_miss_type = True
+
+        if is_miss_type:
+            setattr(self, key, fd.default)
+            print(f"Invalid value: {value} for key: {key}")
+            print(f"Fallback to default: {fd.default}")
+
         setattr(self, key, value)
 
     def __getitem__(self, key: str):

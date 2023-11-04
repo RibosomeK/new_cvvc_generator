@@ -188,6 +188,7 @@ class Cvv:
         return hash("".join([e for e in self if e]))
 
 
+@dataclass
 class Digits:
     def __str__(self) -> str:
         return ",".join(f"{digit:.1f}" for digit in self)
@@ -292,7 +293,7 @@ class Vsdxmf(Label):
             if phoneme[-1] == AliasType.CV_LONG:
                 self.phoneme = (phoneme_sp[0], f"{phoneme_sp[1]}_L", phoneme[-1])
             elif len(phoneme_sp) == 2:
-                self.phoneme = (*phoneme_sp, phoneme[-1])
+                self.phoneme = (phoneme_sp[0], phoneme_sp[1], phoneme[-1])
             elif phoneme[-1] == AliasType.C_HEAD:
                 self.phoneme = ("", *phoneme)
             else:
@@ -380,6 +381,7 @@ class Reclist(UserList[Recline]):
         return "\n".join([str(recline) for recline in self])
 
 
+@dataclass
 class LabelUnion(ABC):
     _is_froze: bool = True
 
@@ -392,25 +394,20 @@ class LabelUnion(ABC):
         self._is_froze = is_froze
 
     def __str__(self) -> str:
-        return "\n".join(
-            [
-                "\n".join(str(label) for label in getattr(self, fd.name))
-                for fd in fields(self)
-                if getattr(self, fd.name)
-            ]
-        )
+        return "\n".join(["\n".join(str(label) for label in self)])
 
     def __iter__(self) -> Iterator[Label]:
         for fd in fields(self):
             labels = getattr(self, fd.name)
+            if not isinstance(labels, Iterable):
+                continue
             for label in labels:
                 yield label
 
     def __len__(self) -> int:
         length = 0
-        for fd in fields(self):
-            otos = getattr(self, fd.name)
-            length += len(otos)
+        for _ in self:
+            length += 1
         return length
 
 
@@ -491,7 +488,7 @@ class VcSet:
                 self.discard(vc)
                 return vc
 
-        raise PopError(f"not found")
+        raise PopError("not found")
 
     def copy(self) -> "VcSet":
         return VcSet(self._data)
@@ -550,20 +547,20 @@ class AliasUnion:
     is_full_cv: bool = True
 
     def update(self, other: "AliasUnion") -> None:
-        for field in fields(self):
-            aliases = getattr(self, field.name)
+        for fd in fields(self):
+            aliases = getattr(self, fd.name)
             if isinstance(aliases, bool):
                 self.is_full_cv = other.is_full_cv
             else:
-                aliases.update(getattr(other, field.name))
+                aliases.update(getattr(other, fd.name))
 
     def difference_update(self, other: "AliasUnion") -> None:
-        for field in fields(self):
-            aliases = getattr(self, field.name)
+        for fd in fields(self):
+            aliases = getattr(self, fd.name)
             if isinstance(aliases, bool):
                 self.is_full_cv = other.is_full_cv
             else:
-                aliases.difference_update(getattr(other, field.name))
+                aliases.difference_update(getattr(other, fd.name))
 
     def copy(self) -> "AliasUnion":
         copied = AliasUnion()
@@ -576,10 +573,35 @@ class AliasUnion:
         self.is_full_cv = True
 
     def __iter__(self) -> Iterator[set[Alias] | VcSet]:
-        for field in fields(self):
-            aliases = getattr(self, field.name)
+        for fd in fields(self):
+            aliases = getattr(self, fd.name)
             if not isinstance(aliases, bool):
                 yield aliases
+
+    def __contains__(self, alias: Alias) -> bool:
+        match alias.type:
+            case AliasType.C:
+                return alias in self.c
+            case AliasType.C_HEAD:
+                return alias in self.c_head
+            case AliasType.CV, AliasType.CV_LONG:
+                return alias in self.cv
+            case AliasType.CV_HEAD:
+                return alias in self.cv_head
+            case AliasType.V:
+                return alias in self.v
+            case AliasType.VC:
+                return alias in self.vc
+            case AliasType.VCV:
+                return alias in self.vcv
+
+        for fd in self.__dataclass_fields__.values():
+            try:
+                if alias in fd.value:
+                    return True
+            except TypeError:
+                continue
+        return False
 
 
 @dataclass

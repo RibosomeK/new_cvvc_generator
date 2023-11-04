@@ -42,7 +42,7 @@ def read_parameters_config(config_path: str) -> Parameters:
             "is_order_length_switch"
         ),
         order_length=config["PARAMETERS"].getint("order_length"),
-        bpm=config["PARAMETERS"].getint("bpm"),
+        bpm=config["PARAMETERS"].getfloat("bpm"),
         blank_beat=config["PARAMETERS"].getint("blank_beat"),
         do_save_reclist=config["PARAMETERS"].getboolean("do_save_reclist"),
         do_save_oto=config["PARAMETERS"].getboolean("do_save_oto"),
