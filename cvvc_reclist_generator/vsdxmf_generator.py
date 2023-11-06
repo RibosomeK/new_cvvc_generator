@@ -40,7 +40,7 @@ class VsdxmfGenerator:
                     self.vsdxmf_union.C.extend(v_head_vsdxmf)
                     alias_union.cv_head.discard(v_head)
                 if (
-                    cv := Alias(row[1].get_cv(alias_union.is_full_cv), AliasType.CV)
+                    cv := Alias(row[1].get_cv(alias_union.IS_FULL_CV), AliasType.CV)
                 ) in alias_union.cv and row[0].c != row[0].v:
                     cv_alias = row[1].get_lsd_c(), row[-1].get_lsd_v()
                     cv_vsdxmf = self.get_vsdxmf((*cv_alias, AliasType.CV), wav, 1, bpm)
@@ -123,7 +123,7 @@ class VsdxmfGenerator:
                             # v_head
                             elif cvv.c == cvv.v:
                                 v_head = Alias(
-                                    cvv.get_cv(alias_union.is_full_cv),
+                                    cvv.get_cv(alias_union.IS_FULL_CV),
                                     AliasType.CV_HEAD,
                                 )
                                 if v_head in alias_union.cv_head:
@@ -154,7 +154,7 @@ class VsdxmfGenerator:
                                 alias_union.vc.discard(vc)
                             if cvv.c != cvv.v:
                                 cv = Alias(
-                                    cvv.get_cv(alias_union.is_full_cv), AliasType.CV
+                                    cvv.get_cv(alias_union.IS_FULL_CV), AliasType.CV
                                 )
                                 if cv in alias_union.cv:
                                     cv_vsdxmf = self.get_vsdxmf(

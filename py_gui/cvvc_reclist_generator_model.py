@@ -104,6 +104,7 @@ class CvvcReclistGeneratorModel:
             is_c_head,
             parameters.is_cv_head,
             parameters.is_full_cv,
+            True,
             alias_config,
         )
 

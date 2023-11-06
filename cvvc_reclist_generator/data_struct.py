@@ -154,6 +154,11 @@ class Cvv:
     def get_lsd_v(self) -> str:
         return self.alias_v if self.alias_v else self.v
 
+    def get_v(self, use_end_v: Optional[bool] = False) -> str:
+        if use_end_v:
+            return self.end_v if self.end_v else self.v
+        return self.v
+
     def get_lsd_cvv(self) -> tuple[str, str, str]:
         cvv = self.get_cv()
         c = self.get_lsd_c()
@@ -544,13 +549,14 @@ class AliasUnion:
     vcv: VcSet = field(default_factory=VcSet)
     v: set[Alias] = field(default_factory=set)
 
-    is_full_cv: bool = True
+    IS_FULL_CV: bool = True
+    USE_END_V: bool = False
 
     def update(self, other: "AliasUnion") -> None:
         for fd in fields(self):
             aliases = getattr(self, fd.name)
             if isinstance(aliases, bool):
-                self.is_full_cv = other.is_full_cv
+                setattr(self, fd.name, getattr(other, fd.name))
             else:
                 aliases.update(getattr(other, fd.name))
 
@@ -558,7 +564,7 @@ class AliasUnion:
         for fd in fields(self):
             aliases = getattr(self, fd.name)
             if isinstance(aliases, bool):
-                self.is_full_cv = other.is_full_cv
+                setattr(self, fd.name, getattr(other, fd.name))
             else:
                 aliases.difference_update(getattr(other, fd.name))
 
@@ -570,7 +576,8 @@ class AliasUnion:
     def clear(self) -> None:
         for aliases in self:
             aliases.clear()
-        self.is_full_cv = True
+        self.IS_FULL_CV = True
+        self.USE_END_V = False
 
     def __iter__(self) -> Iterator[set[Alias] | VcSet]:
         for fd in fields(self):
@@ -611,6 +618,7 @@ class CvvWorkshop:
     cv_dict: dict[str, list[Cvv]] = field(default_factory=dict)
     c_dict: dict[str, list[Cvv]] = field(default_factory=dict)
     v_dict: dict[str, list[Cvv]] = field(default_factory=dict)
+    end_v_dict: dict[str, list[Cvv]] = field(default_factory=dict)
     redirect_consonant_dict: dict[str, list[str]] = field(default_factory=dict)
     redirect_vowel_dict: dict[str, list[str]] = field(default_factory=dict)
 
@@ -626,6 +634,9 @@ class CvvWorkshop:
                         self.cv_dict.setdefault(word.cv, []).append(word)
                     self.c_dict.setdefault(c, []).append(word)
                     self.v_dict.setdefault(v, []).append(word)
+                    self.end_v_dict.setdefault(word.get_v(use_end_v=True), []).append(
+                        word
+                    )
 
     def read_presamp(self, presamp_dir: str) -> None:
         """read presamp.ini file, do not support simplified format.
@@ -732,9 +743,9 @@ class CvvWorkshop:
                         if cv.v not in exception:
                             new_cvv_list.append(cv)
                     cvv_list = new_cvv_list
-                if not cvv_list:
-                    raise CantFindCvvError(f"no cvv has consonant of {c}")
                 return random.choice(cvv_list)
+            else:
+                raise CantFindCvvError(f"no cvv has consonant of {c}")
         if v and not c:
             if cvv_list := self.v_dict.get(v):
                 if exception:
@@ -743,9 +754,17 @@ class CvvWorkshop:
                         if cv.c not in exception:
                             new_cvv_list.append(cv)
                     cvv_list = new_cvv_list
-                if not cvv_list:
-                    raise CantFindCvvError(f"no cvv has vowel {v}")
                 return random.choice(cvv_list)
+            else:
+                if cvv_list := self.end_v_dict.get(v):
+                    if exception:
+                        new_cvv_list: list[Cvv] = []
+                        for cv in cvv_list:
+                            if cv.c not in exception:
+                                new_cvv_list.append(cv)
+                        cvv_list = new_cvv_list
+                    return random.choice(cvv_list)
+                raise CantFindCvvError(f"no cvv has vowel {v}")
         if c and v:
             if cvv_list := self.c_dict.get(c):
                 for cv in cvv_list:
@@ -761,11 +780,23 @@ class CvvWorkshop:
                     raise CantFindCvvError(f"no cvv has {c} and {v} at the same time")
         raise ArgumentTypeError("invalid arguments are given")
 
+    def find_inner(self, v: str, c: str) -> Cvv:
+        for cvv in self.cvv_set:
+            if cvv.mid_v == v and cvv.end_v == c:
+                return cvv
+        raise CantFindCvvError(f"no cvv has {v} and {c} connection within it")
+
     def find_next(self, vc: tuple[str, str], vc_max_v: str) -> Cvv:
         try:
             return self.find_cvv(c=vc[1], v=vc_max_v)
         except CantFindCvvError:
             raise CantFindNextCvvError
+
+    def _find_next(self, vc: tuple[str, str], vc_max_v: str) -> Cvv:
+        try:
+            return self.find_cvv(c=vc[1], v=vc_max_v)
+        except CantFindCvvError:
+            return self.find_cvv(c=vc[1])
 
     def read_redirect_config(self, redirect_config_dir) -> None:
         redirect_config = configparser.ConfigParser(allow_no_value=True)

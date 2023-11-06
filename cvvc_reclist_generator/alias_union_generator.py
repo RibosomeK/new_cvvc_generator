@@ -15,6 +15,7 @@ class AliasUnionGenerator:
         is_c_head: bool = False,
         is_cv_head: bool = True,
         is_full_cv: bool = True,
+        use_end_v: bool = False,
         alias_config: Optional[str] = None,
     ) -> AliasUnion:
         """Get needed alias.
@@ -31,7 +32,8 @@ class AliasUnionGenerator:
             AliasUnion
         """
         alias_union = AliasUnion()
-        self.is_full_cv = is_full_cv
+        alias_union.IS_FULL_CV = is_full_cv
+        alias_union.USE_END_V = use_end_v
 
         if is_c_head:
             alias_union.c_head = {
@@ -47,12 +49,27 @@ class AliasUnionGenerator:
             for alias in alias_union.cv:
                 head_alias = Alias(alias.alias, AliasType.CV_HEAD)
                 alias_union.cv_head.add(head_alias)
-        alias_union.vc.update(
-            Alias((v, c), AliasType.VC)
-            for v in self.cvv_workshop.v_dict
-            for c in self.cvv_workshop.c_dict
-        )
-        alias_union.v = {Alias(v, AliasType.V) for v in self.cvv_workshop.v_dict}
+        if use_end_v:
+            alias_union.vc.update(
+                Alias((end_v, c), AliasType.VC)
+                for end_v in self.cvv_workshop.end_v_dict
+                for c in self.cvv_workshop.c_dict
+            )
+            # vc part within the word
+            for cvv in self.cvv_workshop.cvv_set:
+                if cvv.mid_v and cvv.end_v:
+                    if not cvv.end_v.startswith(cvv.mid_v[0]):
+                        alias_union.vc.add(Alias((cvv.mid_v, cvv.end_v), AliasType.VC))
+            alias_union.v = {
+                Alias(end_v, AliasType.V) for end_v in self.cvv_workshop.end_v_dict
+            }
+        else:
+            alias_union.vc.update(
+                Alias((v, c), AliasType.VC)
+                for v in self.cvv_workshop.v_dict
+                for c in self.cvv_workshop.c_dict
+            )
+            alias_union.v = {Alias(v, AliasType.V) for v in self.cvv_workshop.v_dict}
         if alias_config:
             unneeded, needed = self.read_alias_config(alias_config, is_full_cv)
             alias_union.update(needed)

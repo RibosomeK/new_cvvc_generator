@@ -15,7 +15,7 @@ class ReclistChecker:
         cv_log = self.check_cv_integrity(self.alias_union.cv)
         vcv_log = self.check_vcv_integrity(self.alias_union.vcv)
         vc_log = self.check_vc_integrity(self.alias_union.vc)
-        vr_log = self.check_vr_integrity(self.alias_union.vr)
+        vr_log = self.check_vr_integrity(self.alias_union.v)
         print(
             f"Missing c head: {c_head_log}\n"
             f"Missing cv head: {cv_head_log}\n"
