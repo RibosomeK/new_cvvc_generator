@@ -40,24 +40,16 @@ class Parameters:
     def __post_init__(self):
         for key, fd in self.__dataclass_fields__.items():
             value = getattr(self, key)
-            is_miss_type = False
-            try:
-                if not isinstance(value, fd.type):
-                    is_miss_type = True
-            except TypeError:
-                if not isinstance(value, fd.type.__origin__):
-                    is_miss_type = True
-
-            if is_miss_type:
-                setattr(self, key, fd.default)
-                print(f"Invalid value: {value} for key: {key}")
-                print(f"Fallback to default: {fd.default}")
-
+            self[key] = value
+            
     def __setitem__(self, key, value):
         is_miss_type = False
         fd = self.__dataclass_fields__[key]
         try:
-            if not isinstance(value, fd.type):
+            if not (
+                isinstance(value, fd.type)
+                or isinstance(value, (int, float))
+            ):
                 is_miss_type = True
         except TypeError:
             if not isinstance(value, fd.type.__origin__):
