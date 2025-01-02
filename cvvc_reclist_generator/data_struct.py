@@ -646,7 +646,7 @@ class CvvWorkshop:
             presamp_dir (str): presamp.ini file path
         """
         presamp_config = configparser.ConfigParser(allow_no_value=True)
-        presamp_config.optionxform = str  # type: ignore
+        # presamp_config.optionxform = str  # type: ignore
         try:
             presamp_config.read(presamp_dir, encoding="utf-8")
         except configparser.MissingSectionHeaderError as e:
@@ -690,6 +690,7 @@ class CvvWorkshop:
                 self.v_dict.setdefault(cvv.alias_v, []).append(cvv)
             self.c_dict.setdefault(c, []).append(cvv)
             self.v_dict.setdefault(v, []).append(cvv)
+            self.end_v_dict = self.v_dict.copy()
 
     def read_lsd(self, lsd_dir: str) -> None:
         """read .lsd file, does not support comment at this moment. does not support multi syllable.
